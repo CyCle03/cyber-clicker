@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 
 <body>
@@ -380,6 +380,10 @@
 
             if (gpsDisplay) gpsDisplay.innerText = gameState.gps.toFixed(1);
             if (cryptoDisplay) cryptoDisplay.innerText = formatNumber(gameState.cryptos);
+
+            // Update reboot button state
+            const potentialLevel = calculatePotentialRootAccess();
+            updateRebootButton(potentialLevel);
         }
 
         function createGlitchElement(onClick) {
