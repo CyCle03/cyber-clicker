@@ -988,8 +988,8 @@
 
                 // Random Event Loop (Check every 10 seconds)
                 eventLoopId = setInterval(() => {
-                    // 15% chance every 10 seconds -> approx every 1 minute
-                    if (!gameState.firewallActive && Math.random() < 0.15 && gameState.gps > 0) {
+                    // 5% chance every 10 seconds -> approx every 3.3 minutes
+                    if (!gameState.firewallActive && Math.random() < 0.05 && gameState.gps > 0) {
                         spawnFirewall();
                     }
                 }, 10000);
