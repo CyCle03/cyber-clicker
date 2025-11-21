@@ -261,6 +261,59 @@ body {
     padding-bottom: 2px;
 }
 
+/* Reboot Controls */
+.reboot-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 100, 0, 0.05);
+    border: 1px solid rgba(255, 100, 0, 0.3);
+    border-radius: 5px;
+}
+
+.cyber-button-reboot {
+    min-width: 180px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(255, 100, 0, 0.2), rgba(200, 50, 0, 0.3));
+    border: 2px solid var(--primary-gold);
+    color: var(--primary-gold);
+    font-family: var(--font-header);
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(255, 100, 0, 0.3);
+    text-shadow: 0 0 5px rgba(255, 100, 0, 0.8);
+    letter-spacing: 1px;
+}
+
+.cyber-button-reboot:hover {
+    background: linear-gradient(135deg, rgba(255, 120, 0, 0.3), rgba(220, 70, 0, 0.4));
+    box-shadow: 0 0 25px rgba(255, 100, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.cyber-button-reboot:active {
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(255, 100, 0, 0.3);
+}
+
+.reboot-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.reboot-text {
+    color: var(--primary-gold);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9em;
+    text-shadow: 0 0 3px rgba(255, 200, 0, 0.5);
+}
+
 /* Grid Layouts for Shop/Market/Achievements */
 .grid-container {
     display: grid;
