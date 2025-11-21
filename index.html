@@ -809,6 +809,15 @@
             return false;
         }
 
+        function hardReset() {
+            if (confirm("WARNING: Are you sure you want to wipe ALL game data? This cannot be undone!")) {
+                if (confirm("Double Check: Really delete everything?")) {
+                    localStorage.removeItem(SAVE_KEY);
+                    location.reload();
+                }
+            }
+        }
+
         function clearSave() {
             localStorage.removeItem(SAVE_KEY);
         }
