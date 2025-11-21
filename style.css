@@ -743,3 +743,200 @@ body {
     margin: 20px 0;
     text-shadow: 0 0 10px var(--primary-gold);
 }
+
+/* ============================================
+   MOBILE RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet and smaller (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .split-layout {
+        flex-direction: column;
+    }
+
+    .terminal-section,
+    .auxiliary-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .stats-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .stat-item {
+        flex: 1 1 calc(33.333% - 10px);
+        min-width: 120px;
+    }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    .header {
+        padding: 15px;
+    }
+
+    .game-title {
+        font-size: 1.8em;
+    }
+
+    .stats-bar {
+        padding: 10px;
+    }
+
+    .stat-item {
+        flex: 1 1 100%;
+    }
+
+    /* Hack Button - Smaller on mobile */
+    .cyber-button {
+        width: 180px;
+        height: 180px;
+        font-size: 1.2em;
+    }
+
+    /* Reboot Controls - Compact */
+    .reboot-controls {
+        padding: 10px;
+        margin: 8px 0;
+    }
+
+    .cyber-button-reboot {
+        max-width: 200px;
+        height: 35px;
+        font-size: 0.85em;
+    }
+
+    .reboot-text {
+        font-size: 0.75em;
+    }
+
+    /* Log Container - Smaller */
+    .log-container-wrapper {
+        margin: 10px 0;
+    }
+
+    .log-container {
+        font-size: 0.8em;
+        max-height: 150px;
+    }
+
+    /* Tabs */
+    .tabs {
+        gap: 5px;
+    }
+
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+
+    /* Shop/Market Grid */
+    .grid-container {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 5px;
+    }
+
+    .upgrade-item {
+        padding: 10px;
+    }
+
+    /* Debug Console */
+    #debug-console-container {
+        width: 95%;
+        max-width: none;
+        height: 60vh;
+    }
+
+    #debug-toggle-btn {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 0.8em;
+    }
+
+    /* Firewall Overlay */
+    .firewall-box {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .firewall-title {
+        font-size: 1.2em;
+    }
+
+    .firewall-warning {
+        font-size: 0.85em;
+    }
+
+    /* Offline Overlay */
+    .offline-box {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .offline-amount {
+        font-size: 1.8em;
+    }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1.5em;
+    }
+
+    .cyber-button {
+        width: 150px;
+        height: 150px;
+        font-size: 1em;
+    }
+
+    .cyber-button-reboot {
+        max-width: 180px;
+        height: 32px;
+        font-size: 0.8em;
+        letter-spacing: 1px;
+    }
+
+    .reboot-text {
+        font-size: 0.7em;
+    }
+
+    .log-container {
+        font-size: 0.75em;
+        max-height: 120px;
+    }
+
+    .tab-btn {
+        padding: 6px 10px;
+        font-size: 0.75em;
+    }
+
+    .upgrade-item h3 {
+        font-size: 0.9em;
+    }
+
+    .upgrade-item p {
+        font-size: 0.8em;
+    }
+
+    .firewall-title {
+        font-size: 1em;
+    }
+
+    .firewall-code-display {
+        font-size: 1.5em;
+    }
+
+    .firewall-input {
+        width: 150px;
+        font-size: 1.2em;
+    }
+}
