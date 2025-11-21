@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Clicker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="scanline"></div>
+    <div class="app-container">
+        <!-- Header / HUD -->
+        <header class="hud">
+            <div class="hud-item">
+                <span class="label">BITS:</span>
+                <span id="bits-display" class="value glow-cyan">0</span>
+            </div>
+            <div class="hud-item">
+                <span class="label">GPS:</span>
+                <span id="gps-display" class="value glow-pink">0</span>
+            </div>
+            <div class="hud-item">
+                <span class="label">CRYPTOS:</span>
+                <span id="crypto-display" class="value glow-gold">0</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-interface">
+            <div class="split-layout">
+                <!-- LEFT PANEL: TERMINAL (Always Visible) -->
+                <section class="terminal-section">
+                    <div class="section-header">TERMINAL</div>
+                    <div class="hack-zone">
+                        <button id="hack-button" class="cyber-button">
+                            <div class="btn-content">
+                                <span class="icon">⚡</span>
+                                <span class="text">HACK_SYSTEM</span>
+                            </div>
+                            <div class="btn-glitch"></div>
+                        </button>
+                    </div>
+                    <div class="log-container-wrapper">
+                        <div id="game-log" class="log-container">
+                            <div class="log-entry">> System initialized...</div>
+                            <div class="log-entry">> Waiting for input...</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button id="reboot-button" class="cyber-button-small warning">REBOOT SYSTEM</button>
+                        <div id="reboot-bonus-display" class="bonus-text">Current Bonus: +0% GPS</div>
+                    </div>
+                </section>
+
+                <!-- RIGHT PANEL: AUXILIARY (Tabs) -->
+                <section class="auxiliary-section">
+                    <!-- Tab Navigation -->
+                    <nav class="tabs">
+                        <button class="tab-btn active" data-tab="shop">SHOP</button>
+                        <button class="tab-btn" data-tab="black-market">BLACK MARKET</button>
+                        <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
+                    </nav>
+
+                    <div class="tab-content">
+                        <!-- SHOP TAB -->
+                        <div id="tab-shop" class="tab-pane active">
+                            <div id="shop-container" class="grid-container">
+                                <!-- Upgrades injected here -->
+                            </div>
+                        </div>
+
+                        <!-- BLACK MARKET TAB -->
+                        <div id="tab-black-market" class="tab-pane">
+                            <div class="market-header">
+                                <p>WARNING: ILLEGAL TRANSACTIONS DETECTED. SPEND CRYPTOS WISELY.</p>
+                            </div>
+                            <div id="black-market-container" class="grid-container">
+                                <!-- Black Market items injected here -->
+                            </div>
+                        </div>
+
+                        <!-- ACHIEVEMENTS TAB -->
+                        <div id="tab-achievements" class="tab-pane">
+                            <div id="achievements-container" class="grid-container">
+                                <!-- Achievements injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <!-- Debug Console Overlay -->
+    <div id="debug-console-container">
+        <div class="debug-header">
+            <span>SYSTEM DEBUG LOG</span>
+            <span style="font-size: 0.8em; cursor: pointer;"
+                onclick="document.getElementById('debug-console-container').classList.remove('visible')">[X]</span>
+        </div>
+        <div id="debug-log"></div>
+    </div>
+    <button id="debug-toggle-btn">DEBUG</button>
+
+    <!-- Firewall Overlay -->
+    <div id="firewall-overlay">
+        <div class="firewall-box">
+            <div class="firewall-title">⚠️ FIREWALL DETECTED ⚠️</div>
+            <div class="firewall-warning">
+                SECURITY BREACH IN PROGRESS.<br>
+                GPS REDUCED BY 50%.<br>
+                <br>
+                MANUAL OVERRIDE REQUIRED.
+            </div>
+            <button id="firewall-breach-btn" class="cyber-button warning" style="width: 100%;">
+                <div class="btn-content">
+                    <span class="icon">🛡️</span>
+                    <span class="text">BREACH FIREWALL (0/10)</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('error', function (e) {
+            const log = document.getElementById('game-log');
+            if (log) {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.style.color = 'red';
+                div.innerText = `> SYSTEM ERROR: ${e.message} at ${e.filename}:${e.lineno}`;
+                log.prepend(div);
+            }
+        });
+    </script>
+    <script>
+        /* ==========================================
+           BUNDLE GENERATED FOR FILE PROTOCOL SUPPORT
+           ========================== */
+
+        /* ---------------- constants.js ---------------- */
+        const UPGRADES = {
+            clicker: { id: 'clicker', name: "Mech Switch", cost: 50, gps: 0, click: 1, count: 0, desc: "Mechanical switches for tactile feedback." },
+            autoClicker: { id: 'autoClicker', name: "Auto-Clicker", cost: 15, gps: 0.1, click: 0, count: 0, desc: "Basic script to automate clicking." },
+            bot: { id: 'bot', name: "Script Bot", cost: 100, gps: 1, click: 0, count: 0, desc: "Simple bot to farm bits." },
+            server: { id: 'server', name: "Home Server", cost: 1100, gps: 8, click: 0, count: 0, desc: "Dedicated server for processing." },
+            farm: { id: 'farm', name: "Server Farm", cost: 12000, gps: 47, click: 0, count: 0, desc: "Rack of servers working in parallel." },
+            ai: { id: 'ai', name: "Weak AI", cost: 130000, gps: 260, click: 0, count: 0, desc: "Learning algorithm to optimize mining." },
+            quantum: { id: 'quantum', name: "Quantum Core", cost: 1400000, gps: 1400, click: 0, count: 0, desc: "Entangled bits for instant processing." },
+            overlord: { id: 'overlord', name: 'AI Overlord', cost: 1400000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.' }
+        };
+
+        const BLACK_MARKET_ITEMS = {
+            boost: { id: 'boost', name: 'Signal Boost', cost: 5, desc: '+100% GPS for 30s', type: 'consumable', duration: 30000, multiplier: 2 },
+            core: { id: 'core', name: 'Quantum Core', cost: 50, desc: '+10% GPS Permanently', type: 'permanent', multiplier: 0.1 },
+            warp: { id: 'warp', name: 'Time Warp', cost: 20, desc: 'Instant 1 Hour GPS', type: 'instant', hours: 1 }
+        };
+
+        const GLITCH_CONFIG = {
+            minSpawnTime: 60000, // 60s
+            maxSpawnTime: 180000, // 180s
+            duration: 10000, // 10s
+            minReward: 1,
+            maxReward: 5
+        };
+
+        const ACHIEVEMENTS = [
+            { id: 'hello_world', name: 'Hello World', desc: 'Accumulate 10 Bits', condition: (s) => s.lifetimeBits >= 10, unlocked: false },
+            { id: 'script_kiddie', name: 'Script Kiddie', desc: 'Buy your first upgrade', condition: (s) => s.upgrades.script.count >= 1, unlocked: false },
+            { id: 'serious_business', name: 'Serious Business', desc: 'Accumulate 1,000 Bits', condition: (s) => s.lifetimeBits >= 1000, unlocked: false },
+            { id: 'botnet_master', name: 'Botnet Master', desc: 'Own 10 Zombie Bots', condition: (s) => s.upgrades.bot.count >= 10, unlocked: false },
+            { id: 'millionaire', name: 'Millionaire', desc: 'Accumulate 1,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000, unlocked: false },
+            { id: 'billionaire', name: 'Billionaire', desc: 'Accumulate 1,000,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000000, unlocked: false },
+            { id: 'crypto_miner', name: 'Crypto Miner', desc: 'Find 10 Cryptos', condition: (s) => s.cryptos >= 10, unlocked: false },
+            { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false }
+        ];
+
+        /* ---------------- state.js ---------------- */
+        let gameState = {};
+
+        function initState() {
+            gameState.bits = 0;
+            gameState.lifetimeBits = 0;
+            gameState.gps = 0;
+            gameState.clickPower = 1;
+            gameState.rootAccessLevel = 0;
+            gameState.cryptos = 0;
+            gameState.permanentMultiplier = 1;
+            gameState.firewallActive = false;
+            gameState.firewallClicks = 0;
+
+            // Deep copy upgrades to avoid mutating the constant definition
+            gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES));
+
+            // Achievements need to keep their functions, so we map them
+            gameState.achievements = ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false }));
+
+            gameState.activeBoosts = []; // Array of { multiplier, endTime }
+        }
+
+        function loadState(savedData) {
+            initState(); // Start with fresh state
+
+            if (savedData) {
+                gameState.bits = savedData.bits || 0;
+                gameState.lifetimeBits = savedData.lifetimeBits || 0;
+                gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
+                gameState.cryptos = savedData.cryptos || 0;
+                gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
+
+                // Load Upgrades
+                if (savedData.upgrades) {
+                    for (const key in savedData.upgrades) {
+                        if (gameState.upgrades[key]) {
+                            gameState.upgrades[key].count = savedData.upgrades[key].count;
+                            // Recalculate cost based on count
+                            gameState.upgrades[key].cost = Math.ceil(UPGRADES[key].cost * Math.pow(1.15, savedData.upgrades[key].count));
+                        }
+                    }
+                }
+
+                // Load Achievements
+                if (savedData.achievements) {
+                    savedData.achievements.forEach(savedAch => {
+                        const ach = gameState.achievements.find(a => a.id === savedAch.id);
+                        if (ach) {
+                            ach.unlocked = savedAch.unlocked;
+                        }
+                    });
+                }
+
+                // Load Active Boosts
+                if (savedData.activeBoosts) {
+                    // Filter out expired boosts
+                    const now = Date.now();
+                    gameState.activeBoosts = savedData.activeBoosts.filter(b => b.endTime > now);
+                } else {
+                    gameState.activeBoosts = [];
+                }
+            }
+        }
+
+        function resetStateForPrestige(newRootLevel) {
+            gameState.bits = 0;
+            gameState.lifetimeBits = 0;
+            gameState.gps = 0;
+            gameState.clickPower = 1;
+            gameState.rootAccessLevel = newRootLevel;
+            // Cryptos and Permanent Multiplier are NOT reset
+            gameState.activeBoosts = [];
+
+
+            // Reset Upgrades
+            for (const key in gameState.upgrades) {
+                gameState.upgrades[key].count = 0;
+                gameState.upgrades[key].cost = UPGRADES[key].cost;
+            }
+        }
+
+        /* ---------------- ui.js ---------------- */
+        // DOM Elements
+        let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, hackButton, firewallOverlay, firewallBreachBtn;
+
+        function initUI() {
+            bitsDisplay = document.getElementById('bits-display');
+            gpsDisplay = document.getElementById('gps-display');
+            cryptoDisplay = document.getElementById('crypto-display');
+            shopContainer = document.getElementById('shop-container');
+            blackMarketContainer = document.getElementById('black-market-container');
+            gameLog = document.getElementById('game-log');
+            achievementsContainer = document.getElementById('achievements-container');
+            gameLog = document.getElementById('game-log');
+            achievementsContainer = document.getElementById('achievements-container');
+            rebootButton = document.getElementById('reboot-button');
+            rebootBonusDisplay = document.getElementById('reboot-bonus-display');
+            hackButton = document.getElementById('hack-button');
+            firewallOverlay = document.getElementById('firewall-overlay');
+            firewallBreachBtn = document.getElementById('firewall-breach-btn');
+
+            // Debug Toggle
+            const debugToggle = document.getElementById('debug-toggle-btn');
+            if (debugToggle) {
+                debugToggle.addEventListener('click', () => {
+                    const consoleEl = document.getElementById('debug-console-container');
+                    if (consoleEl) consoleEl.classList.toggle('visible');
+                });
+            }
+
+            if (!hackButton) { console.error("UI: Hack button not found!"); logMessage("ERROR: Hack button not found!"); }
+            if (!bitsDisplay) { console.error("UI: Bits display not found!"); logMessage("ERROR: Bits display not found!"); }
+            else { logMessage("DEBUG: Bits display found."); }
+
+            // Tab Logic
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Deactivate all tabs
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+                    // Activate clicked tab
+                    btn.classList.add('active');
+                    const tabId = `tab-${btn.dataset.tab}`;
+                    const tabPane = document.getElementById(tabId);
+                    if (tabPane) {
+                        tabPane.classList.add('active');
+                    } else {
+                        console.error(`Tab pane not found: ${tabId}`);
+                    }
+                });
+            });
+        }
+
+        function formatNumber(num) {
+            return Math.floor(num).toLocaleString();
+        }
+
+        function logMessage(msg) {
+            // Route DEBUG and ERROR messages to debug console
+            if (msg.startsWith('DEBUG:') || msg.startsWith('ERROR:') || msg.includes('Error')) {
+                const debugLog = document.getElementById('debug-log');
+                if (debugLog) {
+                    const div = document.createElement('div');
+                    div.className = 'debug-entry ' + (msg.includes('ERROR') || msg.includes('Error') ? 'error' : 'debug');
+                    div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                    debugLog.prepend(div);
+                }
+                // Only hide DEBUG from main log, keep ERRORs visible
+                if (msg.startsWith('DEBUG:')) return;
+            }
+
+            if (!gameLog) gameLog = document.getElementById('game-log');
+            if (!gameLog) return;
+
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerText = `> ${msg}`;
+            gameLog.prepend(div);
+
+            if (gameLog.children.length > 20) {
+                gameLog.lastElementChild.remove();
+            }
+        }
+
+        function updateDisplay() {
+            if (bitsDisplay) {
+                bitsDisplay.innerText = formatNumber(gameState.bits);
+            } else {
+                console.error("UI: bitsDisplay is missing in updateDisplay");
+            }
+
+            if (gpsDisplay) gpsDisplay.innerText = gameState.gps.toFixed(1);
+            if (cryptoDisplay) cryptoDisplay.innerText = formatNumber(gameState.cryptos);
+        }
+
+        function createGlitchElement(onClick) {
+            const el = document.createElement('div');
+            el.className = 'glitch-entity';
+            el.innerText = '👾';
+
+            // Random Position
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+
+            el.onclick = () => {
+                onClick();
+                el.remove();
+            };
+
+            document.body.appendChild(el);
+            return el;
+        }
+
+        function createFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function createBinaryParticle(x, y) {
+            const el = document.createElement('div');
+            el.className = 'binary-particle';
+            el.innerText = Math.random() > 0.5 ? '1' : '0';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+
+            // Random direction
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 100;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+
+            el.style.setProperty('--tx', `${tx}px`);
+            el.style.setProperty('--ty', `${ty}px`);
+
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function renderShop(buyCallback) {
+            shopContainer.innerHTML = '';
+            for (const key in gameState.upgrades) {
+                const upgrade = gameState.upgrades[key];
+                const item = document.createElement('div');
+                item.className = 'upgrade-item';
+                item.id = `upgrade-${key}`;
+                item.onclick = () => buyCallback(key);
+
+                let statText = '';
+                if (upgrade.gps > 0) {
+                    statText += `+${upgrade.gps} GPS`;
+                }
+                if (upgrade.click > 0) {
+                    if (statText !== '') statText += ', ';
+                    statText += `+${upgrade.click} Click`;
+                }
+
+
+                item.innerHTML = `
+            <div class="upgrade-info">
+                <h3>${upgrade.name} <span style="font-size:0.8em; color:#fff;">(x${upgrade.count})</span></h3>
+                <p>${upgrade.desc} (${statText})</p>
+            </div>
+            <div class="upgrade-cost">
+                ${formatNumber(upgrade.cost)} BITS
+            </div>
+        `;
+                shopContainer.appendChild(item);
+            }
+            updateShopUI();
+        }
+
+        function renderBlackMarket(buyCallback) {
+            blackMarketContainer.innerHTML = '';
+            // DIRECT ACCESS TO BLACK_MARKET_ITEMS for bundle
+            for (const key in BLACK_MARKET_ITEMS) {
+                const item = BLACK_MARKET_ITEMS[key];
+                const el = document.createElement('div');
+                el.className = 'market-item';
+                el.onclick = () => buyCallback(key);
+
+                el.innerHTML = `
+            <h3>${item.name}</h3>
+            <p>${item.desc}</p>
+            <div class="cost" style="color: var(--primary-gold); font-weight: bold; margin-top: 10px;">
+                ${item.cost} CRYPTOS
+            </div>
+        `;
+                blackMarketContainer.appendChild(el);
+            }
+        }
+
+        function updateShopUI() {
+            for (const key in gameState.upgrades) {
+                const upgrade = gameState.upgrades[key];
+                const el = document.getElementById(`upgrade-${key}`);
+                if (el) {
+                    if (gameState.bits < upgrade.cost) {
+                        el.classList.add('disabled');
+                    } else {
+                        el.classList.remove('disabled');
+                    }
+                }
+            }
+        }
+
+        function renderAchievements() {
+            achievementsContainer.innerHTML = '';
+            gameState.achievements.forEach(ach => {
+                const item = document.createElement('div');
+                item.className = `achievement-item ${ach.unlocked ? 'unlocked' : ''}`;
+                item.innerHTML = `
+            <span class="icon">${ach.unlocked ? '🏆' : '🔒'}</span>
+            <span>${ach.name}</span>
+        `;
+                if (ach.unlocked) {
+                    item.title = ach.desc;
+                }
+                achievementsContainer.appendChild(item);
+            });
+        }
+
+        function showAchievementNotification(ach) {
+            const el = document.createElement('div');
+            el.className = 'achievement-popup';
+            el.innerHTML = `
+        <div class="ach-icon">🏆</div>
+        <div class="ach-text">
+            <div class="ach-title">${ach.name}</div>
+            <div class="ach-desc">${ach.desc}</div>
+        </div>
+    `;
+            document.body.appendChild(el);
+
+            setTimeout(() => el.classList.add('show'), 10);
+            setTimeout(() => {
+                el.classList.remove('show');
+                setTimeout(() => el.remove(), 500);
+            }, 3000);
+        }
+
+        function updateRebootButton(potentialLevel) {
+            if (potentialLevel > gameState.rootAccessLevel) {
+                rebootButton.innerText = `REBOOT (GAIN LEVEL ${potentialLevel})`;
+                rebootButton.style.opacity = 1;
+            } else {
+                rebootButton.innerText = `REBOOT (REQ: ${formatNumber((gameState.rootAccessLevel + 1) * (gameState.rootAccessLevel + 1) * 1000000)} BITS)`;
+                rebootButton.style.opacity = 0.5;
+            }
+
+            if (rebootBonusDisplay) {
+                rebootBonusDisplay.innerText = `Current Bonus: +${(gameState.rootAccessLevel * 10).toFixed(0)}% GPS`;
+            }
+        }
+
+        let flashTimeout;
+        function flashBitsDisplay() {
+            if (flashTimeout) clearTimeout(flashTimeout);
+            bitsDisplay.style.color = '#00ff41';
+            flashTimeout = setTimeout(() => {
+                bitsDisplay.style.color = '';
+                flashTimeout = null;
+            }, 200);
+        }
+
+        function animateHackButton() {
+            hackButton.style.transform = 'scale(0.95)';
+            setTimeout(() => hackButton.style.transform = 'scale(1)', 50);
+        }
+
+        // Create UI namespace for game.js compatibility
+        const UI = {
+            initUI,
+            logMessage,
+            updateDisplay,
+            createGlitchElement,
+            createFloatingText,
+            renderShop,
+            renderBlackMarket,
+            updateShopUI,
+            renderAchievements,
+            showAchievementNotification,
+            updateRebootButton,
+            flashBitsDisplay,
+            animateHackButton,
+            createBinaryParticle,
+            formatNumber
+        };
+
+        /* ---------------- storage.js ---------------- */
+        const SAVE_KEY = 'cyberClickerSave';
+
+        function saveGame() {
+            const saveData = {
+                bits: gameState.bits,
+                lifetimeBits: gameState.lifetimeBits,
+                upgrades: gameState.upgrades,
+                achievements: gameState.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
+                rootAccessLevel: gameState.rootAccessLevel,
+                cryptos: gameState.cryptos,
+                permanentMultiplier: gameState.permanentMultiplier,
+                activeBoosts: gameState.activeBoosts
+            };
+            localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem(SAVE_KEY);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    loadState(data);
+                    return true;
+                } catch (e) {
+                    console.error("Save file corrupted", e);
+                    return false;
+                }
+            }
+            loadState(null); // Initialize fresh if no save
+            return false;
+        }
+
+        function clearSave() {
+            localStorage.removeItem(SAVE_KEY);
+        }
+
+        /* ---------------- game.js ---------------- */
+        console.log("Game Bundle Loaded");
+
+        // Core Functions
+        function addBits(amount) {
+            // UI.logMessage(`DEBUG: addBits called with ${amount}`);
+            gameState.bits += amount;
+            gameState.lifetimeBits += amount;
+            UI.updateDisplay();
+            checkUnlocks();
+        }
+
+        function calculateClickPower() {
+            let power = 1; // Base power
+            for (const key in gameState.upgrades) {
+                const upgrade = gameState.upgrades[key];
+                if (upgrade.click) {
+                    power += upgrade.click * upgrade.count;
+                }
+            }
+            // Apply multipliers if any (currently none for click, but good for future)
+            gameState.clickPower = power;
+        }
+
+        function calculateGPS() {
+            let gps = 0;
+            for (const key in gameState.upgrades) {
+                const upgrade = gameState.upgrades[key];
+                if (upgrade.gps) {
+                    gps += upgrade.gps * upgrade.count;
+                }
+            }
+
+            // Prestige Bonus: +10% per Root Access Level
+            if (gameState.rootAccessLevel > 0) {
+                gps *= (1 + gameState.rootAccessLevel * 0.1);
+            }
+
+            // Permanent Multiplier (Quantum Cores)
+            if (gameState.permanentMultiplier > 1) {
+                gps *= gameState.permanentMultiplier;
+            }
+
+            // Temporary Boosts
+            const now = Date.now();
+            let boostMultiplier = 1;
+            gameState.activeBoosts = gameState.activeBoosts.filter(b => b.endTime > now); // Cleanup expired
+            gameState.activeBoosts.forEach(b => {
+                boostMultiplier *= b.multiplier;
+            });
+            gps *= boostMultiplier;
+
+            // Firewall Penalty
+            if (gameState.firewallActive) {
+                gps *= 0.5;
+            }
+
+            gameState.gps = gps;
+        }
+
+        function checkUnlocks() {
+            gameState.achievements.forEach(ach => {
+                if (!ach.unlocked && ach.condition(gameState)) {
+                    ach.unlocked = true;
+                    UI.showAchievementNotification(ach);
+                    UI.logMessage(`ACHIEVEMENT UNLOCKED: ${ach.name}`);
+                    UI.renderAchievements();
+                    saveGame();
+                }
+            });
+            UI.updateShopUI();
+        }
+
+        function buyUpgrade(key) {
+            const upgrade = gameState.upgrades[key];
+            if (gameState.bits >= upgrade.cost) {
+                gameState.bits -= upgrade.cost;
+                upgrade.count++;
+                upgrade.cost = Math.ceil(upgrade.cost * 1.15); // Cost scaling
+
+                calculateGPS();
+                calculateClickPower();
+                UI.updateDisplay();
+                UI.renderShop(buyUpgrade); // Re-render to update costs and counts
+                saveGame(); // Auto-save on purchase
+                UI.logMessage(`System upgraded: ${upgrade.name}`);
+            } else {
+                UI.logMessage("Insufficient funds.");
+            }
+        }
+
+        function buyBlackMarketItem(key) {
+            const item = BLACK_MARKET_ITEMS[key];
+            if (gameState.cryptos >= item.cost) {
+                gameState.cryptos -= item.cost;
+
+                if (item.type === 'consumable') {
+                    gameState.activeBoosts.push({
+                        multiplier: item.multiplier,
+                        endTime: Date.now() + item.duration
+                    });
+                    UI.logMessage(`ACTIVATED: ${item.name}`);
+                } else if (item.type === 'permanent') {
+                    gameState.permanentMultiplier += item.multiplier;
+                    UI.logMessage(`UPGRADED: ${item.name}`);
+                } else if (item.type === 'instant') {
+                    const reward = gameState.gps * 3600 * item.hours;
+                    addBits(reward);
+                    UI.logMessage(`WARPED TIME: +${UI.formatNumber(reward)} Bits`);
+                }
+
+                calculateGPS();
+                UI.updateDisplay();
+                UI.renderBlackMarket(buyBlackMarketItem);
+                saveGame();
+            } else {
+                UI.logMessage("Insufficient Cryptos.");
+            }
+        }
+
+        // Prestige System
+        function calculatePotentialRootAccess() {
+            return Math.floor(Math.sqrt(gameState.lifetimeBits / 1000000));
+        }
+
+        function rebootSystem() {
+            const potentialLevel = calculatePotentialRootAccess();
+            if (potentialLevel > gameState.rootAccessLevel) {
+                const cryptosGained = potentialLevel - gameState.rootAccessLevel;
+                if (confirm(`SYSTEM REBOOT REQUIRED.\n\nGain Root Access Level ${potentialLevel}?\n(Current: ${gameState.rootAccessLevel})\n\nREWARD: ${cryptosGained} CRYPTOS\n\nWARNING: This will reset your Bits and Upgrades, but keep Achievements, Cryptos, and Root Access.`)) {
+                    gameState.cryptos += cryptosGained;
+                    resetStateForPrestige(potentialLevel);
+                    saveGame();
+                    init(); // Re-init UI
+                    UI.logMessage(`SYSTEM REBOOTED. ROOT ACCESS: LEVEL ${gameState.rootAccessLevel}`);
+                    UI.logMessage(`REWARD: +${cryptosGained} CRYPTOS`);
+                }
+            } else {
+                UI.logMessage("Insufficient data for reboot.");
+            }
+        }
+
+        // Glitch System
+        function spawnGlitch() {
+            const time = Math.random() * (GLITCH_CONFIG.maxSpawnTime - GLITCH_CONFIG.minSpawnTime) + GLITCH_CONFIG.minSpawnTime;
+            setTimeout(() => {
+                const glitchEl = UI.createGlitchElement(handleGlitchClick);
+
+                // Despawn after duration
+                setTimeout(() => {
+                    if (glitchEl.parentNode) {
+                        glitchEl.remove();
+                        UI.logMessage("Glitch signal lost...");
+                        spawnGlitch(); // Schedule next one even if missed
+                    }
+                }, GLITCH_CONFIG.duration);
+
+            }, time);
+        }
+
+        function handleGlitchClick() {
+            const reward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
+            gameState.cryptos += reward;
+            UI.updateDisplay();
+            UI.logMessage(`GLITCH HACKED! Recovered ${reward} Cryptos.`);
+            UI.createFloatingText(window.innerWidth / 2, window.innerHeight / 2, `+${reward} 🪙`);
+            saveGame();
+            spawnGlitch(); // Schedule next one
+        }
+
+        // Firewall Logic
+        function spawnFirewall() {
+            if (gameState.firewallActive) return;
+
+            gameState.firewallActive = true;
+            gameState.firewallClicks = 0;
+
+            firewallOverlay.classList.add('visible');
+            firewallBreachBtn.querySelector('.text').innerText = "BREACH FIREWALL (0/10)";
+
+            UI.logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
+            calculateGPS();
+            UI.updateDisplay();
+        }
+
+        function breachFirewall() {
+            gameState.firewallClicks++;
+            firewallBreachBtn.querySelector('.text').innerText = `BREACH FIREWALL (${gameState.firewallClicks}/10)`;
+
+            // Shake effect
+            firewallOverlay.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+            setTimeout(() => firewallOverlay.style.transform = 'none', 50);
+
+            if (gameState.firewallClicks >= 10) {
+                clearFirewall();
+            }
+        }
+
+        function clearFirewall() {
+            gameState.firewallActive = false;
+            firewallOverlay.classList.remove('visible');
+
+            // Reward: 5 minutes of UNPENALIZED GPS
+            // We need to recalculate GPS first to remove the penalty
+            calculateGPS();
+            const reward = gameState.gps * 300;
+            addBits(reward);
+
+            UI.logMessage(`FIREWALL BREACHED! REWARD: +${formatNumber(reward)} BITS`);
+            UI.updateDisplay();
+        }
+
+        // Interval IDs
+        let gameLoopId, autoSaveId, eventLoopId, rebootBtnId;
+
+        // Initialization
+        function init() {
+            try {
+                // Clear existing intervals if any (for reboot)
+                if (gameLoopId) clearInterval(gameLoopId);
+                if (autoSaveId) clearInterval(autoSaveId);
+                if (eventLoopId) clearInterval(eventLoopId);
+                if (rebootBtnId) clearInterval(rebootBtnId);
+
+                UI.initUI(); // Initialize UI elements first
+
+                // Firewall Button Listener
+                if (firewallBreachBtn) {
+                    // Remove old listener to avoid duplicates (clone node trick)
+                    const newBtn = firewallBreachBtn.cloneNode(true);
+                    firewallBreachBtn.parentNode.replaceChild(newBtn, firewallBreachBtn);
+                    firewallBreachBtn = newBtn;
+                    firewallBreachBtn.addEventListener('click', breachFirewall);
+                }
+
+                // Global Error Handler for debugging (only add once)
+                if (!window.errorHandlerAdded) {
+                    window.addEventListener('error', (e) => {
+                        if (UI && UI.logMessage) {
+                            UI.logMessage(`ERROR: ${e.message}`);
+                        }
+                    });
+                    window.errorHandlerAdded = true;
+                }
+
+                UI.logMessage("DEBUG: Starting init...");
+                UI.logMessage("DEBUG: UI Initialized");
+
+                const loaded = loadGame();
+                if (loaded) {
+                    calculateGPS();
+                    calculateClickPower();
+                    UI.logMessage("Save data loaded.");
+                } else {
+                    UI.logMessage("Connection established.");
+                }
+
+                UI.logMessage(`DEBUG: Upgrades count: ${Object.keys(gameState.upgrades || {}).length}`);
+                UI.renderShop(buyUpgrade);
+                UI.renderBlackMarket(buyBlackMarketItem);
+                UI.renderAchievements();
+                UI.updateDisplay();
+
+                // Update Reboot Button Text periodically
+                rebootBtnId = setInterval(() => {
+                    const potential = calculatePotentialRootAccess();
+                    UI.updateRebootButton(potential);
+                }, 1000);
+
+                // Start Glitch System
+                spawnGlitch();
+
+                // Event Listeners
+                const hackBtn = document.getElementById('hack-button');
+                if (hackBtn) {
+                    // Remove old listener (clone node)
+                    const newHackBtn = hackBtn.cloneNode(true);
+                    hackBtn.parentNode.replaceChild(newHackBtn, hackBtn);
+                    // Re-attach listener
+                    newHackBtn.addEventListener('click', (e) => {
+                        try {
+                            addBits(gameState.clickPower);
+                            UI.createFloatingText(e.clientX, e.clientY, `+${gameState.clickPower}`);
+                            UI.animateHackButton();
+
+                            // Spawn particles
+                            for (let i = 0; i < 8; i++) {
+                                UI.createBinaryParticle(e.clientX, e.clientY);
+                            }
+                        } catch (err) {
+                            UI.logMessage(`CLICK ERROR: ${err.message}`);
+                        }
+                    });
+                    UI.logMessage("DEBUG: Hack button listener attached");
+                } else {
+                    console.error("Hack button not found!");
+                    UI.logMessage("ERROR: Hack button not found!");
+                }
+
+                const rebootBtn = document.getElementById('reboot-button');
+                if (rebootBtn) {
+                    const newRebootBtn = rebootBtn.cloneNode(true);
+                    rebootBtn.parentNode.replaceChild(newRebootBtn, rebootBtn);
+                    newRebootBtn.addEventListener('click', rebootSystem);
+                }
+
+                // Keydown listener (only add once)
+                if (!window.keyDownHandlerAdded) {
+                    document.addEventListener('keydown', (e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                            e.preventDefault();
+                            saveGame();
+                            UI.logMessage("Game saved manually.");
+                            UI.flashBitsDisplay();
+                        }
+                    });
+                    window.keyDownHandlerAdded = true;
+                }
+
+                // Game Loop (Delta Time)
+                let lastTickTime = Date.now();
+                gameLoopId = setInterval(() => {
+                    const now = Date.now();
+                    const deltaTime = (now - lastTickTime) / 1000; // Convert to seconds
+                    lastTickTime = now;
+
+                    if (gameState.gps > 0) {
+                        addBits(gameState.gps * deltaTime);
+                    }
+                }, 100);
+
+                // Auto-Save
+                autoSaveId = setInterval(() => {
+                    saveGame();
+                }, 30000);
+
+                // Random Event Loop (Check every 10 seconds)
+                eventLoopId = setInterval(() => {
+                    // 5% chance every 10 seconds -> approx every 3.3 minutes
+                    if (!gameState.firewallActive && Math.random() < 0.05 && gameState.gps > 0) {
+                        spawnFirewall();
+                    }
+                }, 10000);
+
+                UI.logMessage("DEBUG: Init complete");
+
+            } catch (e) {
+                console.error("Init Error:", e);
+                if (UI && UI.logMessage) UI.logMessage(`INIT FATAL: ${e.message}`);
+            }
+        }
+
+        // Start the game
+        window.addEventListener('load', init);
+    </script>
+</body>
+
+</html>
