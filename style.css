@@ -1014,7 +1014,23 @@ body {
     }
 
     .header {
-        padding: 15px;
+        padding: 10px;
+    }
+
+    /* Fix HUD overlap on mobile */
+    .hud {
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px;
+    }
+
+    .hud-item {
+        font-size: 0.9em;
+        flex: 1 1 45%;
+        /* Allow items to wrap if needed, taking up half width */
+        justify-content: center !important;
+        /* Center all items on mobile */
+        min-width: auto;
     }
 
     .game-title {
