@@ -234,14 +234,14 @@
         };
 
         const ACHIEVEMENTS = [
-            { id: 'hello_world', name: 'Hello World', desc: 'Accumulate 10 Bits', condition: (s) => s.lifetimeBits >= 10, unlocked: false },
-            { id: 'script_kiddie', name: 'Script Kiddie', desc: 'Buy your first upgrade', condition: (s) => s.upgrades.autoClicker.count >= 1, unlocked: false },
-            { id: 'serious_business', name: 'Serious Business', desc: 'Accumulate 1,000 Bits', condition: (s) => s.lifetimeBits >= 1000, unlocked: false },
-            { id: 'botnet_master', name: 'Botnet Master', desc: 'Own 10 Zombie Bots', condition: (s) => s.upgrades.bot.count >= 10, unlocked: false },
-            { id: 'millionaire', name: 'Millionaire', desc: 'Accumulate 1,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000, unlocked: false },
-            { id: 'billionaire', name: 'Billionaire', desc: 'Accumulate 1,000,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000000, unlocked: false },
-            { id: 'crypto_miner', name: 'Crypto Miner', desc: 'Find 10 Cryptos', condition: (s) => s.cryptos >= 10, unlocked: false },
-            { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false }
+            { id: 'hello_world', name: 'Hello World', desc: 'Accumulate 10 Bits', condition: (s) => s.lifetimeBits >= 10, unlocked: false, reward: 1 },
+            { id: 'script_kiddie', name: 'Script Kiddie', desc: 'Buy your first upgrade', condition: (s) => s.upgrades.autoClicker.count >= 1, unlocked: false, reward: 2 },
+            { id: 'serious_business', name: 'Serious Business', desc: 'Accumulate 1,000 Bits', condition: (s) => s.lifetimeBits >= 1000, unlocked: false, reward: 3 },
+            { id: 'botnet_master', name: 'Botnet Master', desc: 'Own 10 Zombie Bots', condition: (s) => s.upgrades.bot.count >= 10, unlocked: false, reward: 5 },
+            { id: 'millionaire', name: 'Millionaire', desc: 'Accumulate 1,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000, unlocked: false, reward: 10 },
+            { id: 'billionaire', name: 'Billionaire', desc: 'Accumulate 1,000,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000000, unlocked: false, reward: 20 },
+            { id: 'crypto_miner', name: 'Crypto Miner', desc: 'Find 10 Cryptos', condition: (s) => s.cryptos >= 10, unlocked: false, reward: 5 },
+            { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false, reward: 15 }
         ];
 
         /* ---------------- state.js ---------------- */
@@ -654,7 +654,10 @@
                 item.className = `achievement-item ${ach.unlocked ? 'unlocked' : ''}`;
                 item.innerHTML = `
             <span class="icon">${ach.unlocked ? '🏆' : '🔒'}</span>
-            <span>${ach.name}</span>
+            <div class="ach-info">
+                <span class="ach-name">${ach.name}</span>
+                <span class="ach-reward" style="font-size:0.8em; color:var(--primary-gold);">+${ach.reward} 🪙</span>
+            </div>
         `;
                 if (ach.unlocked) {
                     item.title = ach.desc;
@@ -671,6 +674,7 @@
         <div class="ach-text">
             <div class="ach-title">${ach.name}</div>
             <div class="ach-desc">${ach.desc}</div>
+            <div class="ach-reward" style="color:var(--primary-gold); font-weight:bold; margin-top:5px;">+${ach.reward} CRYPTOS</div>
         </div>
     `;
             document.body.appendChild(el);
@@ -899,9 +903,11 @@
             gameState.achievements.forEach(ach => {
                 if (!ach.unlocked && ach.condition(gameState)) {
                     ach.unlocked = true;
+                    gameState.cryptos += ach.reward || 0; // Award Cryptos
                     UI.showAchievementNotification(ach);
-                    UI.logMessage(`ACHIEVEMENT UNLOCKED: ${ach.name}`);
+                    UI.logMessage(`ACHIEVEMENT UNLOCKED: ${ach.name} (+${ach.reward} CRYPTOS)`);
                     UI.renderAchievements();
+                    UI.updateDisplay(); // Update Crypto display
                     saveGame();
                 }
             });

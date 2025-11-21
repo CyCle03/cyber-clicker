@@ -510,20 +510,25 @@ body {
 
 /* Achievements */
 .achievement-item {
+    background: rgba(0, 20, 20, 0.8);
+    border: 1px solid #333;
+    padding: 10px;
     display: flex;
     align-items: center;
-    gap: 15px;
-    background: rgba(20, 20, 20, 0.8);
-    border: 1px solid #555;
-    padding: 15px;
-    opacity: 0.6;
+    gap: 10px;
+    opacity: 0.5;
+    transition: all 0.3s;
 }
 
 .achievement-item.unlocked {
     opacity: 1;
     border-color: var(--primary-gold);
-    background: rgba(40, 30, 0, 0.3);
-    box-shadow: 0 0 5px var(--primary-gold);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.ach-info {
+    display: flex;
+    flex-direction: column;
 }
 
 .achievement-item .icon {
