@@ -538,10 +538,10 @@
         function updateRebootButton(potentialLevel) {
             if (potentialLevel > gameState.rootAccessLevel) {
                 rebootButton.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
-                rebootButton.style.opacity = 1;
+                rebootButton.classList.remove('disabled');
             } else {
                 rebootButton.innerText = `REBOOT SYSTEM`;
-                rebootButton.style.opacity = 0.5;
+                rebootButton.classList.add('disabled');
             }
 
             if (rebootLevelDisplay) {
