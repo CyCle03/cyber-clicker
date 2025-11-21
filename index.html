@@ -837,24 +837,7 @@
             return { text: 'Poor', class: 'poor' };
         }
 
-        function renderShop(buyCallback) {
-            shopContainer.innerHTML = '';
-            for (const key in gameState.upgrades) {
-                const upgrade = gameState.upgrades[key];
-                const el = document.createElement('div');
-                el.className = 'shop-item';
-                el.id = `upgrade-${key}`;
-                el.innerHTML = `
-                    <h3>${upgrade.name}</h3>
-                    <p>${upgrade.desc}</p>
-                    <p>Count: ${upgrade.count}</p>
-                    <div class="cost">Cost: ${formatNumber(upgrade.cost)} BITS</div>
-                `;
-                el.addEventListener('click', () => buyCallback(key));
-                shopContainer.appendChild(el);
-            }
-            updateShopUI();
-        }
+
 
         function calculateClickPower() {
             let power = 1; // Base power
