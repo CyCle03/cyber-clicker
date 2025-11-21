@@ -632,10 +632,33 @@ body {
     letter-spacing: 2px;
 }
 
-.firewall-warning {
+.firewall-code-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 3em;
+    color: #ff0000;
+    letter-spacing: 10px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px #ff0000;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border: 1px solid #ff0000;
+}
+
+.firewall-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #ff0000;
     color: #fff;
-    font-size: 1.1em;
-    text-shadow: 0 0 10px var(--primary-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 2em;
+    text-align: center;
+    width: 200px;
+    outline: none;
+    text-transform: uppercase;
+}
+
+.firewall-input::placeholder {
+    color: rgba(255, 0, 0, 0.5);
 }
 
 .offline-amount {
