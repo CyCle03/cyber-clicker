@@ -89,6 +89,12 @@
                             <div class="market-header">
                                 <p>WARNING: ILLEGAL TRANSACTIONS DETECTED. SPEND CRYPTOS WISELY.</p>
                             </div>
+
+                            <!-- Active Effects Display -->
+                            <div id="active-effects-container" class="active-effects">
+                                <!-- Active effects will be displayed here -->
+                            </div>
+
                             <div id="black-market-container" class="grid-container">
                                 <!-- Black Market items injected here -->
                             </div>
@@ -435,6 +441,11 @@
 
             // Update statistics
             renderStatistics();
+
+            // Update active effects (for countdown timers)
+            if (document.getElementById('active-effects-container')) {
+                renderActiveEffects();
+            }
         }
 
         function createGlitchElement(onClick) {
@@ -564,6 +575,54 @@
             </div>
         `;
                 blackMarketContainer.appendChild(el);
+            }
+
+            // Render active effects
+            renderActiveEffects();
+        }
+
+        function renderActiveEffects() {
+            const container = document.getElementById('active-effects-container');
+            if (!container) return;
+
+            let effectsHTML = '';
+
+            // Show permanent multiplier if > 1
+            if (gameState.permanentMultiplier > 1) {
+                const bonusPercent = ((gameState.permanentMultiplier - 1) * 100).toFixed(0);
+                effectsHTML += `
+                    <div class="effect-item permanent">
+                        <span class="effect-icon">⚡</span>
+                        <span class="effect-name">Permanent GPS Boost</span>
+                        <span class="effect-value">+${bonusPercent}%</span>
+                    </div>
+                `;
+            }
+
+            // Show active boosts
+            const now = Date.now();
+            gameState.activeBoosts = gameState.activeBoosts.filter(boost => boost.endTime > now);
+
+            gameState.activeBoosts.forEach(boost => {
+                const remaining = Math.ceil((boost.endTime - now) / 1000);
+                const bonusPercent = ((boost.multiplier - 1) * 100).toFixed(0);
+                effectsHTML += `
+                    <div class="effect-item active">
+                        <span class="effect-icon">🔥</span>
+                        <span class="effect-name">Signal Boost</span>
+                        <span class="effect-value">+${bonusPercent}% (${remaining}s)</span>
+                    </div>
+                `;
+            });
+
+            if (effectsHTML) {
+                container.innerHTML = `
+                    <div class="effects-header">ACTIVE EFFECTS</div>
+                    ${effectsHTML}
+                `;
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
             }
         }
 
