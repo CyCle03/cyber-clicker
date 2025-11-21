@@ -54,6 +54,8 @@
                     </div>
                     <div class="controls">
                         <button id="reboot-button" class="cyber-button-small warning">REBOOT SYSTEM</button>
+                        <div id="reboot-level-display" class="bonus-text">Root Access: LVL 0 (Next: LVL 1 at 1,000,000
+                            BITS)</div>
                         <div id="reboot-bonus-display" class="bonus-text">Current Bonus: +0% GPS</div>
                     </div>
                 </section>
@@ -279,7 +281,7 @@
 
         /* ---------------- ui.js ---------------- */
         // DOM Elements
-        let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, hackButton, firewallOverlay, firewallCodeDisplay, firewallInput;
+        let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, rebootLevelDisplay, hackButton, firewallOverlay, firewallCodeDisplay, firewallInput;
 
         function initUI() {
             bitsDisplay = document.getElementById('bits-display');
@@ -293,6 +295,7 @@
             achievementsContainer = document.getElementById('achievements-container');
             rebootButton = document.getElementById('reboot-button');
             rebootBonusDisplay = document.getElementById('reboot-bonus-display');
+            rebootLevelDisplay = document.getElementById('reboot-level-display');
             hackButton = document.getElementById('hack-button');
             firewallOverlay = document.getElementById('firewall-overlay');
             firewallCodeDisplay = document.getElementById('firewall-code-display');
@@ -528,11 +531,21 @@
 
         function updateRebootButton(potentialLevel) {
             if (potentialLevel > gameState.rootAccessLevel) {
-                rebootButton.innerText = `REBOOT (GAIN LEVEL ${potentialLevel})`;
+                rebootButton.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
                 rebootButton.style.opacity = 1;
             } else {
-                rebootButton.innerText = `REBOOT (REQ: ${formatNumber((gameState.rootAccessLevel + 1) * (gameState.rootAccessLevel + 1) * 1000000)} BITS)`;
+                rebootButton.innerText = `REBOOT SYSTEM`;
                 rebootButton.style.opacity = 0.5;
+            }
+
+            if (rebootLevelDisplay) {
+                const nextLevel = gameState.rootAccessLevel + 1;
+                const requiredBits = nextLevel * nextLevel * 1000000;
+                if (potentialLevel > gameState.rootAccessLevel) {
+                    rebootLevelDisplay.innerText = `Root Access: LVL ${gameState.rootAccessLevel} → LVL ${potentialLevel} (Ready!)`;
+                } else {
+                    rebootLevelDisplay.innerText = `Root Access: LVL ${gameState.rootAccessLevel} (Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+                }
             }
 
             if (rebootBonusDisplay) {
