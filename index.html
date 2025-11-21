@@ -243,7 +243,36 @@
             <span class="icon">📊</span>
             <span class="label">STATS</span>
         </button>
+        </button>
+        <button class="mobile-nav-btn" data-tab="statistics" onclick="switchMobileTab('statistics')">
+            <span class="icon">📊</span>
+            <span class="label">STATS</span>
+        </button>
     </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">SYSTEM SETTINGS</div>
+
+            <div class="setting-item">
+                <div class="setting-label">MASTER VOLUME</div>
+                <input type="range" id="volume-slider" min="0" max="100" value="50" class="cyber-slider">
+                <div class="setting-value" id="volume-value">50%</div>
+            </div>
+
+            <div class="setting-item">
+                <button class="cyber-button" onclick="toggleMute()" id="mute-btn">MUTE SOUND</button>
+            </div>
+
+            <div class="modal-footer">
+                <button class="cyber-button" onclick="closeSettings()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Button (Fixed Top Right) -->
+    <button id="settings-btn" class="settings-btn" onclick="openSettings()">⚙️</button>
 
     <script>
         window.addEventListener('error', function (e) {
@@ -300,6 +329,134 @@
         ];
 
         /* ---------------- state.js ---------------- */
+        // Sound System
+        const SoundManager = {
+            ctx: null,
+            masterVolume: 0.5,
+            muted: false,
+
+            init: function () {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.loadSettings();
+                } catch (e) {
+                    console.error("Web Audio API not supported");
+                }
+            },
+
+            loadSettings: function () {
+                const savedVol = localStorage.getItem('cc_volume');
+                const savedMute = localStorage.getItem('cc_mute');
+                if (savedVol !== null) this.masterVolume = parseFloat(savedVol);
+                if (savedMute !== null) this.muted = (savedMute === 'true');
+
+                this.updateUI();
+            },
+
+            saveSettings: function () {
+                localStorage.setItem('cc_volume', this.masterVolume);
+                localStorage.setItem('cc_mute', this.muted);
+            },
+
+            updateUI: function () {
+                const slider = document.getElementById('volume-slider');
+                const valueDisplay = document.getElementById('volume-value');
+                const muteBtn = document.getElementById('mute-btn');
+
+                if (slider) slider.value = this.masterVolume * 100;
+                if (valueDisplay) valueDisplay.innerText = Math.round(this.masterVolume * 100) + '%';
+                if (muteBtn) {
+                    muteBtn.innerText = this.muted ? "UNMUTE SOUND" : "MUTE SOUND";
+                    muteBtn.classList.toggle('danger', this.muted);
+                }
+            },
+
+            playTone: function (freq, type, duration, vol = 1) {
+                if (!this.ctx || this.muted) return;
+
+                // Resume context if suspended (browser policy)
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(vol * this.masterVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+
+            playSFX: function (name) {
+                if (!this.ctx) this.init();
+
+                switch (name) {
+                    case 'click':
+                        this.playTone(1200, 'sine', 0.1, 0.3);
+                        break;
+                    case 'buy':
+                        this.playTone(600, 'square', 0.1, 0.3);
+                        setTimeout(() => this.playTone(1200, 'square', 0.2, 0.3), 100);
+                        break;
+                    case 'error':
+                        this.playTone(150, 'sawtooth', 0.3, 0.5);
+                        break;
+                    case 'alert':
+                        this.playTone(800, 'sawtooth', 0.5, 0.4);
+                        setTimeout(() => this.playTone(600, 'sawtooth', 0.5, 0.4), 200);
+                        break;
+                    case 'success':
+                        this.playTone(400, 'sine', 0.1, 0.4);
+                        setTimeout(() => this.playTone(600, 'sine', 0.1, 0.4), 100);
+                        setTimeout(() => this.playTone(800, 'sine', 0.2, 0.4), 200);
+                        break;
+                    case 'reboot':
+                        this.playTone(100, 'sawtooth', 1.0, 0.8);
+                        break;
+                }
+            }
+        };
+
+        // Settings UI Functions
+        function openSettings() {
+            document.getElementById('settings-modal').classList.add('visible');
+            SoundManager.updateUI();
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('visible');
+        }
+
+        function toggleMute() {
+            SoundManager.muted = !SoundManager.muted;
+            SoundManager.saveSettings();
+            SoundManager.updateUI();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.getElementById('volume-slider');
+            if (slider) {
+                slider.addEventListener('input', (e) => {
+                    SoundManager.masterVolume = e.target.value / 100;
+                    document.getElementById('volume-value').innerText = e.target.value + '%';
+                    SoundManager.saveSettings();
+                });
+            }
+            // Init Sound
+            document.body.addEventListener('click', () => {
+                if (SoundManager.ctx && SoundManager.ctx.state === 'suspended') {
+                    SoundManager.ctx.resume();
+                }
+            }, { once: true });
+        });
+
         let gameState = {};
 
         function initState() {
@@ -390,7 +547,7 @@
             gameState.gps = 0;
             gameState.clickPower = 1;
             gameState.rootAccessLevel = newRootLevel;
-            // Cryptos and Permanent Multiplier are NOT reset
+            gameState.permanentMultiplier *= 1.1; // +10% permanent bonus per reboot
             gameState.activeBoosts = [];
 
 
@@ -1060,6 +1217,7 @@
                 upgrade.count++;
                 upgrade.cost = Math.ceil(upgrade.cost * 1.15); // Cost scaling
 
+                SoundManager.playSFX('buy');
                 calculateGPS();
                 calculateClickPower();
                 UI.updateDisplay();
@@ -1067,6 +1225,7 @@
                 saveGame(); // Auto-save on purchase
                 UI.logMessage(`System upgraded: ${upgrade.name}`);
             } else {
+                SoundManager.playSFX('error');
                 UI.logMessage("Insufficient funds.");
             }
         }
@@ -1096,6 +1255,7 @@
                 UI.renderBlackMarket(buyBlackMarketItem);
                 saveGame();
             } else {
+                SoundManager.playSFX('error');
                 UI.logMessage("Insufficient Cryptos.");
             }
         }
@@ -1115,8 +1275,9 @@
                         gameState.statistics.rebootCount++;
                     }
                     resetStateForPrestige(potentialLevel);
+                    SoundManager.playSFX('reboot');
                     saveGame();
-                    init(); // Re-init UI
+                    location.reload();
                     UI.logMessage(`SYSTEM REBOOTED. ROOT ACCESS: LEVEL ${gameState.rootAccessLevel}`);
                     UI.logMessage(`REWARD: +${cryptosGained} CRYPTOS`);
                 }
@@ -1173,6 +1334,7 @@
             firewallInput.value = "";
             // firewallInput.focus(); // Removed to prevent mobile keyboard popup
 
+            SoundManager.playSFX('alert');
             UI.logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
             calculateGPS();
             UI.updateDisplay();
@@ -1215,12 +1377,13 @@
 
             firewallOverlay.classList.remove('visible');
 
-            // Reward: 5 minutes of UNPENALIZED GPS
+            // Reward: 5 minutes of UNMUTE GPS
             // We need to recalculate GPS first to remove the penalty
             calculateGPS();
             const reward = gameState.gps * 300;
             addBits(reward);
 
+            SoundManager.playSFX('success');
             UI.logMessage(`FIREWALL BREACHED! REWARD: +${formatNumber(reward)} BITS`);
             UI.updateDisplay();
         }
@@ -1368,6 +1531,7 @@
                             addBits(gameState.clickPower);
                             UI.createFloatingText(e.clientX, e.clientY, `+${gameState.clickPower}`);
                             UI.animateHackButton();
+                            SoundManager.playSFX('click');
 
                             // Spawn particles
                             for (let i = 0; i < 8; i++) {
