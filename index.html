@@ -47,20 +47,21 @@
                             <div class="btn-glitch"></div>
                         </button>
                     </div>
-                    <div class="log-container-wrapper">
-                        <div id="game-log" class="log-container">
-                            <div class="log-entry">> System initialized...</div>
-                            <div class="log-entry">> Waiting for input...</div>
-                        </div>
-                    </div>
 
-                    <!-- Reboot Controls (Bottom) -->
+                    <!-- Reboot Controls (Below HACK_SYSTEM) -->
                     <div class="reboot-controls">
                         <button id="reboot-button" class="cyber-button-reboot">REBOOT SYSTEM</button>
                         <div class="reboot-info">
                             <div id="reboot-level-display" class="reboot-text">Root Access: LVL 0 (Next: LVL 1 at
                                 1,000,000 BITS)</div>
                             <div id="reboot-bonus-display" class="reboot-text">Current Bonus: +0% GPS</div>
+                        </div>
+                    </div>
+
+                    <div class="log-container-wrapper">
+                        <div id="game-log" class="log-container">
+                            <div class="log-entry">> System initialized...</div>
+                            <div class="log-entry">> Waiting for input...</div>
                         </div>
                     </div>
                 </section>
@@ -547,9 +548,9 @@
                 const nextLevel = gameState.rootAccessLevel + 1;
                 const requiredBits = nextLevel * nextLevel * 1000000;
                 if (potentialLevel > gameState.rootAccessLevel) {
-                    rebootLevelDisplay.innerText = `Root Access: LVL ${gameState.rootAccessLevel} → LVL ${potentialLevel} (Ready!)`;
+                    rebootLevelDisplay.innerHTML = `Root Access: LVL ${gameState.rootAccessLevel}<br>→ LVL ${potentialLevel} (Ready!)`;
                 } else {
-                    rebootLevelDisplay.innerText = `Root Access: LVL ${gameState.rootAccessLevel} (Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+                    rebootLevelDisplay.innerHTML = `Root Access: LVL ${gameState.rootAccessLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
                 }
             }
 
