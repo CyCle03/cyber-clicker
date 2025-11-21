@@ -124,6 +124,16 @@
                                     <div class="stat-value" id="stat-reboots">0</div>
                                     <div class="stat-label">Reboots</div>
                                 </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🛡️</div>
+                                    <div class="stat-value" id="stat-firewalls">0</div>
+                                    <div class="stat-label">Firewalls Encountered</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">✅</div>
+                                    <div class="stat-value" id="stat-firewalls-cleared">0</div>
+                                    <div class="stat-label">Firewalls Cleared</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -248,6 +258,8 @@
                 totalBitsEarned: 0,
                 playTimeSeconds: 0,
                 rebootCount: 0,
+                firewallsEncountered: 0,
+                firewallsCleared: 0,
                 sessionStartTime: Date.now()
             };
 
@@ -597,11 +609,15 @@
             const statBits = document.getElementById('stat-bits');
             const statTime = document.getElementById('stat-time');
             const statReboots = document.getElementById('stat-reboots');
+            const statFirewalls = document.getElementById('stat-firewalls');
+            const statFirewallsCleared = document.getElementById('stat-firewalls-cleared');
 
             if (statClicks) statClicks.innerText = formatNumber(gameState.statistics.totalClicks);
             if (statBits) statBits.innerText = formatNumber(gameState.statistics.totalBitsEarned);
             if (statTime) statTime.innerText = formatTime(totalPlayTime);
             if (statReboots) statReboots.innerText = gameState.statistics.rebootCount;
+            if (statFirewalls) statFirewalls.innerText = gameState.statistics.firewallsEncountered || 0;
+            if (statFirewallsCleared) statFirewallsCleared.innerText = gameState.statistics.firewallsCleared || 0;
         }
 
         function updateRebootButton(potentialLevel) {
@@ -881,6 +897,10 @@
             if (gameState.firewallActive) return;
 
             gameState.firewallActive = true;
+            if (gameState.statistics) {
+                gameState.statistics.firewallsEncountered++;
+            }
+
             // Generate Random Hex Code (4 chars)
             const chars = "0123456789ABCDEF";
             let code = "";
@@ -916,6 +936,10 @@
 
         function clearFirewall() {
             gameState.firewallActive = false;
+            if (gameState.statistics) {
+                gameState.statistics.firewallsCleared++;
+            }
+
             firewallOverlay.classList.remove('visible');
 
             // Reward: 5 minutes of UNPENALIZED GPS
