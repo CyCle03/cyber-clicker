@@ -115,14 +115,11 @@
                 SECURITY BREACH IN PROGRESS.<br>
                 GPS REDUCED BY 50%.<br>
                 <br>
-                MANUAL OVERRIDE REQUIRED.
+                ENTER SECURITY CODE TO OVERRIDE:
             </div>
-            <button id="firewall-breach-btn" class="cyber-button warning" style="width: 100%;">
-                <div class="btn-content">
-                    <span class="icon">🛡️</span>
-                    <span class="text">BREACH FIREWALL (0/10)</span>
-                </div>
-            </button>
+            <div id="firewall-code-display" class="firewall-code-display">----</div>
+            <input type="text" id="firewall-input" class="firewall-input" maxlength="4" placeholder="CODE"
+                autocomplete="off">
         </div>
     </div>
 
@@ -208,7 +205,7 @@
             gameState.cryptos = 0;
             gameState.permanentMultiplier = 1;
             gameState.firewallActive = false;
-            gameState.firewallClicks = 0;
+            gameState.firewallCode = "";
 
             // Deep copy upgrades to avoid mutating the constant definition
             gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES));
@@ -282,7 +279,7 @@
 
         /* ---------------- ui.js ---------------- */
         // DOM Elements
-        let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, hackButton, firewallOverlay, firewallBreachBtn;
+        let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, hackButton, firewallOverlay, firewallCodeDisplay, firewallInput;
 
         function initUI() {
             bitsDisplay = document.getElementById('bits-display');
@@ -298,7 +295,8 @@
             rebootBonusDisplay = document.getElementById('reboot-bonus-display');
             hackButton = document.getElementById('hack-button');
             firewallOverlay = document.getElementById('firewall-overlay');
-            firewallBreachBtn = document.getElementById('firewall-breach-btn');
+            firewallCodeDisplay = document.getElementById('firewall-code-display');
+            firewallInput = document.getElementById('firewall-input');
 
             // Debug Toggle
             const debugToggle = document.getElementById('debug-toggle-btn');
@@ -789,26 +787,33 @@
             if (gameState.firewallActive) return;
 
             gameState.firewallActive = true;
-            gameState.firewallClicks = 0;
+            // Generate Random Hex Code (4 chars)
+            const chars = "0123456789ABCDEF";
+            let code = "";
+            for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            gameState.firewallCode = code;
 
             firewallOverlay.classList.add('visible');
-            firewallBreachBtn.querySelector('.text').innerText = "BREACH FIREWALL (0/10)";
+            firewallCodeDisplay.innerText = code;
+            firewallInput.value = "";
+            firewallInput.focus();
 
             UI.logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
             calculateGPS();
             UI.updateDisplay();
         }
 
-        function breachFirewall() {
-            gameState.firewallClicks++;
-            firewallBreachBtn.querySelector('.text').innerText = `BREACH FIREWALL (${gameState.firewallClicks}/10)`;
-
-            // Shake effect
-            firewallOverlay.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
-            setTimeout(() => firewallOverlay.style.transform = 'none', 50);
-
-            if (gameState.firewallClicks >= 10) {
+        function checkFirewallInput() {
+            const input = firewallInput.value.toUpperCase();
+            if (input === gameState.firewallCode) {
                 clearFirewall();
+            } else if (input.length >= 4) {
+                // Wrong code
+                firewallInput.style.color = 'red';
+                setTimeout(() => {
+                    firewallInput.value = "";
+                    firewallInput.style.color = 'white';
+                }, 500);
             }
         }
 
@@ -840,13 +845,18 @@
 
                 UI.initUI(); // Initialize UI elements first
 
-                // Firewall Button Listener
-                if (firewallBreachBtn) {
-                    // Remove old listener to avoid duplicates (clone node trick)
-                    const newBtn = firewallBreachBtn.cloneNode(true);
-                    firewallBreachBtn.parentNode.replaceChild(newBtn, firewallBreachBtn);
-                    firewallBreachBtn = newBtn;
-                    firewallBreachBtn.addEventListener('click', breachFirewall);
+                // Firewall Input Listener
+                if (firewallInput) {
+                    // Remove old listener
+                    const newInput = firewallInput.cloneNode(true);
+                    firewallInput.parentNode.replaceChild(newInput, firewallInput);
+                    firewallInput = newInput;
+
+                    firewallInput.addEventListener('input', checkFirewallInput);
+                    // Prevent losing focus
+                    firewallInput.addEventListener('blur', () => {
+                        if (gameState.firewallActive) firewallInput.focus();
+                    });
                 }
 
                 // Global Error Handler for debugging (only add once)
