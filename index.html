@@ -1245,7 +1245,11 @@
                 if (rebootBtn) {
                     const newRebootBtn = rebootBtn.cloneNode(true);
                     rebootBtn.parentNode.replaceChild(newRebootBtn, rebootBtn);
-                    newRebootBtn.addEventListener('click', rebootSystem);
+                    rebootButton = newRebootBtn; // Update global reference
+
+                    newRebootBtn.addEventListener('click', () => {
+                        rebootSystem();
+                    });
                 }
 
                 // Keydown listener (only add once)
