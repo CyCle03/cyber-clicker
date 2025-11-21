@@ -175,7 +175,7 @@
             </div>
             <div id="firewall-code-display" class="firewall-code-display">----</div>
             <input type="text" id="firewall-input" class="firewall-input" maxlength="4" placeholder="CODE"
-                autocomplete="off">
+                autocomplete="off" readonly>
 
             <!-- Touch Keypad -->
             <div class="keypad-container">
@@ -1171,7 +1171,7 @@
             firewallOverlay.classList.add('visible');
             firewallCodeDisplay.innerText = code;
             firewallInput.value = "";
-            firewallInput.focus();
+            // firewallInput.focus(); // Removed to prevent mobile keyboard popup
 
             UI.logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
             calculateGPS();
@@ -1247,11 +1247,36 @@
                     firewallInput = newInput;
 
                     firewallInput.addEventListener('input', checkFirewallInput);
-                    // Prevent losing focus
-                    firewallInput.addEventListener('blur', () => {
-                        if (gameState.firewallActive) firewallInput.focus();
-                    });
+                    // Removed forced focus on blur to prevent mobile keyboard issues
                 }
+
+                // Global Keydown Listener for Firewall
+                document.addEventListener('keydown', (e) => {
+                    if (gameState.firewallActive) {
+                        const key = e.key.toUpperCase();
+                        const validKeys = "0123456789ABCDEF";
+
+                        // Handle Backspace
+                        if (e.key === 'Backspace') {
+                            firewallInput.value = firewallInput.value.slice(0, -1);
+                            return;
+                        }
+
+                        // Handle Enter
+                        if (e.key === 'Enter') {
+                            checkFirewallInput();
+                            return;
+                        }
+
+                        // Handle Hex Input
+                        if (validKeys.includes(key) && key.length === 1) {
+                            if (firewallInput.value.length < 4) {
+                                firewallInput.value += key;
+                                checkFirewallInput();
+                            }
+                        }
+                    }
+                });
 
                 // Global Error Handler for debugging (only add once)
                 if (!window.errorHandlerAdded) {
