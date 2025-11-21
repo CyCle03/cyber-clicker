@@ -126,6 +126,22 @@
         </div>
     </div>
 
+    <!-- Offline Progress Overlay -->
+    <div id="offline-overlay">
+        <div class="offline-box">
+            <div class="offline-title">SYSTEM RESTORED</div>
+            <div style="color: #aaa; margin-bottom: 10px;">MINING OPERATIONS CONTINUED IN BACKGROUND</div>
+            <div class="offline-amount" id="offline-amount-display">+0 BITS</div>
+            <div style="color: #fff; margin-bottom: 30px;" id="offline-time-display">Time Offline: 0s</div>
+            <button class="cyber-button"
+                onclick="document.getElementById('offline-overlay').classList.remove('visible')">
+                <div class="btn-content">
+                    <span class="text">ACKNOWLEDGE</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
     <script>
         window.addEventListener('error', function (e) {
             const log = document.getElementById('game-log');
@@ -201,6 +217,7 @@
             gameState.achievements = ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false }));
 
             gameState.activeBoosts = []; // Array of { multiplier, endTime }
+            gameState.lastSaveTime = Date.now();
         }
 
         function loadState(savedData) {
@@ -212,6 +229,7 @@
                 gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
                 gameState.cryptos = savedData.cryptos || 0;
                 gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
+                gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
 
                 // Load Upgrades
                 if (savedData.upgrades) {
@@ -570,7 +588,8 @@
                 rootAccessLevel: gameState.rootAccessLevel,
                 cryptos: gameState.cryptos,
                 permanentMultiplier: gameState.permanentMultiplier,
-                activeBoosts: gameState.activeBoosts
+                activeBoosts: gameState.activeBoosts,
+                lastSaveTime: Date.now()
             };
             localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
         }
@@ -848,6 +867,29 @@
                     calculateGPS();
                     calculateClickPower();
                     UI.logMessage("Save data loaded.");
+
+                    // Offline Progress Calculation
+                    if (gameState.lastSaveTime) {
+                        const now = Date.now();
+                        const secondsOffline = (now - gameState.lastSaveTime) / 1000;
+                        if (secondsOffline > 60 && gameState.gps > 0) { // Minimum 60 seconds
+                            const offlineEarnings = secondsOffline * gameState.gps;
+                            addBits(offlineEarnings);
+
+                            // Show Overlay
+                            const overlay = document.getElementById('offline-overlay');
+                            const amountDisplay = document.getElementById('offline-amount-display');
+                            const timeDisplay = document.getElementById('offline-time-display');
+
+                            if (overlay && amountDisplay && timeDisplay) {
+                                amountDisplay.innerText = `+${formatNumber(offlineEarnings)} BITS`;
+                                timeDisplay.innerText = `Time Offline: ${formatNumber(secondsOffline)}s`;
+                                overlay.classList.add('visible');
+                            }
+                            UI.logMessage(`OFFLINE: Earned ${formatNumber(offlineEarnings)} Bits over ${formatNumber(secondsOffline)}s`);
+                        }
+                    }
+
                 } else {
                     UI.logMessage("Connection established.");
                 }

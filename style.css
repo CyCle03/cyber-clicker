@@ -635,16 +635,13 @@ body {
 .firewall-warning {
     color: #fff;
     font-size: 1.1em;
-    margin-bottom: 30px;
-    line-height: 1.5;
+    text-shadow: 0 0 10px var(--primary-cyan);
 }
 
-@keyframes pulse-red {
-    from {
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-    }
-
-    to {
-        box-shadow: 0 0 60px rgba(255, 0, 0, 0.9);
-    }
+.offline-amount {
+    color: var(--primary-gold);
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 20px 0;
+    text-shadow: 0 0 10px var(--primary-gold);
 }
