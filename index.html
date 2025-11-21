@@ -506,14 +506,40 @@
                     statText += `+${upgrade.click} Click`;
                 }
 
+                // Calculate additional info
+                const contribution = calculateGPSContribution(key);
+                const efficiency = calculateEfficiency(upgrade);
+                const rating = getEfficiencyRating(efficiency);
+
+                // Build contribution text
+                let contributionHTML = '';
+                if (upgrade.gps > 0 && upgrade.count > 0) {
+                    contributionHTML = `
+                        <div class="upgrade-contribution">
+                            Current: ${contribution.contribution.toFixed(1)} GPS (${contribution.percentage.toFixed(1)}%)
+                        </div>
+                    `;
+                }
+
+                // Build efficiency badge
+                let efficiencyHTML = '';
+                if (upgrade.gps > 0) {
+                    efficiencyHTML = `
+                        <div class="upgrade-efficiency ${rating.class}">
+                            ${rating.text}
+                        </div>
+                    `;
+                }
 
                 item.innerHTML = `
             <div class="upgrade-info">
                 <h3>${upgrade.name} <span style="font-size:0.8em; color:#fff;">(x${upgrade.count})</span></h3>
                 <p>${upgrade.desc} (${statText})</p>
+                ${contributionHTML}
             </div>
             <div class="upgrade-cost">
                 ${formatNumber(upgrade.cost)} BITS
+                ${efficiencyHTML}
             </div>
         `;
                 shopContainer.appendChild(item);
@@ -729,6 +755,46 @@
             }
             UI.updateDisplay();
             checkUnlocks();
+        }
+
+        // Helper functions for upgrade information
+        function calculateGPSContribution(upgradeKey) {
+            const upgrade = gameState.upgrades[upgradeKey];
+            const contribution = upgrade.gps * upgrade.count;
+            const percentage = gameState.gps > 0 ? (contribution / gameState.gps) * 100 : 0;
+            return { contribution, percentage };
+        }
+
+        function calculateEfficiency(upgrade) {
+            if (upgrade.gps === 0) return Infinity; // Click upgrades have no GPS efficiency
+            return upgrade.cost / upgrade.gps; // Lower is better
+        }
+
+        function getEfficiencyRating(efficiency) {
+            if (efficiency === Infinity) return { text: 'N/A', class: 'neutral' };
+            if (efficiency < 500) return { text: 'Excellent', class: 'excellent' };
+            if (efficiency < 2000) return { text: 'Good', class: 'good' };
+            if (efficiency < 10000) return { text: 'Fair', class: 'fair' };
+            return { text: 'Poor', class: 'poor' };
+        }
+
+        function renderShop(buyCallback) {
+            shopContainer.innerHTML = '';
+            for (const key in gameState.upgrades) {
+                const upgrade = gameState.upgrades[key];
+                const el = document.createElement('div');
+                el.className = 'shop-item';
+                el.id = `upgrade-${key}`;
+                el.innerHTML = `
+                    <h3>${upgrade.name}</h3>
+                    <p>${upgrade.desc}</p>
+                    <p>Count: ${upgrade.count}</p>
+                    <div class="cost">Cost: ${formatNumber(upgrade.cost)} BITS</div>
+                `;
+                el.addEventListener('click', () => buyCallback(key));
+                shopContainer.appendChild(el);
+            }
+            updateShopUI();
         }
 
         function calculateClickPower() {
