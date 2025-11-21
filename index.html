@@ -172,6 +172,32 @@
             <div id="firewall-code-display" class="firewall-code-display">----</div>
             <input type="text" id="firewall-input" class="firewall-input" maxlength="4" placeholder="CODE"
                 autocomplete="off">
+
+            <!-- Touch Keypad -->
+            <div class="keypad-container">
+                <button class="keypad-btn" onclick="handleKeypadInput('1')">1</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('2')">2</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('3')">3</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('A')">A</button>
+
+                <button class="keypad-btn" onclick="handleKeypadInput('4')">4</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('5')">5</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('6')">6</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('B')">B</button>
+
+                <button class="keypad-btn" onclick="handleKeypadInput('7')">7</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('8')">8</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('9')">9</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('C')">C</button>
+
+                <button class="keypad-btn" onclick="handleKeypadInput('0')">0</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('D')">D</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('E')">E</button>
+                <button class="keypad-btn" onclick="handleKeypadInput('F')">F</button>
+
+                <button class="keypad-btn control-clr" onclick="handleKeypadInput('CLR')">CLR</button>
+                <button class="keypad-btn control-ok" onclick="handleKeypadInput('OK')">OK</button>
+            </div>
         </div>
     </div>
 
@@ -1142,16 +1168,28 @@
         window.testFirewall = spawnFirewall;
 
         function checkFirewallInput() {
-            const input = firewallInput.value.toUpperCase();
-            if (input === gameState.firewallCode) {
+            if (!gameState.firewallActive) return;
+
+            const input = document.getElementById('firewall-input');
+            if (input.value.toUpperCase() === gameState.firewallCode) {
                 clearFirewall();
-            } else if (input.length >= 4) {
-                // Wrong code
-                firewallInput.style.color = 'red';
-                setTimeout(() => {
-                    firewallInput.value = "";
-                    firewallInput.style.color = 'white';
-                }, 500);
+                input.value = "";
+            }
+        }
+
+        function handleKeypadInput(key) {
+            const input = document.getElementById('firewall-input');
+            if (!input) return;
+
+            if (key === 'CLR') {
+                input.value = "";
+            } else if (key === 'OK') {
+                checkFirewallInput();
+            } else {
+                if (input.value.length < 4) {
+                    input.value += key;
+                    checkFirewallInput(); // Check immediately on input
+                }
             }
         }
 

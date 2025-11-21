@@ -1136,6 +1136,58 @@ body {
     .offline-amount {
         font-size: 1.8em;
     }
+
+    /* Keypad Styles */
+    .keypad-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 15px;
+        width: 100%;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .keypad-btn {
+        background: rgba(0, 20, 20, 0.8);
+        border: 1px solid var(--primary-cyan);
+        color: var(--primary-cyan);
+        padding: 12px 0;
+        font-family: var(--font-main);
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: all 0.1s;
+        border-radius: 4px;
+    }
+
+    .keypad-btn:active {
+        background: var(--primary-cyan);
+        color: #000;
+        transform: scale(0.95);
+    }
+
+    .keypad-btn.control-clr {
+        grid-column: span 2;
+        border-color: var(--danger-red);
+        color: var(--danger-red);
+    }
+
+    .keypad-btn.control-clr:active {
+        background: var(--danger-red);
+        color: #000;
+    }
+
+    .keypad-btn.control-ok {
+        grid-column: span 2;
+        border-color: var(--primary-gold);
+        color: var(--primary-gold);
+    }
+
+    .keypad-btn.control-ok:active {
+        background: var(--primary-gold);
+        color: #000;
+    }
 }
 
 /* Small Mobile (max-width: 480px) */
