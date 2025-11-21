@@ -495,9 +495,9 @@
             const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
             const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
 
-            let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
+            let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(5));
             if (shortValue % 1 !== 0) {
-                shortValue = shortValue.toFixed(1);
+                shortValue = shortValue.toFixed(3);
             }
             return shortValue + suffixes[suffixNum];
         }
