@@ -319,6 +319,13 @@
                 } else {
                     gameState.activeBoosts = [];
                 }
+
+                // Load Statistics
+                if (savedData.statistics) {
+                    // Merge saved statistics with current (initial) statistics.
+                    // This ensures new stats fields are initialized correctly if they didn't exist in old saves.
+                    gameState.statistics = { ...gameState.statistics, ...savedData.statistics };
+                }
             }
         }
 
@@ -776,6 +783,7 @@
                 cryptos: gameState.cryptos,
                 permanentMultiplier: gameState.permanentMultiplier,
                 activeBoosts: gameState.activeBoosts,
+                statistics: gameState.statistics,
                 lastSaveTime: Date.now()
             };
             localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
