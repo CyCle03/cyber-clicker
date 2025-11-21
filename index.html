@@ -24,6 +24,7 @@
             <div class="hud-item">
                 <span class="label">GPS:</span>
                 <span id="gps-display" class="value glow-pink">0</span>
+                <span id="gps-bonus" class="bonus-value"></span>
             </div>
             <div class="hud-item">
                 <span class="label">CRYPTOS:</span>
@@ -439,7 +440,39 @@
                 console.error("UI: bitsDisplay is missing in updateDisplay");
             }
 
-            if (gpsDisplay) gpsDisplay.innerText = gameState.gps.toFixed(1);
+            if (gpsDisplay) {
+                gpsDisplay.innerText = gameState.gps.toFixed(1);
+
+                // Calculate and display total bonus
+                const bonusEl = document.getElementById('gps-bonus');
+                if (bonusEl) {
+                    let totalMultiplier = 1;
+
+                    // 1. Root Access Bonus
+                    if (gameState.rootAccessLevel > 0) {
+                        totalMultiplier *= (1 + gameState.rootAccessLevel * 0.1);
+                    }
+
+                    // 2. Permanent Multiplier
+                    if (gameState.permanentMultiplier > 1) {
+                        totalMultiplier *= gameState.permanentMultiplier;
+                    }
+
+                    // 3. Active Boosts
+                    const now = Date.now();
+                    gameState.activeBoosts.forEach(b => {
+                        if (b.endTime > now) totalMultiplier *= b.multiplier;
+                    });
+
+                    if (totalMultiplier > 1) {
+                        const bonusPercent = ((totalMultiplier - 1) * 100).toFixed(0);
+                        bonusEl.innerText = `(+${bonusPercent}%)`;
+                        bonusEl.style.display = 'inline';
+                    } else {
+                        bonusEl.style.display = 'none';
+                    }
+                }
+            }
             if (cryptoDisplay) cryptoDisplay.innerText = formatNumber(gameState.cryptos);
 
             // Update reboot button state
