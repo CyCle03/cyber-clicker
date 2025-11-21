@@ -320,6 +320,26 @@ body {
     box-shadow: 0 0 10px rgba(0, 255, 234, 0.3);
 }
 
+@keyframes pulse-cyan {
+    0% {
+        box-shadow: 0 0 15px rgba(0, 255, 234, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(0, 255, 234, 0.6);
+    }
+
+    100% {
+        box-shadow: 0 0 15px rgba(0, 255, 234, 0.3);
+    }
+}
+
+.cyber-button-reboot:not(.disabled) {
+    animation: pulse-cyan 2s infinite;
+    border-color: var(--primary-cyan);
+    color: var(--primary-cyan);
+}
+
 .reboot-info {
     width: 100%;
     display: flex;
