@@ -73,6 +73,7 @@
                         <button class="tab-btn active" data-tab="shop">SHOP</button>
                         <button class="tab-btn" data-tab="black-market">BLACK MARKET</button>
                         <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
+                        <button class="tab-btn" data-tab="statistics">STATISTICS</button>
                     </nav>
 
                     <div class="tab-content">
@@ -97,6 +98,32 @@
                         <div id="tab-achievements" class="tab-pane">
                             <div id="achievements-container" class="grid-container">
                                 <!-- Achievements injected here -->
+                            </div>
+                        </div>
+
+                        <!-- STATISTICS TAB -->
+                        <div id="tab-statistics" class="tab-pane">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">🖱️</div>
+                                    <div class="stat-value" id="stat-clicks">0</div>
+                                    <div class="stat-label">Total Clicks</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💰</div>
+                                    <div class="stat-value" id="stat-bits">0</div>
+                                    <div class="stat-label">Total BITS Earned</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">⏱️</div>
+                                    <div class="stat-value" id="stat-time">00:00:00</div>
+                                    <div class="stat-label">Play Time</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🔄</div>
+                                    <div class="stat-value" id="stat-reboots">0</div>
+                                    <div class="stat-label">Reboots</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -214,6 +241,15 @@
             gameState.permanentMultiplier = 1;
             gameState.firewallActive = false;
             gameState.firewallCode = "";
+
+            // Statistics tracking
+            gameState.statistics = {
+                totalClicks: 0,
+                totalBitsEarned: 0,
+                playTimeSeconds: 0,
+                rebootCount: 0,
+                sessionStartTime: Date.now()
+            };
 
             // Deep copy upgrades to avoid mutating the constant definition
             gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES));
@@ -384,6 +420,9 @@
             // Update reboot button state
             const potentialLevel = calculatePotentialRootAccess();
             updateRebootButton(potentialLevel);
+
+            // Update statistics
+            renderStatistics();
         }
 
         function createGlitchElement(onClick) {
@@ -532,11 +571,37 @@
     `;
             document.body.appendChild(el);
 
-            setTimeout(() => el.classList.add('show'), 10);
             setTimeout(() => {
-                el.classList.remove('show');
+                el.style.opacity = 0;
                 setTimeout(() => el.remove(), 500);
             }, 3000);
+        }
+
+        function renderStatistics() {
+            if (!gameState.statistics) return;
+
+            // Format time as HH:MM:SS
+            const formatTime = (seconds) => {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+
+            // Update play time
+            const currentSessionTime = Math.floor((Date.now() - gameState.statistics.sessionStartTime) / 1000);
+            const totalPlayTime = gameState.statistics.playTimeSeconds + currentSessionTime;
+
+            // Update DOM elements
+            const statClicks = document.getElementById('stat-clicks');
+            const statBits = document.getElementById('stat-bits');
+            const statTime = document.getElementById('stat-time');
+            const statReboots = document.getElementById('stat-reboots');
+
+            if (statClicks) statClicks.innerText = formatNumber(gameState.statistics.totalClicks);
+            if (statBits) statBits.innerText = formatNumber(gameState.statistics.totalBitsEarned);
+            if (statTime) statTime.innerText = formatTime(totalPlayTime);
+            if (statReboots) statReboots.innerText = gameState.statistics.rebootCount;
         }
 
         function updateRebootButton(potentialLevel) {
@@ -643,6 +708,9 @@
             // UI.logMessage(`DEBUG: addBits called with ${amount}`);
             gameState.bits += amount;
             gameState.lifetimeBits += amount;
+            if (gameState.statistics) {
+                gameState.statistics.totalBitsEarned += amount;
+            }
             UI.updateDisplay();
             checkUnlocks();
         }
@@ -766,6 +834,9 @@
                 const cryptosGained = potentialLevel - gameState.rootAccessLevel;
                 if (confirm(`SYSTEM REBOOT REQUIRED.\n\nGain Root Access Level ${potentialLevel}?\n(Current: ${gameState.rootAccessLevel})\n\nREWARD: ${cryptosGained} CRYPTOS\n\nWARNING: This will reset your Bits and Upgrades, but keep Achievements, Cryptos, and Root Access.`)) {
                     gameState.cryptos += cryptosGained;
+                    if (gameState.statistics) {
+                        gameState.statistics.rebootCount++;
+                    }
                     resetStateForPrestige(potentialLevel);
                     saveGame();
                     init(); // Re-init UI
@@ -931,6 +1002,12 @@
                 }
 
                 UI.logMessage(`DEBUG: Upgrades count: ${Object.keys(gameState.upgrades || {}).length}`);
+                UI.renderShop = renderShop;
+                UI.renderBlackMarket = renderBlackMarket;
+                UI.renderAchievements = renderAchievements;
+                UI.renderStatistics = renderStatistics;
+
+                // Initial render
                 UI.renderShop(buyUpgrade);
                 UI.renderBlackMarket(buyBlackMarketItem);
                 UI.renderAchievements();
@@ -954,6 +1031,9 @@
                     // Re-attach listener
                     newHackBtn.addEventListener('click', (e) => {
                         try {
+                            if (gameState.statistics) {
+                                gameState.statistics.totalClicks++;
+                            }
                             addBits(gameState.clickPower);
                             UI.createFloatingText(e.clientX, e.clientY, `+${gameState.clickPower}`);
                             UI.animateHackButton();

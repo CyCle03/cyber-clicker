@@ -358,6 +358,52 @@ body {
     display: none;
 }
 
+/* Statistics Tab */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.stat-card {
+    background: rgba(0, 20, 20, 0.8);
+    border: 2px solid var(--primary-cyan);
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.2);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(0, 255, 234, 0.4);
+    border-color: var(--primary-gold);
+}
+
+.stat-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 234, 0.5));
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-family: var(--font-header);
+    color: var(--primary-cyan);
+    font-weight: bold;
+    margin: 10px 0;
+    text-shadow: 0 0 10px var(--primary-cyan);
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+}
+
 /* Grid Layouts for Shop/Market/Achievements */
 .grid-container {
     display: grid;
