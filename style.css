@@ -69,6 +69,23 @@ body {
     align-items: center;
     gap: 10px;
     font-size: 1.2em;
+    flex: 1;
+    /* Distribute space equally */
+    min-width: 0;
+    /* Prevent overflow */
+}
+
+/* Specific alignment for HUD items to keep center item centered */
+.hud-item:first-child {
+    justify-content: flex-start;
+}
+
+.hud-item:nth-child(2) {
+    justify-content: center;
+}
+
+.hud-item:last-child {
+    justify-content: flex-end;
 }
 
 .glow-cyan {
