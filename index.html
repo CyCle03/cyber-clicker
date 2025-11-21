@@ -750,11 +750,12 @@
         }
 
         function updateRebootButton(potentialLevel) {
+            const btnText = rebootButton.querySelector('.text');
             if (potentialLevel > gameState.rootAccessLevel) {
-                rebootButton.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
+                if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
                 rebootButton.classList.remove('disabled');
             } else {
-                rebootButton.innerText = `REBOOT SYSTEM`;
+                if (btnText) btnText.innerText = `REBOOT SYSTEM`;
                 rebootButton.classList.add('disabled');
             }
 
