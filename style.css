@@ -1516,3 +1516,110 @@ body {
     box-shadow: 0 0 10px var(--primary-cyan);
     border: 2px solid #fff;
 }
+
+/* Save Indicator */
+.save-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--primary-cyan);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary-cyan);
+    font-family: 'Orbitron', sans-serif;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    box-shadow: 0 0 10px var(--primary-cyan);
+}
+
+.save-indicator.visible {
+    opacity: 1;
+}
+
+/* Tutorial Overlay */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.tutorial-overlay.visible {
+    display: flex;
+}
+
+.tutorial-box {
+    background: rgba(10, 10, 10, 0.95);
+    border: 2px solid var(--primary-cyan);
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    position: relative;
+}
+
+.tutorial-header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--primary-cyan);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px var(--primary-cyan);
+}
+
+.tutorial-content {
+    font-family: 'Share Tech Mono', monospace;
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    min-height: 100px;
+}
+
+.tutorial-footer {
+    display: flex;
+    justify-content: center;
+}
+
+/* Enhanced Particles */
+.binary-particle {
+    /* Existing styles assumed, adding variants */
+    font-weight: bold;
+    text-shadow: 0 0 5px currentColor;
+}
+
+.particle-cyan {
+    color: var(--primary-cyan);
+}
+
+.particle-pink {
+    color: var(--primary-pink);
+}
+
+.particle-gold {
+    color: var(--primary-gold);
+}
+
+@keyframes particle-float {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}

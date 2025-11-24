@@ -54,6 +54,14 @@ const STORY_EVENTS = [
     { id: 'bender', condition: (s) => s.upgrades.bender.count >= 1, message: "Spacetime coordinates locked. Harvesting from the void.", triggered: false }
 ];
 
+const TUTORIAL_STEPS = [
+    { text: "INITIALIZING...<br><br>Welcome to Cyber Clicker.<br>Your goal is to hack the system and mine BITS." },
+    { text: "MANUAL OVERRIDE<br><br>Click the [HACK_SYSTEM] button in the TERMINAL to generate BITS manually." },
+    { text: "AUTOMATION<br><br>Use BITS to buy upgrades in the SHOP. Upgrades increase your GPS (Global Processing Speed)." },
+    { text: "SYSTEM REBOOT<br><br>When you have enough BITS, REBOOT the system to gain Root Access and permanent bonuses." },
+    { text: "GOOD LUCK<br><br>The network is waiting. Begin operations." }
+];
+
 /* ---------------- state.js ---------------- */
 // Sound System
 const SoundManager = {
@@ -216,6 +224,7 @@ function initState() {
     // Story events state
     gameState.storyEvents = STORY_EVENTS.map(evt => ({ ...evt, triggered: false }));
 
+    gameState.tutorialSeen = false;
     gameState.activeBoosts = []; // Array of { multiplier, endTime }
     gameState.lastSaveTime = Date.now();
 }
@@ -230,6 +239,7 @@ function loadState(savedData) {
         gameState.cryptos = savedData.cryptos || 0;
         gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
         gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
+        gameState.tutorialSeen = savedData.tutorialSeen || false;
 
         // Load Upgrades
         if (savedData.upgrades) {
@@ -515,7 +525,10 @@ function createFloatingText(x, y, text) {
 
 function createBinaryParticle(x, y) {
     const el = document.createElement('div');
-    el.className = 'binary-particle';
+    const colors = ['particle-cyan', 'particle-pink', 'particle-gold'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    el.className = `binary-particle ${randomColor}`;
     el.innerText = Math.random() > 0.5 ? '1' : '0';
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
@@ -817,9 +830,17 @@ function saveGame() {
         permanentMultiplier: gameState.permanentMultiplier,
         activeBoosts: gameState.activeBoosts,
         statistics: gameState.statistics,
+        tutorialSeen: gameState.tutorialSeen,
         lastSaveTime: Date.now()
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+
+    // Show Save Indicator
+    const indicator = document.getElementById('save-indicator');
+    if (indicator) {
+        indicator.classList.add('visible');
+        setTimeout(() => indicator.classList.remove('visible'), 2000);
+    }
 }
 
 function loadGame() {
@@ -853,6 +874,39 @@ function clearSave() {
 
 /* ---------------- game.js ---------------- */
 console.log("Game Bundle Loaded");
+
+// Tutorial Logic
+let currentTutorialStep = 0;
+function showTutorial() {
+    const overlay = document.getElementById('tutorial-overlay');
+    const content = document.getElementById('tutorial-content');
+    const nextBtn = document.getElementById('tutorial-next-btn');
+
+    if (!overlay || !content || !nextBtn) return;
+
+    currentTutorialStep = 0;
+    updateTutorialStep();
+    overlay.classList.add('visible');
+
+    nextBtn.onclick = () => {
+        currentTutorialStep++;
+        if (currentTutorialStep < TUTORIAL_STEPS.length) {
+            updateTutorialStep();
+        } else {
+            overlay.classList.remove('visible');
+            gameState.tutorialSeen = true;
+            saveGame();
+        }
+    };
+}
+
+function updateTutorialStep() {
+    const content = document.getElementById('tutorial-content');
+    const nextBtn = document.getElementById('tutorial-next-btn');
+
+    content.innerHTML = TUTORIAL_STEPS[currentTutorialStep].text;
+    nextBtn.innerText = currentTutorialStep === TUTORIAL_STEPS.length - 1 ? "CLOSE" : "NEXT";
+}
 
 // Core Functions
 function addBits(amount) {
@@ -1237,6 +1291,10 @@ function init() {
 
         } else {
             UI.logMessage("Connection established.");
+            // Show Tutorial for new players
+            if (!gameState.tutorialSeen) {
+                showTutorial();
+            }
         }
 
         UI.logMessage(`DEBUG: Upgrades count: ${Object.keys(gameState.upgrades || {}).length}`);
