@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Clicker Tests</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        .pass {
+            color: #0f0;
+        }
+
+        .fail {
+            color: #f00;
+        }
+
+        .summary {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cyber Clicker Unit Tests</h1>
+    <div id="test-results"></div>
+
+    <!-- Mock DOM elements required by script.js -->
+    <div id="game-ui" style="display: none;">
+        <div id="bits-display"></div>
+        <div id="gps-display"></div>
+        <div id="crypto-display"></div>
+        <div id="shop-container"></div>
+        <div id="black-market-container"></div>
+        <div id="achievements-container"></div>
+        <div id="game-log"></div>
+        <div id="reboot-button"></div>
+        <div id="reboot-bonus-display"></div>
+        <div id="reboot-level-display"></div>
+        <div id="hack-button"></div>
+        <div id="firewall-overlay"></div>
+        <div id="firewall-code-display"></div>
+        <input id="firewall-input" type="text">
+        <div id="offline-overlay"></div>
+        <div id="offline-amount-display"></div>
+        <div id="offline-time-display"></div>
+        <div id="save-indicator"></div>
+        <div id="tutorial-overlay"></div>
+        <div id="tutorial-content"></div>
+        <button id="tutorial-next-btn"></button>
+    </div>
+
+    <!-- Load Game Script -->
+    <script src="script.js"></script>
+
+    <!-- Load Tests -->
+    <script src="tests.js"></script>
+</body>
+
+</html>

@@ -1,3 +1,65 @@
+// @ts-check
+
+/* ==========================================
+   BUNDLE GENERATED FOR FILE PROTOCOL SUPPORT
+   ========================== */
+
+/**
+ * @typedef {Object} Upgrade
+ * @property {string} id
+ * @property {string} name
+ * @property {number} cost
+ * @property {number} gps
+ * @property {number} click
+ * @property {number} count
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} GameState
+ * @property {number} bits
+ * @property {number} lifetimeBits
+ * @property {number} gps
+ * @property {number} clickPower
+ * @property {number} rootAccessLevel
+ * @property {number} cryptos
+ * @property {number} permanentMultiplier
+ * @property {boolean} firewallActive
+ * @property {string} firewallCode
+ * @property {Object.<string, Upgrade>} upgrades
+ * @property {Array<{id: string, unlocked: boolean, name: string, desc: string, reward: number, condition: function(GameState):boolean}>} achievements
+ * @property {Array<{id: string, triggered: boolean, message: string, condition: function(GameState):boolean}>} storyEvents
+ * @property {Array<{multiplier: number, endTime: number}>} activeBoosts
+ * @property {Object} statistics
+ * @property {number} statistics.totalClicks
+ * @property {number} statistics.totalBitsEarned
+ * @property {number} statistics.playTimeSeconds
+ * @property {number} statistics.rebootCount
+ * @property {number} statistics.firewallsEncountered
+ * @property {number} statistics.firewallsCleared
+ * @property {number} statistics.sessionStartTime
+ * @property {number} lastSaveTime
+ * @property {boolean} tutorialSeen
+ */
+
+/**
+ * @typedef {Object} Achievement
+ * @property {string} id
+ * @property {string} name
+ * @property {string} desc
+ * @property {function(GameState):boolean} condition
+ * @property {boolean} unlocked
+ * @property {number} reward
+ */
+
+/**
+ * @typedef {Object} StoryEvent
+ * @property {string} id
+ * @property {function(GameState):boolean} condition
+ * @property {string} message
+ * @property {boolean} triggered
+ */
+
 /* ==========================================
    CYBER CLICKER - MAIN SCRIPT
    ========================================== */
@@ -30,11 +92,13 @@ const GLITCH_CONFIG = {
     maxReward: 5
 };
 
+/** @type {Array<Achievement>} */
 const ACHIEVEMENTS = [
-    { id: 'hello_world', name: 'Hello World', desc: 'Accumulate 10 Bits', condition: (s) => s.lifetimeBits >= 10, unlocked: false, reward: 1 },
-    { id: 'script_kiddie', name: 'Script Kiddie', desc: 'Buy your first upgrade', condition: (s) => s.upgrades.autoClicker.count >= 1, unlocked: false, reward: 2 },
-    { id: 'serious_business', name: 'Serious Business', desc: 'Accumulate 1,000 Bits', condition: (s) => s.lifetimeBits >= 1000, unlocked: false, reward: 3 },
-    { id: 'botnet_master', name: 'Botnet Master', desc: 'Own 10 Zombie Bots', condition: (s) => s.upgrades.bot.count >= 10, unlocked: false, reward: 5 },
+    { id: 'first_click', name: 'First Click', desc: 'Click for the first time', condition: (s) => s.statistics.totalClicks >= 1, unlocked: false, reward: 0 },
+    { id: 'click_apprentice', name: 'Click Apprentice', desc: 'Click 100 times', condition: (s) => s.statistics.totalClicks >= 100, unlocked: false, reward: 0 },
+    { id: 'click_master', name: 'Click Master', desc: 'Click 1,000 times', condition: (s) => s.statistics.totalClicks >= 1000, unlocked: false, reward: 0 },
+    { id: 'novice_miner', name: 'Novice Miner', desc: 'Accumulate 1,000 Bits', condition: (s) => s.lifetimeBits >= 1000, unlocked: false, reward: 0 },
+    { id: 'expert_miner', name: 'Expert Miner', desc: 'Accumulate 100,000 Bits', condition: (s) => s.lifetimeBits >= 100000, unlocked: false, reward: 0 },
     { id: 'millionaire', name: 'Millionaire', desc: 'Accumulate 1,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000, unlocked: false, reward: 10 },
     { id: 'billionaire', name: 'Billionaire', desc: 'Accumulate 1,000,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000000, unlocked: false, reward: 20 },
     { id: 'crypto_miner', name: 'Crypto Miner', desc: 'Find 10 Cryptos', condition: (s) => s.cryptos >= 10, unlocked: false, reward: 5 },
@@ -44,6 +108,7 @@ const ACHIEVEMENTS = [
     { id: 'singularity', name: 'Singularity', desc: 'Reach 1 Billion GPS', condition: (s) => s.gps >= 1000000000, unlocked: false, reward: 100 }
 ];
 
+/** @type {Array<StoryEvent>} */
 const STORY_EVENTS = [
     { id: 'first_click', condition: (s) => s.lifetimeBits >= 1, message: "System initialized. User detected. Beginning data extraction...", triggered: false },
     { id: 'first_upgrade', condition: (s) => Object.values(s.upgrades).some(u => u.count > 0), message: "Optimization protocols engaged. Efficiency increasing.", triggered: false },
@@ -65,14 +130,14 @@ const TUTORIAL_STEPS = [
 /* ---------------- state.js ---------------- */
 // Sound System
 const SoundManager = {
-    ctx: null,
+    audioCtx: null,
     masterVolume: 0.5,
     muted: false,
 
     init: function () {
         try {
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.ctx = new AudioContext();
+            this.audioCtx = new AudioContext();
             this.loadSettings();
         } catch (e) {
             console.error("Web Audio API not supported");
@@ -88,17 +153,75 @@ const SoundManager = {
         this.updateUI();
     },
 
+    initAudio: function () {
+        if (this.audioCtx) return;
+        // @ts-ignore
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            this.audioCtx = new AudioContext();
+        }
+    },
+    /**
+     * @param {string} type 
+     */
+    playSFX: function (type) {
+        if (!this.audioCtx) this.initAudio();
+        if (!this.audioCtx) return;
+        if (this.muted) return;
+
+        // Simple synth sounds
+        if (type === 'click') this.playTone(800, 'sine', 0.05);
+        if (type === 'buy') this.playTone(600, 'square', 0.1);
+        if (type === 'error') this.playTone(150, 'sawtooth', 0.3);
+        if (type === 'achievement') {
+            this.playTone(400, 'sine', 0.1);
+            setTimeout(() => this.playTone(600, 'sine', 0.1), 100);
+            setTimeout(() => this.playTone(800, 'sine', 0.2), 200);
+        }
+        if (type === 'typing') this.playTone(1000 + Math.random() * 500, 'square', 0.02);
+    },
+    /**
+     * @param {number} freq 
+     * @param {string} type 
+     * @param {number} duration 
+     * @param {number} [vol] 
+     */
+    playTone: function (freq, type, duration, vol = 1) {
+        if (!this.audioCtx) return;
+        // @ts-ignore
+        const osc = this.audioCtx.createOscillator();
+        // @ts-ignore
+        const gain = this.audioCtx.createGain();
+
+        osc.type = type;
+        // @ts-ignore
+        osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+
+        // @ts-ignore
+        gain.gain.setValueAtTime(vol * this.masterVolume, this.audioCtx.currentTime);
+        // @ts-ignore
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        // @ts-ignore
+        gain.connect(this.audioCtx.destination);
+
+        osc.start();
+        // @ts-ignore
+        osc.stop(this.audioCtx.currentTime + duration);
+    },
+
     saveSettings: function () {
-        localStorage.setItem('cc_volume', this.masterVolume);
-        localStorage.setItem('cc_mute', this.muted);
+        localStorage.setItem('cc_volume', String(this.masterVolume));
+        localStorage.setItem('cc_mute', String(this.muted));
     },
 
     updateUI: function () {
-        const slider = document.getElementById('volume-slider');
+        const slider = /** @type {HTMLInputElement} */ (document.getElementById('volume-slider'));
         const valueDisplay = document.getElementById('volume-value');
         const muteBtn = document.getElementById('mute-btn');
 
-        if (slider) slider.value = this.masterVolume * 100;
+        if (slider) slider.value = String(this.masterVolume * 100);
         if (valueDisplay) valueDisplay.innerText = Math.round(this.masterVolume * 100) + '%';
         if (muteBtn) {
             muteBtn.innerText = this.muted ? "UNMUTE SOUND" : "MUTE SOUND";
@@ -106,30 +229,13 @@ const SoundManager = {
         }
     },
 
-    playTone: function (freq, type, duration, vol = 1) {
-        if (!this.ctx || this.muted) return;
-
-        // Resume context if suspended (browser policy)
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-
-        gain.gain.setValueAtTime(vol * this.masterVolume, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + duration);
-    },
-
+    /**
+     * @param {string} name 
+     */
     playSFX: function (name) {
-        if (!this.ctx) this.init();
+        if (!this.audioCtx) this.init(); // Use init to ensure audioCtx is created and settings loaded
+        if (!this.audioCtx) return;
+        if (this.muted) return;
 
         switch (name) {
             case 'click':
@@ -153,6 +259,14 @@ const SoundManager = {
                 break;
             case 'reboot':
                 this.playTone(100, 'sawtooth', 1.0, 0.8);
+                break;
+            case 'achievement': // Added achievement sound
+                this.playTone(400, 'sine', 0.1);
+                setTimeout(() => this.playTone(600, 'sine', 0.1), 100);
+                setTimeout(() => this.playTone(800, 'sine', 0.2), 200);
+                break;
+            case 'typing': // Added typing sound
+                this.playTone(1000 + Math.random() * 500, 'square', 0.02);
                 break;
         }
     }
@@ -185,13 +299,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Init Sound
     document.body.addEventListener('click', () => {
-        if (SoundManager.ctx && SoundManager.ctx.state === 'suspended') {
-            SoundManager.ctx.resume();
+        if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'suspended') {
+            SoundManager.audioCtx.resume();
         }
     }, { once: true });
 });
 
-let gameState = {};
+/** @type {GameState} */
+let gameState = /** @type {any} */ ({});
 
 function initState() {
     gameState.bits = 0;
@@ -309,7 +424,34 @@ function resetStateForPrestige(newRootLevel) {
 
 /* ---------------- ui.js ---------------- */
 // DOM Elements
-let bitsDisplay, gpsDisplay, cryptoDisplay, shopContainer, blackMarketContainer, gameLog, achievementsContainer, rebootButton, rebootBonusDisplay, rebootLevelDisplay, hackButton, firewallOverlay, firewallCodeDisplay, firewallInput;
+/** @type {HTMLElement} */
+let bitsDisplay;
+/** @type {HTMLElement} */
+let gpsDisplay;
+/** @type {HTMLElement} */
+let cryptoDisplay;
+/** @type {HTMLElement} */
+let shopContainer;
+/** @type {HTMLElement} */
+let blackMarketContainer;
+/** @type {HTMLElement} */
+let gameLog;
+/** @type {HTMLElement} */
+let achievementsContainer;
+/** @type {HTMLElement} */
+let rebootButton;
+/** @type {HTMLElement} */
+let rebootBonusDisplay;
+/** @type {HTMLElement} */
+let rebootLevelDisplay;
+/** @type {HTMLElement} */
+let hackButton;
+/** @type {HTMLElement} */
+let firewallOverlay;
+/** @type {HTMLElement} */
+let firewallCodeDisplay;
+/** @type {HTMLInputElement} */
+let firewallInput;
 
 function switchTab(tabId) {
     // Update active state of buttons
@@ -997,6 +1139,7 @@ function checkUnlocks() {
         if (!ach.unlocked && ach.condition(gameState)) {
             ach.unlocked = true;
             gameState.cryptos += ach.reward || 0; // Award Cryptos
+            SoundManager.playSFX('achievement'); // Play achievement sound
             UI.showAchievementNotification(ach);
             UI.logMessage(`ACHIEVEMENT UNLOCKED: ${ach.name} (+${ach.reward} CRYPTOS)`);
             UI.renderAchievements();
@@ -1153,15 +1296,21 @@ window.testFirewall = spawnFirewall;
 function checkFirewallInput() {
     if (!gameState.firewallActive) return;
 
-    const input = document.getElementById('firewall-input');
-    if (input.value.toUpperCase() === gameState.firewallCode) {
-        clearFirewall();
-        input.value = "";
+    const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
+    if (input) {
+        if (input.value.toUpperCase() === gameState.firewallCode) {
+            clearFirewall();
+            input.value = "";
+        } else {
+            input.style.borderColor = 'red';
+            setTimeout(() => input.style.borderColor = 'var(--primary-cyan)', 500);
+            SoundManager.playSFX('error');
+        }
     }
 }
 
 function handleKeypadInput(key) {
-    const input = document.getElementById('firewall-input');
+    const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
     if (!input) return;
 
     if (key === 'CLR') {
@@ -1196,7 +1345,14 @@ function clearFirewall() {
 }
 
 // Interval IDs
-let gameLoopId, autoSaveId, eventLoopId, rebootBtnId;
+/** @type {number|undefined} */
+let gameLoopId;
+/** @type {number|undefined} */
+let autoSaveId;
+/** @type {number|undefined} */
+let eventLoopId;
+/** @type {number|undefined} */
+let rebootBtnId;
 
 // Initialization
 function init() {
