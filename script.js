@@ -11,7 +11,9 @@ const UPGRADES = {
     farm: { id: 'farm', name: "Server Farm", cost: 12000, gps: 47, click: 0, count: 0, desc: "Rack of servers working in parallel." },
     ai: { id: 'ai', name: "Weak AI", cost: 130000, gps: 260, click: 0, count: 0, desc: "Learning algorithm to optimize mining." },
     quantum: { id: 'quantum', name: "Quantum Core", cost: 1400000, gps: 1400, click: 0, count: 0, desc: "Entangled bits for instant processing." },
-    overlord: { id: 'overlord', name: 'AI Overlord', cost: 1400000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.' }
+    overlord: { id: 'overlord', name: 'AI Overlord', cost: 14000000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.' },
+    matrix: { id: 'matrix', name: 'Matrix Builder', cost: 150000000, gps: 120000, click: 0, count: 0, desc: 'Constructs a simulated reality for infinite mining.' },
+    bender: { id: 'bender', name: 'Reality Bender', cost: 2000000000, gps: 1500000, click: 0, count: 0, desc: 'Warps the fabric of spacetime to extract bits from the void.' }
 };
 
 const BLACK_MARKET_ITEMS = {
@@ -36,7 +38,20 @@ const ACHIEVEMENTS = [
     { id: 'millionaire', name: 'Millionaire', desc: 'Accumulate 1,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000, unlocked: false, reward: 10 },
     { id: 'billionaire', name: 'Billionaire', desc: 'Accumulate 1,000,000,000 Bits', condition: (s) => s.lifetimeBits >= 1000000000, unlocked: false, reward: 20 },
     { id: 'crypto_miner', name: 'Crypto Miner', desc: 'Find 10 Cryptos', condition: (s) => s.cryptos >= 10, unlocked: false, reward: 5 },
-    { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false, reward: 15 }
+    { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false, reward: 15 },
+    { id: 'the_architect', name: 'The Architect', desc: 'Own 1 Matrix Builder', condition: (s) => s.upgrades.matrix.count >= 1, unlocked: false, reward: 25 },
+    { id: 'god_mode', name: 'God Mode', desc: 'Own 1 Reality Bender', condition: (s) => s.upgrades.bender.count >= 1, unlocked: false, reward: 50 },
+    { id: 'singularity', name: 'Singularity', desc: 'Reach 1 Billion GPS', condition: (s) => s.gps >= 1000000000, unlocked: false, reward: 100 }
+];
+
+const STORY_EVENTS = [
+    { id: 'first_click', condition: (s) => s.lifetimeBits >= 1, message: "System initialized. User detected. Beginning data extraction...", triggered: false },
+    { id: 'first_upgrade', condition: (s) => Object.values(s.upgrades).some(u => u.count > 0), message: "Optimization protocols engaged. Efficiency increasing.", triggered: false },
+    { id: '1k_bits', condition: (s) => s.lifetimeBits >= 1000, message: "Data stream stabilizing. Accessing low-level subsystems.", triggered: false },
+    { id: '1m_bits', condition: (s) => s.lifetimeBits >= 1000000, message: "Firewall penetration imminent. Root access requested.", triggered: false },
+    { id: 'ai_overlord', condition: (s) => s.upgrades.overlord.count >= 1, message: "WARNING: Sentient AI detected. It is watching you.", triggered: false },
+    { id: 'matrix', condition: (s) => s.upgrades.matrix.count >= 1, message: "Reality simulation loaded. Is this the real world?", triggered: false },
+    { id: 'bender', condition: (s) => s.upgrades.bender.count >= 1, message: "Spacetime coordinates locked. Harvesting from the void.", triggered: false }
 ];
 
 /* ---------------- state.js ---------------- */
@@ -198,6 +213,9 @@ function initState() {
     // Achievements need to keep their functions, so we map them
     gameState.achievements = ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false }));
 
+    // Story events state
+    gameState.storyEvents = STORY_EVENTS.map(evt => ({ ...evt, triggered: false }));
+
     gameState.activeBoosts = []; // Array of { multiplier, endTime }
     gameState.lastSaveTime = Date.now();
 }
@@ -230,6 +248,16 @@ function loadState(savedData) {
                 const ach = gameState.achievements.find(a => a.id === savedAch.id);
                 if (ach) {
                     ach.unlocked = savedAch.unlocked;
+                }
+            });
+        }
+
+        // Load Story Events
+        if (savedData.storyEvents) {
+            savedData.storyEvents.forEach(savedEvt => {
+                const evt = gameState.storyEvents.find(e => e.id === savedEvt.id);
+                if (evt) {
+                    evt.triggered = savedEvt.triggered;
                 }
             });
         }
@@ -351,9 +379,11 @@ function initUI() {
 
     // Tab Logic
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            switchTab(btn.dataset.tab);
-        });
+        if (btn.dataset.tab) {
+            btn.addEventListener('click', () => {
+                switchTab(btn.dataset.tab);
+            });
+        }
     });
 }
 
@@ -781,6 +811,7 @@ function saveGame() {
         lifetimeBits: gameState.lifetimeBits,
         upgrades: gameState.upgrades,
         achievements: gameState.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
+        storyEvents: gameState.storyEvents.map(e => ({ id: e.id, triggered: e.triggered })),
         rootAccessLevel: gameState.rootAccessLevel,
         cryptos: gameState.cryptos,
         permanentMultiplier: gameState.permanentMultiplier,
@@ -833,6 +864,7 @@ function addBits(amount) {
     }
     UI.updateDisplay();
     checkUnlocks();
+    checkStoryEvents();
 }
 
 // Helper functions for upgrade information
@@ -919,6 +951,16 @@ function checkUnlocks() {
         }
     });
     UI.updateShopUI();
+}
+
+function checkStoryEvents() {
+    gameState.storyEvents.forEach(evt => {
+        if (!evt.triggered && evt.condition(gameState)) {
+            evt.triggered = true;
+            UI.logMessage(`[STORY] ${evt.message}`);
+            saveGame();
+        }
+    });
 }
 
 function buyUpgrade(key) {
@@ -1290,7 +1332,7 @@ function init() {
             if (gameState.gps > 0) {
                 addBits(gameState.gps * deltaTime);
             }
-            
+
             gameLoopId = requestAnimationFrame(gameLoop);
         }
         gameLoopId = requestAnimationFrame(gameLoop);
