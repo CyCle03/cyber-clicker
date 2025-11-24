@@ -129,6 +129,21 @@ const TUTORIAL_STEPS = [
 
 /* ---------------- state.js ---------------- */
 // Sound System
+/**
+ * @typedef {Object} SoundManagerType
+ * @property {AudioContext|null} audioCtx
+ * @property {number} masterVolume
+ * @property {boolean} muted
+ * @property {function(): void} init
+ * @property {function(): void} loadSettings
+ * @property {function(): void} initAudio
+ * @property {function(string): void} playSFX
+ * @property {function(number, string, number, number=): void} playTone
+ * @property {function(): void} saveSettings
+ * @property {function(): void} updateUI
+ */
+
+/** @type {SoundManagerType} */
 const SoundManager = {
     audioCtx: null,
     masterVolume: 0.5,
@@ -136,7 +151,9 @@ const SoundManager = {
 
     init: function () {
         try {
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            // @ts-ignore
+            const Win = /** @type {any} */ (window);
+            Win.AudioContext = Win.AudioContext || Win.webkitAudioContext;
             this.audioCtx = new AudioContext();
             this.loadSettings();
         } catch (e) {
@@ -156,30 +173,53 @@ const SoundManager = {
     initAudio: function () {
         if (this.audioCtx) return;
         // @ts-ignore
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const Win = /** @type {any} */ (window);
+        const AudioContext = Win.AudioContext || Win.webkitAudioContext;
         if (AudioContext) {
             this.audioCtx = new AudioContext();
         }
     },
     /**
-     * @param {string} type 
+     * @param {string} name 
      */
-    playSFX: function (type) {
-        if (!this.audioCtx) this.initAudio();
+    playSFX: function (name) {
+        if (!this.audioCtx) this.init(); // Use init to ensure audioCtx is created and settings loaded
         if (!this.audioCtx) return;
         if (this.muted) return;
 
-        // Simple synth sounds
-        if (type === 'click') this.playTone(800, 'sine', 0.05);
-        if (type === 'buy') this.playTone(600, 'square', 0.1);
-        if (type === 'error') this.playTone(150, 'sawtooth', 0.3);
-        if (type === 'achievement') {
-            this.playTone(400, 'sine', 0.1);
-            setTimeout(() => this.playTone(600, 'sine', 0.1), 100);
-            setTimeout(() => this.playTone(800, 'sine', 0.2), 200);
+        switch (name) {
+            case 'click':
+                this.playTone(1200, 'sine', 0.1, 0.3);
+                break;
+            case 'buy':
+                this.playTone(600, 'square', 0.1, 0.3);
+                break;
+            case 'error':
+                this.playTone(150, 'sawtooth', 0.3, 0.5);
+                break;
+            case 'alert':
+                this.playTone(800, 'sawtooth', 0.5, 0.4);
+                setTimeout(() => this.playTone(600, 'sawtooth', 0.5, 0.4), 200);
+                break;
+            case 'success':
+                this.playTone(400, 'sine', 0.1, 0.4);
+                setTimeout(() => this.playTone(600, 'sine', 0.1, 0.4), 100);
+                setTimeout(() => this.playTone(800, 'sine', 0.2, 0.4), 200);
+                break;
+            case 'reboot':
+                this.playTone(100, 'sawtooth', 1.0, 0.8);
+                break;
+            case 'achievement': // Added achievement sound
+                this.playTone(400, 'sine', 0.1);
+                setTimeout(() => this.playTone(600, 'sine', 0.1), 100);
+                setTimeout(() => this.playTone(800, 'sine', 0.2), 200);
+                break;
+            case 'typing': // Added typing sound
+                this.playTone(1000 + Math.random() * 500, 'square', 0.02);
+                break;
         }
-        if (type === 'typing') this.playTone(1000 + Math.random() * 500, 'square', 0.02);
     },
+
     /**
      * @param {number} freq 
      * @param {string} type 
@@ -193,7 +233,8 @@ const SoundManager = {
         // @ts-ignore
         const gain = this.audioCtx.createGain();
 
-        osc.type = type;
+        // @ts-ignore
+        osc.type = /** @type {any} */ (type);
         // @ts-ignore
         osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
 
@@ -227,59 +268,159 @@ const SoundManager = {
             muteBtn.innerText = this.muted ? "UNMUTE SOUND" : "MUTE SOUND";
             muteBtn.classList.toggle('danger', this.muted);
         }
-    },
-
-    /**
-     * @param {string} name 
-     */
-    playSFX: function (name) {
-        if (!this.audioCtx) this.init(); // Use init to ensure audioCtx is created and settings loaded
-        if (!this.audioCtx) return;
-        if (this.muted) return;
-
-        switch (name) {
-            case 'click':
-                this.playTone(1200, 'sine', 0.1, 0.3);
-                break;
-            case 'buy':
-                this.playTone(600, 'square', 0.1, 0.3);
-                setTimeout(() => this.playTone(1200, 'square', 0.2, 0.3), 100);
-                break;
-            case 'error':
-                this.playTone(150, 'sawtooth', 0.3, 0.5);
-                break;
-            case 'alert':
-                this.playTone(800, 'sawtooth', 0.5, 0.4);
-                setTimeout(() => this.playTone(600, 'sawtooth', 0.5, 0.4), 200);
-                break;
-            case 'success':
-                this.playTone(400, 'sine', 0.1, 0.4);
-                setTimeout(() => this.playTone(600, 'sine', 0.1, 0.4), 100);
-                setTimeout(() => this.playTone(800, 'sine', 0.2, 0.4), 200);
-                break;
-            case 'reboot':
-                this.playTone(100, 'sawtooth', 1.0, 0.8);
-                break;
-            case 'achievement': // Added achievement sound
-                this.playTone(400, 'sine', 0.1);
-                setTimeout(() => this.playTone(600, 'sine', 0.1), 100);
-                setTimeout(() => this.playTone(800, 'sine', 0.2), 200);
-                break;
-            case 'typing': // Added typing sound
-                this.playTone(1000 + Math.random() * 500, 'square', 0.02);
-                break;
-        }
     }
 };
 
+/* --- Data Breach Mini-game --- */
+/** @type {HTMLElement} */
+let breachOverlay;
+/** @type {HTMLElement} */
+let breachGrid;
+/** @type {HTMLElement} */
+let breachTimerDisplay;
+/** @type {HTMLElement} */
+let breachScoreDisplay;
+
+/** @type {number|undefined} */
+let breachInterval;
+let breachTimeLeft = 0;
+let breachScore = 0;
+let breachTotalData = 0;
+let breachActive = false;
+
+function initDataBreach() {
+    breachOverlay = /** @type {HTMLElement} */ (document.getElementById('breach-overlay'));
+    breachGrid = /** @type {HTMLElement} */ (document.getElementById('breach-grid'));
+    breachTimerDisplay = /** @type {HTMLElement} */ (document.getElementById('breach-timer'));
+    breachScoreDisplay = /** @type {HTMLElement} */ (document.getElementById('breach-score'));
+}
+
+function startDataBreach() {
+    if (breachActive) return;
+    breachActive = true;
+    breachTimeLeft = 10; // 10 seconds
+    breachScore = 0;
+    breachTotalData = 0;
+
+    if (breachOverlay) breachOverlay.classList.remove('hidden');
+    generateBreachGrid();
+    updateBreachUI();
+
+    breachInterval = window.setInterval(() => {
+        breachTimeLeft -= 0.1;
+        if (breachTimeLeft <= 0) {
+            endDataBreach(false);
+        }
+        updateBreachUI();
+    }, 100);
+}
+
+function generateBreachGrid() {
+    if (!breachGrid) return;
+    breachGrid.innerHTML = '';
+    const gridSize = 25; // 5x5
+    const dataCount = 5 + Math.floor(Math.random() * 5); // 5-10 data nodes
+    const iceCount = 3 + Math.floor(Math.random() * 3); // 3-5 ICE nodes
+    breachTotalData = dataCount;
+
+    let nodes = Array(gridSize).fill('empty');
+
+    // Place Data
+    let placed = 0;
+    while (placed < dataCount) {
+        const idx = Math.floor(Math.random() * gridSize);
+        if (nodes[idx] === 'empty') {
+            nodes[idx] = 'data';
+            placed++;
+        }
+    }
+
+    // Place ICE
+    placed = 0;
+    while (placed < iceCount) {
+        const idx = Math.floor(Math.random() * gridSize);
+        if (nodes[idx] === 'empty') {
+            nodes[idx] = 'ice';
+            placed++;
+        }
+    }
+
+    // Render Grid
+    nodes.forEach((type, index) => {
+        const node = document.createElement('div');
+        node.className = `breach-node ${type}`;
+        node.dataset.type = type;
+        node.dataset.index = String(index);
+        node.onclick = () => handleNodeClick(node, type);
+        breachGrid.appendChild(node);
+    });
+}
+
+/**
+ * @param {HTMLElement} node 
+ * @param {string} type 
+ */
+function handleNodeClick(node, type) {
+    if (!breachActive || node.classList.contains('hacked') || node.classList.contains('revealed')) return;
+
+    if (type === 'data') {
+        node.classList.add('revealed', 'hacked');
+        node.innerText = '1';
+        breachScore++;
+        SoundManager.playSFX('typing');
+
+        if (breachScore >= breachTotalData) {
+            endDataBreach(true);
+        }
+    } else if (type === 'ice') {
+        node.classList.add('revealed');
+        node.innerText = 'X';
+        SoundManager.playSFX('error');
+        breachTimeLeft -= 2.0; // Penalty
+        createFloatingText(node.getBoundingClientRect().left, node.getBoundingClientRect().top, "-2s");
+    } else {
+        // Empty
+        node.classList.add('revealed');
+    }
+    updateBreachUI();
+}
+
+function updateBreachUI() {
+    if (breachTimerDisplay) breachTimerDisplay.innerText = `TIME: ${Math.max(0, breachTimeLeft).toFixed(1)}s`;
+    if (breachScoreDisplay) breachScoreDisplay.innerText = `DATA: ${breachScore}/${breachTotalData}`;
+}
+
+/**
+ * @param {boolean} success 
+ */
+function endDataBreach(success) {
+    breachActive = false;
+    clearInterval(breachInterval);
+
+    setTimeout(() => {
+        if (breachOverlay) breachOverlay.classList.add('hidden');
+        if (success) {
+            const reward = gameState.gps * 60 * 5; // 5 minutes of GPS
+            addBits(reward);
+            logMessage(`BREACH SUCCESSFUL! Stolen Data Value: ${formatNumber(reward)} Bits`);
+            SoundManager.playSFX('success');
+        } else {
+            logMessage(`BREACH FAILED. Connection Terminated.`);
+            SoundManager.playSFX('error');
+        }
+    }, 1000);
+}
+
 // Settings UI Functions
 function openSettings() {
-    document.getElementById('settings-modal').classList.add('visible');
+    const modal = document.getElementById('settings-modal');
+    if (modal) modal.classList.add('visible');
     SoundManager.updateUI();
 }
 
 function closeSettings() {
-    document.getElementById('settings-modal').classList.remove('visible');
+    const modal = document.getElementById('settings-modal');
+    if (modal) modal.classList.remove('visible');
 }
 
 function toggleMute() {
@@ -289,12 +430,16 @@ function toggleMute() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.getElementById('volume-slider');
+    const slider = /** @type {HTMLInputElement} */ (document.getElementById('volume-slider'));
     if (slider) {
         slider.addEventListener('input', (e) => {
-            SoundManager.masterVolume = e.target.value / 100;
-            document.getElementById('volume-value').innerText = e.target.value + '%';
-            SoundManager.saveSettings();
+            const target = /** @type {HTMLInputElement} */ (e.target);
+            if (target) {
+                SoundManager.masterVolume = parseFloat(target.value) / 100;
+                const valDisplay = document.getElementById('volume-value');
+                if (valDisplay) valDisplay.innerText = target.value + '%';
+                SoundManager.saveSettings();
+            }
         });
     }
     // Init Sound
@@ -316,6 +461,8 @@ function initState() {
     gameState.rootAccessLevel = 0;
     gameState.cryptos = 0;
     gameState.permanentMultiplier = 1;
+    gameState.skillPoints = 0;
+    gameState.skills = {}; // id -> level
     gameState.firewallActive = false;
     gameState.firewallCode = "";
 
@@ -333,6 +480,11 @@ function initState() {
     // Deep copy upgrades to avoid mutating the constant definition
     gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES));
 
+    // Initialize skills
+    for (const key in SKILL_TREE) {
+        gameState.skills[key] = 0;
+    }
+
     // Achievements need to keep their functions, so we map them
     gameState.achievements = ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false }));
 
@@ -344,6 +496,9 @@ function initState() {
     gameState.lastSaveTime = Date.now();
 }
 
+/**
+ * @param {any} savedData 
+ */
 function loadState(savedData) {
     initState(); // Start with fresh state
 
@@ -353,8 +508,14 @@ function loadState(savedData) {
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
         gameState.cryptos = savedData.cryptos || 0;
         gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
+        gameState.skillPoints = savedData.skillPoints || 0;
         gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
         gameState.tutorialSeen = savedData.tutorialSeen || false;
+
+        // Load Skills
+        if (savedData.skills) {
+            gameState.skills = { ...gameState.skills, ...savedData.skills };
+        }
 
         // Load Upgrades
         if (savedData.upgrades) {
@@ -362,14 +523,14 @@ function loadState(savedData) {
                 if (gameState.upgrades[key]) {
                     gameState.upgrades[key].count = savedData.upgrades[key].count;
                     // Recalculate cost based on count
-                    gameState.upgrades[key].cost = Math.ceil(UPGRADES[key].cost * Math.pow(1.15, savedData.upgrades[key].count));
+                    gameState.upgrades[key].cost = Math.ceil(UPGRADES[/** @type {keyof typeof UPGRADES} */ (key)].cost * Math.pow(1.15, savedData.upgrades[key].count));
                 }
             }
         }
 
         // Load Achievements
         if (savedData.achievements) {
-            savedData.achievements.forEach(savedAch => {
+            savedData.achievements.forEach((/** @type {any} */ savedAch) => {
                 const ach = gameState.achievements.find(a => a.id === savedAch.id);
                 if (ach) {
                     ach.unlocked = savedAch.unlocked;
@@ -379,7 +540,7 @@ function loadState(savedData) {
 
         // Load Story Events
         if (savedData.storyEvents) {
-            savedData.storyEvents.forEach(savedEvt => {
+            savedData.storyEvents.forEach((/** @type {any} */ savedEvt) => {
                 const evt = gameState.storyEvents.find(e => e.id === savedEvt.id);
                 if (evt) {
                     evt.triggered = savedEvt.triggered;
@@ -391,7 +552,7 @@ function loadState(savedData) {
         if (savedData.activeBoosts) {
             // Filter out expired boosts
             const now = Date.now();
-            gameState.activeBoosts = savedData.activeBoosts.filter(b => b.endTime > now);
+            gameState.activeBoosts = savedData.activeBoosts.filter((/** @type {any} */ b) => b.endTime > now);
         } else {
             gameState.activeBoosts = [];
         }
@@ -405,6 +566,7 @@ function loadState(savedData) {
     }
 }
 
+/** @param {number} newRootLevel */
 function resetStateForPrestige(newRootLevel) {
     gameState.bits = 0;
     gameState.lifetimeBits = 0;
@@ -412,13 +574,31 @@ function resetStateForPrestige(newRootLevel) {
     gameState.clickPower = 1;
     gameState.rootAccessLevel = newRootLevel;
     gameState.permanentMultiplier *= 1.1; // +10% permanent bonus per reboot
+    gameState.skillPoints += (newRootLevel - gameState.rootAccessLevel); // Earn points for new levels
+    // Actually, skill points should be total based on level, but let's just add new ones for now.
+    // Better: Skill Points = Root Level (Total). Used points are tracked in skills.
+    // Let's simplify: You get 1 SP per Root Level.
+    // On Prestige, you keep your skills? Or reset them?
+    // Standard idle game: Skills usually persist or you get points to rebuy.
+    // Let's say Skills PERSIST across reboots (permanent perks).
+    // So we just update skill points based on level increase.
+    // Wait, if I reboot from lvl 0 to 1, I get 1 point.
+    // If I reboot again from 0 to 2 (total), do I get 2 points?
+    // Root Access Level is cumulative or reset?
+    // "Root Access: LVL X". It seems permanent.
+    // So:
+    const levelsGained = newRootLevel - gameState.rootAccessLevel;
+    if (levelsGained > 0) {
+        gameState.skillPoints += levelsGained;
+    }
+
     gameState.activeBoosts = [];
 
 
     // Reset Upgrades
     for (const key in gameState.upgrades) {
         gameState.upgrades[key].count = 0;
-        gameState.upgrades[key].cost = UPGRADES[key].cost;
+        gameState.upgrades[key].cost = UPGRADES[/** @type {keyof typeof UPGRADES} */ (key)].cost;
     }
 }
 
@@ -434,6 +614,8 @@ let cryptoDisplay;
 let shopContainer;
 /** @type {HTMLElement} */
 let blackMarketContainer;
+/** @type {HTMLElement} */
+let skillTreeContainer;
 /** @type {HTMLElement} */
 let gameLog;
 /** @type {HTMLElement} */
@@ -453,12 +635,16 @@ let firewallCodeDisplay;
 /** @type {HTMLInputElement} */
 let firewallInput;
 
+/**
+ * @param {string} tabId 
+ */
 function switchTab(tabId) {
     // Update active state of buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tabId) {
-            btn.classList.add('active');
+        const el = /** @type {HTMLElement} */ (btn);
+        el.classList.remove('active');
+        if (el.dataset.tab === tabId) {
+            el.classList.add('active');
         }
     });
 
@@ -474,18 +660,29 @@ function switchTab(tabId) {
     }
 }
 
+/**
+ * @param {string} tabId 
+ */
 function switchMobileTab(tabId) {
     // Update active state of mobile buttons
     document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tabId) {
-            btn.classList.add('active');
+        const el = /** @type {HTMLElement} */ (btn);
+        if (el.dataset.tab === tabId) {
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
         }
     });
 
-    const terminalSection = document.querySelector('.terminal-section');
-    const auxiliarySection = document.querySelector('.auxiliary-section');
+    const terminalSection = document.getElementById('terminal-section');
+    const auxiliarySection = document.getElementById('auxiliary-section');
 
+    if (!terminalSection || !auxiliarySection) return;
+
+    // The original logic used classes for mobile visibility.
+    // The provided diff snippet for this part was incomplete/malformed.
+    // Reverting to the original class-based visibility logic,
+    // but applying the null checks and dataset access fixes.
     if (tabId === 'terminal') {
         // Show Terminal, Hide Aux
         terminalSection.classList.remove('mobile-hidden');
@@ -501,20 +698,51 @@ function switchMobileTab(tabId) {
 }
 
 function initUI() {
-    bitsDisplay = document.getElementById('bits-display');
-    gpsDisplay = document.getElementById('gps-display');
-    cryptoDisplay = document.getElementById('crypto-display');
-    shopContainer = document.getElementById('shop-container');
-    blackMarketContainer = document.getElementById('black-market-container');
-    gameLog = document.getElementById('game-log');
-    achievementsContainer = document.getElementById('achievements-container');
-    rebootButton = document.getElementById('reboot-button');
-    rebootBonusDisplay = document.getElementById('reboot-bonus-display');
-    rebootLevelDisplay = document.getElementById('reboot-level-display');
-    hackButton = document.getElementById('hack-button');
-    firewallOverlay = document.getElementById('firewall-overlay');
-    firewallCodeDisplay = document.getElementById('firewall-code-display');
-    firewallInput = document.getElementById('firewall-input');
+    bitsDisplay = /** @type {HTMLElement} */ (document.getElementById('bits-display'));
+    gpsDisplay = /** @type {HTMLElement} */ (document.getElementById('gps-display'));
+    cryptoDisplay = /** @type {HTMLElement} */ (document.getElementById('crypto-display'));
+    shopContainer = /** @type {HTMLElement} */ (document.getElementById('shop-container'));
+    blackMarketContainer = /** @type {HTMLElement} */ (document.getElementById('black-market-container'));
+    gameLog = /** @type {HTMLElement} */ (document.getElementById('game-log'));
+    achievementsContainer = /** @type {HTMLElement} */ (document.getElementById('achievements-container'));
+    rebootButton = /** @type {HTMLElement} */ (document.getElementById('reboot-button'));
+    rebootBonusDisplay = /** @type {HTMLElement} */ (document.getElementById('reboot-bonus-display'));
+    rebootLevelDisplay = /** @type {HTMLElement} */ (document.getElementById('reboot-level-display'));
+    hackButton = /** @type {HTMLElement} */ (document.getElementById('hack-button'));
+    firewallOverlay = /** @type {HTMLElement} */ (document.getElementById('firewall-overlay'));
+    firewallCodeDisplay = /** @type {HTMLElement} */ (document.getElementById('firewall-code-display'));
+    firewallInput = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
+
+    // Initialize all section displays to none, then activate the default one
+    const shop = document.getElementById('shop-section');
+    const blackMarket = document.getElementById('black-market-section');
+    const achievements = document.getElementById('achievements-section');
+    const statistics = document.getElementById('statistics-section');
+    const settings = document.getElementById('settings-section');
+    const about = document.getElementById('about-section');
+    const tutorial = document.getElementById('tutorial-section');
+    const save = document.getElementById('save-section');
+    const offline = document.getElementById('offline-section');
+    const breach = document.getElementById('breach-section');
+    const skillTree = document.getElementById('skill-tree-section');
+    const exportImport = document.getElementById('export-import-section');
+
+    skillTreeContainer = /** @type {HTMLElement} */ (document.getElementById('skill-tree-container'));
+
+
+
+    if (shop) shop.style.display = 'none';
+    if (blackMarket) blackMarket.style.display = 'none';
+    if (achievements) achievements.style.display = 'none';
+    if (statistics) statistics.style.display = 'none';
+    if (settings) settings.style.display = 'none';
+    if (about) about.style.display = 'none';
+    if (tutorial) tutorial.style.display = 'none';
+    if (save) save.style.display = 'none';
+    if (offline) offline.style.display = 'none';
+    if (breach) breach.style.display = 'none';
+    if (skillTree) skillTree.style.display = 'none';
+    if (exportImport) exportImport.style.display = 'none';
 
     // Debug Toggle
     const debugToggle = document.getElementById('debug-toggle-btn');
@@ -531,14 +759,20 @@ function initUI() {
 
     // Tab Logic
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        if (btn.dataset.tab) {
-            btn.addEventListener('click', () => {
-                switchTab(btn.dataset.tab);
+        const el = /** @type {HTMLElement} */ (btn); // Added type assertion
+        if (el.dataset.tab) { // Changed to use 'el' and added null check for dataset.tab
+            el.addEventListener('click', () => {
+                if (el.dataset.tab) {
+                    switchTab(el.dataset.tab);
+                }
             });
         }
     });
 }
 
+/**
+ * @param {number} num 
+ */
 function formatNumber(num) {
     if (num < 1000) return Math.floor(num).toLocaleString();
 
@@ -546,12 +780,16 @@ function formatNumber(num) {
     const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
 
     let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(5));
+    let shortValueStr = String(shortValue);
     if (shortValue % 1 !== 0) {
-        shortValue = shortValue.toFixed(3);
+        shortValueStr = shortValue.toFixed(3);
     }
-    return shortValue + suffixes[suffixNum];
+    return shortValueStr + suffixes[suffixNum];
 }
 
+/**
+ * @param {string} msg 
+ */
 function logMessage(msg) {
     // Route DEBUG and ERROR messages to debug console
     if (msg.startsWith('DEBUG:') || msg.startsWith('ERROR:') || msg.includes('Error')) {
@@ -566,16 +804,18 @@ function logMessage(msg) {
         if (msg.startsWith('DEBUG:')) return;
     }
 
-    if (!gameLog) gameLog = document.getElementById('game-log');
+    if (!gameLog) gameLog = /** @type {HTMLElement} */ (document.getElementById('game-log'));
     if (!gameLog) return;
 
-    const div = document.createElement('div');
+    const div = /** @type {HTMLElement} */ (document.createElement('div'));
     div.className = 'log-entry';
     div.innerText = `> ${msg}`;
     gameLog.prepend(div);
 
     if (gameLog.children.length > 20) {
-        gameLog.lastElementChild.remove();
+        if (gameLog.lastElementChild) {
+            gameLog.lastElementChild.scrollIntoView();
+        }
     }
 }
 
@@ -634,6 +874,9 @@ function updateDisplay() {
     }
 }
 
+/**
+ * @param {function} onClick 
+ */
 function createGlitchElement(onClick) {
     const el = document.createElement('div');
     el.className = 'glitch-entity';
@@ -654,6 +897,11 @@ function createGlitchElement(onClick) {
     return el;
 }
 
+/**
+ * @param {number} x 
+ * @param {number} y 
+ * @param {string} text 
+ */
 function createFloatingText(x, y, text) {
     const debugBtn = document.createElement('button');
     debugBtn.innerText = "DEBUG: +1M Bits";
@@ -689,6 +937,10 @@ function createFloatingText(x, y, text) {
     setTimeout(() => el.remove(), 1000);
 }
 
+/**
+ * @param {number} x 
+ * @param {number} y 
+ */
 function createBinaryParticle(x, y) {
     const el = document.createElement('div');
     const colors = ['particle-cyan', 'particle-pink', 'particle-gold'];
@@ -712,6 +964,9 @@ function createBinaryParticle(x, y) {
     setTimeout(() => el.remove(), 1000);
 }
 
+/**
+ * @param {function} buyCallback 
+ */
 function renderShop(buyCallback) {
     shopContainer.innerHTML = '';
     for (const key in gameState.upgrades) {
@@ -771,11 +1026,14 @@ function renderShop(buyCallback) {
     updateShopUI();
 }
 
+/**
+ * @param {function} buyCallback 
+ */
 function renderBlackMarket(buyCallback) {
     blackMarketContainer.innerHTML = '';
     // DIRECT ACCESS TO BLACK_MARKET_ITEMS for bundle
     for (const key in BLACK_MARKET_ITEMS) {
-        const item = BLACK_MARKET_ITEMS[key];
+        const item = BLACK_MARKET_ITEMS[/** @type {keyof typeof BLACK_MARKET_ITEMS} */ (key)];
         const el = document.createElement('div');
         el.className = 'market-item';
         el.onclick = () => buyCallback(key);
@@ -792,6 +1050,44 @@ function renderBlackMarket(buyCallback) {
 
     // Render active effects
     renderActiveEffects();
+}
+
+/**
+ * @param {function} buyCallback 
+ */
+function renderSkillTree(buyCallback) {
+    if (!skillTreeContainer) return;
+    skillTreeContainer.innerHTML = '';
+
+    const spDisplay = document.getElementById('skill-points-value');
+    if (spDisplay) spDisplay.innerText = String(gameState.skillPoints);
+
+    for (const key in SKILL_TREE) {
+        const skill = SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */ (key)];
+        const currentLevel = gameState.skills[key] || 0;
+        const isMaxed = currentLevel >= skill.maxLevel;
+        const canAfford = gameState.skillPoints >= skill.cost;
+        const isLocked = !canAfford && !isMaxed; // Simple lock logic for now
+
+        const el = document.createElement('div');
+        el.className = `skill-node ${isMaxed ? 'maxed' : (canAfford ? 'affordable' : 'locked')} ${currentLevel > 0 ? 'unlocked' : ''}`;
+        el.onclick = () => {
+            if (!isMaxed && canAfford) {
+                buyCallback(key);
+            }
+        };
+
+        el.innerHTML = `
+            <div class="skill-icon">🧠</div>
+            <div class="skill-name">${skill.name}</div>
+            <div class="skill-desc">${skill.desc}</div>
+            <div class="skill-level">Level: ${currentLevel} / ${skill.maxLevel}</div>
+            <div class="skill-cost" style="${isMaxed ? 'color:#0f0' : ''}">
+                ${isMaxed ? 'MAXED' : `${skill.cost} SP`}
+            </div>
+        `;
+        skillTreeContainer.appendChild(el);
+    }
 }
 
 function renderActiveEffects() {
@@ -855,7 +1151,7 @@ function updateShopUI() {
 
 function renderAchievements() {
     achievementsContainer.innerHTML = '';
-    gameState.achievements.forEach(ach => {
+    gameState.achievements.forEach((/** @type {any} */ ach) => {
         const item = document.createElement('div');
         item.className = `achievement-item ${ach.unlocked ? 'unlocked' : ''}`;
         item.innerHTML = `
@@ -872,6 +1168,7 @@ function renderAchievements() {
     });
 }
 
+/** @param {any} ach */
 function showAchievementNotification(ach) {
     const el = document.createElement('div');
     el.className = 'achievement-popup';
@@ -886,7 +1183,7 @@ function showAchievementNotification(ach) {
     document.body.appendChild(el);
 
     setTimeout(() => {
-        el.style.opacity = 0;
+        el.style.opacity = '0';
         setTimeout(() => el.remove(), 500);
     }, 3000);
 }
@@ -895,6 +1192,7 @@ function renderStatistics() {
     if (!gameState.statistics) return;
 
     // Format time as HH:MM:SS
+    /** @param {number} seconds */
     const formatTime = (seconds) => {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -907,21 +1205,24 @@ function renderStatistics() {
     const totalPlayTime = gameState.statistics.playTimeSeconds + currentSessionTime;
 
     // Update DOM elements
-    const statClicks = document.getElementById('stat-clicks');
-    const statBits = document.getElementById('stat-bits');
-    const statTime = document.getElementById('stat-time');
-    const statReboots = document.getElementById('stat-reboots');
-    const statFirewalls = document.getElementById('stat-firewalls');
-    const statFirewallsCleared = document.getElementById('stat-firewalls-cleared');
+    const statClicks = /** @type {HTMLElement} */ (document.getElementById('stat-clicks'));
+    const statBits = /** @type {HTMLElement} */ (document.getElementById('stat-bits'));
+    const statTime = /** @type {HTMLElement} */ (document.getElementById('stat-time'));
+    const statReboots = /** @type {HTMLElement} */ (document.getElementById('stat-reboots'));
+    const statFirewalls = /** @type {HTMLElement} */ (document.getElementById('stat-firewalls'));
+    const statFirewallsCleared = /** @type {HTMLElement} */ (document.getElementById('stat-firewalls-cleared'));
 
     if (statClicks) statClicks.innerText = formatNumber(gameState.statistics.totalClicks);
     if (statBits) statBits.innerText = formatNumber(gameState.statistics.totalBitsEarned);
     if (statTime) statTime.innerText = formatTime(totalPlayTime);
-    if (statReboots) statReboots.innerText = gameState.statistics.rebootCount;
-    if (statFirewalls) statFirewalls.innerText = gameState.statistics.firewallsEncountered || 0;
-    if (statFirewallsCleared) statFirewallsCleared.innerText = gameState.statistics.firewallsCleared || 0;
+    if (statReboots) statReboots.innerText = String(gameState.statistics.rebootCount);
+    if (statFirewalls) statFirewalls.innerText = String(gameState.statistics.firewallsEncountered || 0);
+    if (statFirewallsCleared) statFirewallsCleared.innerText = String(gameState.statistics.firewallsCleared || 0);
 }
 
+/**
+ * @param {number} potentialLevel 
+ */
 function updateRebootButton(potentialLevel) {
     const btnText = rebootButton.querySelector('.text');
     if (potentialLevel > gameState.rootAccessLevel) {
@@ -947,6 +1248,7 @@ function updateRebootButton(potentialLevel) {
     }
 }
 
+/** @type {any} */
 let flashTimeout;
 function flashBitsDisplay() {
     if (flashTimeout) clearTimeout(flashTimeout);
@@ -971,9 +1273,11 @@ const UI = {
     createFloatingText,
     renderShop,
     renderBlackMarket,
+    renderSkillTree,
     updateShopUI,
     renderAchievements,
     showAchievementNotification,
+    renderStatistics, // Added missing property
     updateRebootButton,
     flashBitsDisplay,
     animateHackButton,
@@ -994,6 +1298,8 @@ function saveGame() {
         rootAccessLevel: gameState.rootAccessLevel,
         cryptos: gameState.cryptos,
         permanentMultiplier: gameState.permanentMultiplier,
+        skillPoints: gameState.skillPoints,
+        skills: gameState.skills,
         activeBoosts: gameState.activeBoosts,
         statistics: gameState.statistics,
         tutorialSeen: gameState.tutorialSeen,
@@ -1073,16 +1379,19 @@ function updateTutorialStep() {
     const content = document.getElementById('tutorial-content');
     const nextBtn = document.getElementById('tutorial-next-btn');
 
+    if (!content || !nextBtn) return;
+
     content.innerHTML = TUTORIAL_STEPS[currentTutorialStep].text;
     nextBtn.innerText = currentTutorialStep === TUTORIAL_STEPS.length - 1 ? "CLOSE" : "NEXT";
 }
 
 // Core Functions
+/** @param {number} amount */
 function addBits(amount) {
     // UI.logMessage(`DEBUG: addBits called with ${amount}`);
     gameState.bits += amount;
     gameState.lifetimeBits += amount;
-    if (gameState.statistics) {
+    if (gameState && gameState.statistics) {
         gameState.statistics.totalBitsEarned += amount;
     }
     UI.updateDisplay();
@@ -1091,6 +1400,7 @@ function addBits(amount) {
 }
 
 // Helper functions for upgrade information
+/** @param {string} upgradeKey */
 function calculateGPSContribution(upgradeKey) {
     const upgrade = gameState.upgrades[upgradeKey];
     const contribution = upgrade.gps * upgrade.count;
@@ -1098,11 +1408,13 @@ function calculateGPSContribution(upgradeKey) {
     return { contribution, percentage };
 }
 
+/** @param {any} upgrade */
 function calculateEfficiency(upgrade) {
     if (upgrade.gps === 0) return Infinity; // Click upgrades have no GPS efficiency
     return upgrade.cost / upgrade.gps; // Lower is better
 }
 
+/** @param {number} efficiency */
 function getEfficiencyRating(efficiency) {
     if (efficiency === Infinity) return { text: 'N/A', class: 'neutral' };
     if (efficiency < 500) return { text: 'Excellent', class: 'excellent' };
@@ -1147,7 +1459,7 @@ function calculateGPS() {
     // Temporary Boosts
     const now = Date.now();
     let boostMultiplier = 1;
-    gameState.activeBoosts = gameState.activeBoosts.filter(b => b.endTime > now); // Cleanup expired
+    gameState.activeBoosts = gameState.activeBoosts.filter((/** @type {any} */ b) => b.endTime > now); // Cleanup expired
     gameState.activeBoosts.forEach(b => {
         boostMultiplier *= b.multiplier;
     });
@@ -1187,8 +1499,9 @@ function checkStoryEvents() {
     });
 }
 
+/** @param {string} key */
 function buyUpgrade(key) {
-    const upgrade = gameState.upgrades[key];
+    const upgrade = gameState.upgrades[/** @type {keyof typeof gameState.upgrades} */ (key)];
     if (gameState.bits >= upgrade.cost) {
         gameState.bits -= upgrade.cost;
         upgrade.count++;
@@ -1207,22 +1520,26 @@ function buyUpgrade(key) {
     }
 }
 
+/** @param {string} key */
 function buyBlackMarketItem(key) {
-    const item = BLACK_MARKET_ITEMS[key];
+    const item = BLACK_MARKET_ITEMS[/** @type {keyof typeof BLACK_MARKET_ITEMS} */ (key)];
     if (gameState.cryptos >= item.cost) {
         gameState.cryptos -= item.cost;
 
         if (item.type === 'consumable') {
+            const consumable = /** @type {any} */ (item);
             gameState.activeBoosts.push({
-                multiplier: item.multiplier,
-                endTime: Date.now() + item.duration
+                multiplier: consumable.multiplier,
+                endTime: Date.now() + consumable.duration
             });
             UI.logMessage(`ACTIVATED: ${item.name}`);
         } else if (item.type === 'permanent') {
-            gameState.permanentMultiplier += item.multiplier;
+            const permanent = /** @type {any} */ (item);
+            gameState.permanentMultiplier += permanent.multiplier;
             UI.logMessage(`UPGRADED: ${item.name}`);
         } else if (item.type === 'instant') {
-            const reward = gameState.gps * 3600 * item.hours;
+            const instant = /** @type {any} */ (item);
+            const reward = gameState.gps * 3600 * instant.hours;
             addBits(reward);
             UI.logMessage(`WARPED TIME: +${UI.formatNumber(reward)} Bits`);
         }
@@ -1296,7 +1613,7 @@ function spawnFirewall() {
     if (gameState.firewallActive) return;
 
     gameState.firewallActive = true;
-    if (gameState.statistics) {
+    if (gameState && gameState.statistics) {
         gameState.statistics.firewallsEncountered++;
     }
 
@@ -1318,7 +1635,7 @@ function spawnFirewall() {
 }
 
 // Expose for testing
-window.testFirewall = spawnFirewall;
+/** @type {any} */ (window).testFirewall = spawnFirewall;
 
 function checkFirewallInput() {
     if (!gameState.firewallActive) return;
@@ -1336,6 +1653,7 @@ function checkFirewallInput() {
     }
 }
 
+/** @param {string} key */
 function handleKeypadInput(key) {
     const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
     if (!input) return;
@@ -1393,9 +1711,9 @@ function init() {
         UI.initUI(); // Initialize UI elements first
 
         // Firewall Input Listener
-        if (firewallInput) {
+        if (firewallInput && firewallInput.parentNode) {
             // Remove old listener
-            const newInput = firewallInput.cloneNode(true);
+            const newInput = /** @type {HTMLInputElement} */ (firewallInput.cloneNode(true));
             firewallInput.parentNode.replaceChild(newInput, firewallInput);
             firewallInput = newInput;
 
@@ -1432,13 +1750,13 @@ function init() {
         });
 
         // Global Error Handler for debugging (only add once)
-        if (!window.errorHandlerAdded) {
+        if (!/** @type {any} */ (window).errorHandlerAdded) {
             window.addEventListener('error', (e) => {
                 if (UI && UI.logMessage) {
                     UI.logMessage(`ERROR: ${e.message}`);
                 }
             });
-            window.errorHandlerAdded = true;
+            /** @type {any} */ (window).errorHandlerAdded = true;
         }
 
         UI.logMessage("DEBUG: Starting init...");
@@ -1511,27 +1829,29 @@ function init() {
 
         // Event Listeners
         const hackBtn = document.getElementById('hack-button');
-        if (hackBtn) {
+        if (hackBtn && hackBtn.parentNode) {
             // Remove old listener (clone node)
             const newHackBtn = hackBtn.cloneNode(true);
             hackBtn.parentNode.replaceChild(newHackBtn, hackBtn);
             // Re-attach listener
             newHackBtn.addEventListener('click', (e) => {
                 try {
+                    const me = /** @type {MouseEvent} */ (e);
                     if (gameState.statistics) {
                         gameState.statistics.totalClicks++;
                     }
                     addBits(gameState.clickPower);
-                    UI.createFloatingText(e.clientX, e.clientY, `+${gameState.clickPower}`);
+                    UI.createFloatingText(me.clientX, me.clientY, `+${gameState.clickPower}`);
                     UI.animateHackButton();
                     SoundManager.playSFX('click');
 
                     // Spawn particles
                     for (let i = 0; i < 8; i++) {
-                        UI.createBinaryParticle(e.clientX, e.clientY);
+                        UI.createBinaryParticle(me.clientX, me.clientY);
                     }
                 } catch (err) {
-                    UI.logMessage(`CLICK ERROR: ${err.message}`);
+                    const error = /** @type {Error} */ (err);
+                    UI.logMessage(`CLICK ERROR: ${error.message}`);
                 }
             });
             UI.logMessage("DEBUG: Hack button listener attached");
@@ -1541,8 +1861,8 @@ function init() {
         }
 
         const rebootBtn = document.getElementById('reboot-button');
-        if (rebootBtn) {
-            const newRebootBtn = rebootBtn.cloneNode(true);
+        if (rebootBtn && rebootBtn.parentNode) {
+            const newRebootBtn = /** @type {HTMLElement} */ (rebootBtn.cloneNode(true));
             rebootBtn.parentNode.replaceChild(newRebootBtn, rebootBtn);
             rebootButton = newRebootBtn; // Update global reference
 
@@ -1552,8 +1872,8 @@ function init() {
         }
 
         // Keydown listener (only add once)
-        if (!window.keyDownHandlerAdded) {
-            document.addEventListener('keydown', (e) => {
+        if (!/** @type {any} */ (window).keyDownHandlerAdded) {
+            document.addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
                     saveGame();
@@ -1561,11 +1881,12 @@ function init() {
                     UI.flashBitsDisplay();
                 }
             });
-            window.keyDownHandlerAdded = true;
+            /** @type {any} */ (window).keyDownHandlerAdded = true;
         }
 
         // Game Loop (RequestAnimationFrame)
         let lastTickTime = performance.now();
+        /** @param {number} currentTime */
         function gameLoop(currentTime) {
             const deltaTime = (currentTime - lastTickTime) / 1000; // Convert to seconds
             lastTickTime = currentTime;

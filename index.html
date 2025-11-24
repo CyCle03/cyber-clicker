@@ -73,6 +73,7 @@
                     <nav class="tabs">
                         <button class="tab-btn active" data-tab="shop">SHOP</button>
                         <button class="tab-btn" data-tab="black-market">BLACK MARKET</button>
+                        <button class="tab-btn" data-tab="skill-tree">SKILL TREE</button>
                         <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
                         <button class="tab-btn" data-tab="statistics">STATISTICS</button>
                         <button class="tab-btn" onclick="openSettings(); event.stopPropagation();">SETTINGS</button>
@@ -99,6 +100,18 @@
 
                             <div id="black-market-container" class="grid-container">
                                 <!-- Black Market items injected here -->
+                            </div>
+                        </div>
+
+                        <!-- SKILL TREE TAB -->
+                        <div id="tab-skill-tree" class="tab-pane">
+                            <div class="skill-tree-header">
+                                <div class="skill-points-display">SKILL POINTS: <span id="skill-points-value">0</span>
+                                </div>
+                                <div class="skill-tree-info">Unlock Root Access levels to earn Skill Points.</div>
+                            </div>
+                            <div id="skill-tree-container" class="skill-tree-container">
+                                <!-- Skill Nodes injected here -->
                             </div>
                         </div>
 
@@ -235,6 +248,10 @@
         <button class="mobile-nav-btn" data-tab="black-market" onclick="switchMobileTab('black-market')">
             <span class="icon">☠️</span>
             <span class="label">MARKET</span>
+        </button>
+        <button class="mobile-nav-btn" data-tab="skill-tree" onclick="switchMobileTab('skill-tree')">
+            <span class="icon">🧠</span>
+            <span class="label">SKILLS</span>
         </button>
         <button class="mobile-nav-btn" data-tab="achievements" onclick="switchMobileTab('achievements')">
             <span class="icon">🏆</span>
