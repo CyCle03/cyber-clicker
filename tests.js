@@ -44,21 +44,21 @@ let failed = 0;
 
 // @ts-ignore
 /** @type {GameState} */
-const gameState = window.gameState || {};
+const gameState = /** @type {any} */ (window).gameState || /** @type {any} */ ({});
 // @ts-ignore
-const UPGRADES = window.UPGRADES || {};
+const UPGRADES = /** @type {any} */ (window).UPGRADES || {};
 // @ts-ignore
 /** @type {(amount: number) => void} */
-const addBits = window.addBits || (() => { });
+const addBits = /** @type {any} */ (window).addBits || (() => { });
 // @ts-ignore
 /** @type {(upgradeKey: string) => void} */
-const buyUpgrade = window.buyUpgrade || (() => { });
+const buyUpgrade = /** @type {any} */ (window).buyUpgrade || (() => { });
 // @ts-ignore
 /** @type {() => void} */
-const calculateGPS = window.calculateGPS || (() => { });
+const calculateGPS = /** @type {any} */ (window).calculateGPS || (() => { });
 // @ts-ignore
 /** @type {() => number} */
-const calculatePotentialRootAccess = window.calculatePotentialRootAccess || (() => 0);
+const calculatePotentialRootAccess = /** @type {any} */ (window).calculatePotentialRootAccess || (() => 0);
 
 /**
  * @param {string} name 
@@ -88,6 +88,11 @@ function assert(condition, message) {
     }
 }
 
+/**
+ * @param {string} name 
+ * @param {boolean} isPass 
+ * @param {string} [errorMsg] 
+ */
 function logResult(name, isPass, errorMsg = "") {
     const div = document.createElement('div');
     div.className = isPass ? 'pass' : 'fail';
