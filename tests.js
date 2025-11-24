@@ -1,21 +1,64 @@
 // @ts-check
 
+/**
+ * @typedef {Object} Upgrade
+ * @property {string} id
+ * @property {string} name
+ * @property {number} cost
+ * @property {number} gps
+ * @property {number} click
+ * @property {number} count
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} GameState
+ * @property {number} bits
+ * @property {number} lifetimeBits
+ * @property {number} gps
+ * @property {number} clickPower
+ * @property {number} rootAccessLevel
+ * @property {number} cryptos
+ * @property {number} permanentMultiplier
+ * @property {boolean} firewallActive
+ * @property {string} firewallCode
+ * @property {Object.<string, Upgrade>} upgrades
+ * @property {Array<any>} achievements
+ * @property {Array<any>} storyEvents
+ * @property {Array<any>} activeBoosts
+ * @property {Object} statistics
+ * @property {number} statistics.totalClicks
+ * @property {number} statistics.totalBitsEarned
+ * @property {number} statistics.playTimeSeconds
+ * @property {number} statistics.rebootCount
+ * @property {number} statistics.firewallsEncountered
+ * @property {number} statistics.firewallsCleared
+ * @property {number} statistics.sessionStartTime
+ * @property {number} lastSaveTime
+ * @property {boolean} tutorialSeen
+ */
+
 const resultsDiv = /** @type {HTMLElement} */ (document.getElementById('test-results'));
 let passed = 0;
 let failed = 0;
 
 // @ts-ignore
+/** @type {GameState} */
 const gameState = window.gameState || {};
 // @ts-ignore
 const UPGRADES = window.UPGRADES || {};
 // @ts-ignore
+/** @type {(amount: number) => void} */
 const addBits = window.addBits || (() => { });
 // @ts-ignore
+/** @type {(upgradeKey: string) => void} */
 const buyUpgrade = window.buyUpgrade || (() => { });
 // @ts-ignore
+/** @type {() => void} */
 const calculateGPS = window.calculateGPS || (() => { });
 // @ts-ignore
-const calculatePotentialRootAccess = window.calculatePotentialRootAccess || (() => { });
+/** @type {() => number} */
+const calculatePotentialRootAccess = window.calculatePotentialRootAccess || (() => 0);
 
 /**
  * @param {string} name 
