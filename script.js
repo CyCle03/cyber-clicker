@@ -40,6 +40,8 @@
  * @property {number} statistics.sessionStartTime
  * @property {number} lastSaveTime
  * @property {boolean} tutorialSeen
+ * @property {number} skillPoints
+ * @property {Object.<string, number>} skills
  */
 
 /**
@@ -118,6 +120,13 @@ const STORY_EVENTS = [
     { id: 'matrix', condition: (s) => s.upgrades.matrix.count >= 1, message: "Reality simulation loaded. Is this the real world?", triggered: false },
     { id: 'bender', condition: (s) => s.upgrades.bender.count >= 1, message: "Spacetime coordinates locked. Harvesting from the void.", triggered: false }
 ];
+
+const SKILL_TREE = {
+    click_efficiency: { id: 'click_efficiency', name: 'Click Efficiency', desc: 'Increases click power by 50%', cost: 1, maxLevel: 5 },
+    gps_overclock: { id: 'gps_overclock', name: 'GPS Overclock', desc: 'Increases GPS by 10%', cost: 2, maxLevel: 5 },
+    firewall_bypass: { id: 'firewall_bypass', name: 'Firewall Bypass', desc: 'Reduces firewall penalty by 10%', cost: 3, maxLevel: 3 },
+    lucky_hacker: { id: 'lucky_hacker', name: 'Lucky Hacker', desc: 'Increases Glitch spawn rate', cost: 5, maxLevel: 3 }
+};
 
 const TUTORIAL_STEPS = [
     { text: "INITIALIZING...<br><br>Welcome to Cyber Clicker.<br>Your goal is to hack the system and mine BITS." },
@@ -1224,7 +1233,7 @@ function renderStatistics() {
  * @param {number} potentialLevel 
  */
 function updateRebootButton(potentialLevel) {
-    const btnText = rebootButton.querySelector('.text');
+    const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
     if (potentialLevel > gameState.rootAccessLevel) {
         if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
         rebootButton.classList.remove('disabled');
@@ -1914,7 +1923,8 @@ function init() {
 
         UI.logMessage("DEBUG: Init complete");
 
-    } catch (e) {
+    } catch (err) {
+        const e = /** @type {Error} */ (err);
         console.error("Init failed:", e);
         if (UI && UI.logMessage) UI.logMessage(`CRITICAL ERROR: Init failed: ${e.message}`);
     }
