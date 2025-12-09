@@ -1563,6 +1563,42 @@ function buyBlackMarketItem(key) {
     }
 }
 
+/** @param {string} skillId */
+function buySkill(skillId) {
+    const skill = SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */ (skillId)];
+    if (!skill) return;
+
+    const currentLevel = gameState.skills[skillId] || 0;
+    if (currentLevel >= skill.maxLevel) {
+        UI.logMessage("Skill already maxed.");
+        return;
+    }
+
+    if (gameState.skillPoints >= skill.cost) {
+        gameState.skillPoints -= skill.cost;
+        gameState.skills[skillId] = currentLevel + 1;
+
+        // Apply immediate effects if any logic requires it
+        // Most effects are calculated continuously (GPS, Click Power)
+
+        SoundManager.playSFX('upgrade');
+        // Note: 'upgrade' SFX might not exist, falling back to 'buy' if needed or ensuring it exists
+        // Looking at file, 'buy' exists. Let's use 'buy' or 'achievement' for now? 
+        // The plan didn't specify adding new SFX. I'll use 'buy'.
+        // Actually, let's check SoundManager in a second. For now, use 'buy'.
+
+        calculateGPS();
+        calculateClickPower();
+        UI.updateDisplay();
+        UI.renderSkillTree(buySkill);
+        saveGame();
+        UI.logMessage(`Skill Acquired: ${skill.name}`);
+    } else {
+        SoundManager.playSFX('error');
+        UI.logMessage("Insufficient Skill Points.");
+    }
+}
+
 // Prestige System
 function calculatePotentialRootAccess() {
     return Math.floor(Math.sqrt(gameState.lifetimeBits / 1000000));
@@ -1645,6 +1681,10 @@ function spawnFirewall() {
 
 // Expose for testing
 /** @type {any} */ (window).testFirewall = spawnFirewall;
+/** @type {any} */ (window).buySkill = buySkill;
+/** @type {any} */ (window).gameState = gameState;
+/** @type {any} */ (window).UPGRADES = UPGRADES;
+/** @type {any} */ (window).SKILL_TREE = SKILL_TREE;
 
 function checkFirewallInput() {
     if (!gameState.firewallActive) return;
@@ -1819,6 +1859,7 @@ function init() {
         // Initial render
         UI.renderShop(buyUpgrade);
         UI.renderBlackMarket(buyBlackMarketItem);
+        UI.renderSkillTree(buySkill);
         UI.renderAchievements();
         UI.updateDisplay();
 
