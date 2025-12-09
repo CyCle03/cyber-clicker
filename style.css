@@ -236,7 +236,7 @@ body {
     border: 2px solid var(--primary-cyan);
     color: var(--primary-cyan);
     font-family: var(--font-header);
-    font-size: 1.5em;
+    font-size: 1.2em;
     cursor: pointer;
     position: relative;
     overflow: hidden;
