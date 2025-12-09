@@ -112,12 +112,12 @@ body {
 
 .tab-btn {
     flex: 1;
-    padding: 15px;
+    padding: 10px 5px;
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
     color: var(--text-color);
     font-family: var(--font-header);
-    font-size: 1.1em;
+    font-size: 0.95em;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
@@ -264,7 +264,9 @@ body {
     border: 1px solid #333;
     padding: 10px;
     font-family: 'Courier New', monospace;
-    font-size: 1.1em;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-shadow: 0 0 2px #0f0;
     color: #0f0;
     overflow-y: auto;
     display: flex;
