@@ -82,8 +82,11 @@ const UPGRADES = {
 
 const BLACK_MARKET_ITEMS = {
     boost: { id: 'boost', name: 'Signal Boost', cost: 5, desc: '+100% GPS for 30s', type: 'consumable', duration: 30000, multiplier: 2 },
+    overdrive: { id: 'overdrive', name: 'Overdrive Chip', cost: 10, desc: '+400% GPS for 15s', type: 'consumable', duration: 15000, multiplier: 5 },
+    warp: { id: 'warp', name: 'Time Warp', cost: 20, desc: 'Instant 1 Hour GPS', type: 'instant', hours: 1 },
+    cache: { id: 'cache', name: 'Deep Net Cache', cost: 60, desc: 'Instant 4 Hours GPS', type: 'instant', hours: 4 },
     core: { id: 'core', name: 'Quantum Core', cost: 50, desc: '+10% GPS Permanently', type: 'permanent', multiplier: 0.1 },
-    warp: { id: 'warp', name: 'Time Warp', cost: 20, desc: 'Instant 1 Hour GPS', type: 'instant', hours: 1 }
+    rootkit: { id: 'rootkit', name: 'Root Kit', cost: 100, desc: '+25% GPS Permanently', type: 'permanent', multiplier: 0.25 }
 };
 
 const GLITCH_CONFIG = {
