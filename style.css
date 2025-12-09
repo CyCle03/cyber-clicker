@@ -264,7 +264,7 @@ body {
     border: 1px solid #333;
     padding: 10px;
     font-family: 'Courier New', monospace;
-    font-size: 0.9em;
+    font-size: 1.1em;
     color: #0f0;
     overflow-y: auto;
     display: flex;
@@ -1700,6 +1700,7 @@ body {
         opacity: 0;
     }
 }
+
 /* Skill Tree Styles */
 .skill-tree-header {
     text-align: center;
