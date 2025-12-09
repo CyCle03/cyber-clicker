@@ -1244,7 +1244,8 @@ function updateRebootButton(potentialLevel) {
 
     if (rebootLevelDisplay) {
         const nextLevel = gameState.rootAccessLevel + 1;
-        const requiredBits = nextLevel * nextLevel * 1000000;
+        // Match the new exponential formula: 1M * 10^(level/5)
+        const requiredBits = 1000000 * Math.pow(10, nextLevel / 5);
         if (potentialLevel > gameState.rootAccessLevel) {
             rebootLevelDisplay.innerHTML = `Root Access: LVL ${gameState.rootAccessLevel}<br>→ LVL ${potentialLevel} (Ready!)`;
         } else {
@@ -1612,7 +1613,13 @@ function buySkill(skillId) {
 
 // Prestige System
 function calculatePotentialRootAccess() {
-    return Math.floor(Math.sqrt(gameState.lifetimeBits / 1000000));
+    // Exponential scaling: Each level requires 10x more bits than the previous tier
+    // Level 1-5: 1M - 10M bits
+    // Level 6-10: 10M - 100M bits  
+    // Level 11-15: 100M - 1B bits
+    // Level 16-20: 1B - 10B bits
+    if (gameState.lifetimeBits < 1000000) return 0;
+    return Math.floor(Math.log10(gameState.lifetimeBits / 1000000) * 5);
 }
 
 function rebootSystem() {
