@@ -686,15 +686,11 @@ function switchMobileTab(tabId) {
         }
     });
 
-    const terminalSection = document.getElementById('terminal-section');
-    const auxiliarySection = document.getElementById('auxiliary-section');
+    const terminalSection = document.querySelector('.terminal-section');
+    const auxiliarySection = document.querySelector('.auxiliary-section');
 
     if (!terminalSection || !auxiliarySection) return;
 
-    // The original logic used classes for mobile visibility.
-    // The provided diff snippet for this part was incomplete/malformed.
-    // Reverting to the original class-based visibility logic,
-    // but applying the null checks and dataset access fixes.
     if (tabId === 'terminal') {
         // Show Terminal, Hide Aux
         terminalSection.classList.remove('mobile-hidden');
@@ -1524,7 +1520,18 @@ function buyUpgrade(key) {
         calculateGPS();
         calculateClickPower();
         UI.updateDisplay();
+
+        // Save scroll position before re-rendering
+        const shopPane = document.getElementById('tab-shop');
+        const scrollPos = shopPane ? shopPane.scrollTop : 0;
+
         UI.renderShop(buyUpgrade); // Re-render to update costs and counts
+
+        // Restore scroll position after re-rendering
+        if (shopPane) {
+            shopPane.scrollTop = scrollPos;
+        }
+
         saveGame(); // Auto-save on purchase
         UI.logMessage(`System upgraded: ${upgrade.name}`);
     } else {
