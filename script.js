@@ -751,7 +751,8 @@ function initUI() {
     if (offline) offline.style.display = 'none';
     if (breach) breach.style.display = 'none';
     if (skillTree) skillTree.style.display = 'none';
-    if (exportImport) exportImport.style.display = 'none';
+    // exportImport handling removed as it's now part of the settings modal
+
 
     // Debug Toggle
     const debugToggle = document.getElementById('debug-toggle-btn');
@@ -1692,7 +1693,7 @@ function exportSave() {
     try {
         const json = JSON.stringify(gameState);
         const b64 = btoa(json);
-        
+
         const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
         if (textArea) {
             textArea.value = b64;
@@ -1734,18 +1735,18 @@ function importSave() {
         if (confirm("WARNING: Importing a save will overwrite your current progress. Are you sure?")) {
             loadState(data);
             saveGame(); // Save immediately
-            
+
             // Recalculate derived stats
             calculateGPS();
             calculateClickPower();
-            
+
             // Re-render UI
             UI.updateDisplay();
             UI.renderShop(buyUpgrade);
             UI.renderBlackMarket(buyBlackMarketItem);
             UI.renderSkillTree(buySkill);
             UI.renderAchievements();
-            
+
             closeSettings();
             UI.logMessage("SYSTEM RESTORED: Save imported successfully.");
             SoundManager.playSFX('success');
