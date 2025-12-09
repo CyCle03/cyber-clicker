@@ -1685,6 +1685,78 @@ function spawnFirewall() {
 /** @type {any} */ (window).gameState = gameState;
 /** @type {any} */ (window).UPGRADES = UPGRADES;
 /** @type {any} */ (window).SKILL_TREE = SKILL_TREE;
+/** @type {any} */ (window).exportSave = exportSave;
+/** @type {any} */ (window).importSave = importSave;
+
+function exportSave() {
+    try {
+        const json = JSON.stringify(gameState);
+        const b64 = btoa(json);
+        
+        const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
+        if (textArea) {
+            textArea.value = b64;
+            textArea.select();
+            // Try to copy to clipboard automatically
+            try {
+                navigator.clipboard.writeText(b64).then(() => {
+                    UI.logMessage("SAVE EXPORTED: Copied to clipboard!");
+                }).catch(() => {
+                    UI.logMessage("SAVE EXPORTED: Copy from the text area.");
+                });
+            } catch (e) {
+                UI.logMessage("SAVE EXPORTED: Copy from the text area.");
+            }
+        }
+    } catch (e) {
+        console.error("Export failed:", e);
+        UI.logMessage("ERROR: Export failed.");
+    }
+}
+
+function importSave() {
+    try {
+        const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
+        if (!textArea || !textArea.value) {
+            UI.logMessage("ERROR: No save data found to import.");
+            return;
+        }
+
+        const b64 = textArea.value.trim();
+        const json = atob(b64);
+        const data = JSON.parse(json);
+
+        // Basic Validation
+        if (typeof data.bits !== 'number' || !data.upgrades) {
+            throw new Error("Invalid save data format.");
+        }
+
+        if (confirm("WARNING: Importing a save will overwrite your current progress. Are you sure?")) {
+            loadState(data);
+            saveGame(); // Save immediately
+            
+            // Recalculate derived stats
+            calculateGPS();
+            calculateClickPower();
+            
+            // Re-render UI
+            UI.updateDisplay();
+            UI.renderShop(buyUpgrade);
+            UI.renderBlackMarket(buyBlackMarketItem);
+            UI.renderSkillTree(buySkill);
+            UI.renderAchievements();
+            
+            closeSettings();
+            UI.logMessage("SYSTEM RESTORED: Save imported successfully.");
+            SoundManager.playSFX('success');
+        }
+    } catch (e) {
+        console.error("Import failed:", e);
+        UI.logMessage("ERROR: Invalid save string.");
+        SoundManager.playSFX('error');
+    }
+}
+
 
 function checkFirewallInput() {
     if (!gameState.firewallActive) return;

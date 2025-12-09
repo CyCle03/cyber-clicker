@@ -281,6 +281,15 @@
                 <button class="cyber-button" onclick="toggleMute()" id="mute-btn">MUTE SOUND</button>
             </div>
 
+            <div class="setting-item" id="export-import-section" style="display: block;">
+                <div class="setting-label">DATA MANAGEMENT</div>
+                <div class="export-import-controls">
+                    <button class="cyber-button" onclick="exportSave()">EXPORT SAVE</button>
+                    <button class="cyber-button" onclick="importSave()">IMPORT SAVE</button>
+                </div>
+                <textarea id="save-data-area" class="save-data-area" placeholder="Paste save data here to import..."></textarea>
+            </div>
+
             <div class="modal-footer">
                 <button class="cyber-button" onclick="closeSettings()">CLOSE</button>
             </div>

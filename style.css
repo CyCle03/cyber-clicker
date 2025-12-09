@@ -1397,11 +1397,45 @@ body {
     .firewall-code-display {
         font-size: 1.5em;
     }
+}
 
-    .firewall-input {
-        width: 150px;
-        font-size: 1.2em;
-    }
+/* Save Export/Import Styles */
+.export-import-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.export-import-controls .cyber-button {
+    flex: 1;
+    font-size: 0.9em;
+    padding: 10px;
+}
+
+.save-data-area {
+    width: 100%;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--primary-cyan);
+    color: var(--primary-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8em;
+    padding: 10px;
+    resize: none;
+    margin-top: 10px;
+    outline: none;
+}
+
+.save-data-area:focus {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+
+.firewall-input {
+    width: 150px;
+    font-size: 1.2em;
+}
 }
 
 /* Mobile Navigation */
