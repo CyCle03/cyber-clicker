@@ -1399,14 +1399,15 @@ body {
     }
 }
 
-/* Save Export/Import Styles */
+/* Save Export/Import Styles & Modal Button Overrides */
 .export-import-controls {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
 }
 
-.export-import-controls .cyber-button {
+/* Force all buttons in modal to be rectangular and compact */
+.modal-box .cyber-button {
     flex: 1;
     font-size: 0.9em;
     padding: 10px;
@@ -1414,6 +1415,8 @@ body {
     height: auto;
     aspect-ratio: auto;
     border-radius: 4px;
+    min-width: 120px;
+    /* Ensure they aren't too small */
 }
 
 .save-data-area {
