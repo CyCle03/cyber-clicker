@@ -1439,6 +1439,7 @@ body {
 .firewall-input {
     width: 150px;
     font-size: 1.2em;
+    /* Adjusted for mobile input */
 }
 
 /* Mobile Navigation */
