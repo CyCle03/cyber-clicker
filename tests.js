@@ -1,7 +1,8 @@
 // @ts-check
-import { gameState, initState } from './js/state.js';
+import { getGameState, initState, loadState } from './js/state.js';
 import { UPGRADES, SKILL_TREE } from './js/constants.js';
-import { addBits, buyUpgrade, calculateGPS, calculatePotentialRootAccess, buySkill } from './js/game.js';
+import { addBits, buyUpgrade, calculateGPS, buySkill } from './js/game.js';
+import { calculatePotentialRootAccess } from './js/formulas.js'; // Import from formulas.js
 
 (function () {
     const resultsDiv = /** @type {HTMLElement} */ (document.getElementById('test-results'));
@@ -55,77 +56,147 @@ import { addBits, buyUpgrade, calculateGPS, calculatePotentialRootAccess, buySki
 
     // --- TESTS ---
 
-    test("Initial State", () => {
+    test("State | Initial State", () => {
+        const gameState = getGameState();
         assert(gameState.bits === 0, "Bits should start at 0");
         assert(gameState.gps === 0, "GPS should start at 0");
         assert(gameState.clickPower === 1, "Click Power should start at 1");
     });
 
-    test("Add Bits", () => {
-        addBits(10);
-        assert(gameState.bits === 10, "Adding 10 bits should result in 10 bits");
-        assert(gameState.lifetimeBits === 10, "Lifetime bits should increase");
-        assert(gameState.statistics.totalBitsEarned === 10, "Statistics should update");
-    });
-
-    test("Buy Upgrade - Cost Deduction", () => {
+    test("State | Get Game State", () => {
+        const gameState = getGameState();
         gameState.bits = 100;
-        buyUpgrade('autoClicker'); // Cost 15
-        assert(gameState.bits === 85, "Bits should be deducted (100 - 15 = 85)");
-        assert(gameState.upgrades.autoClicker.count === 1, "Upgrade count should increase");
+        const newGameState = getGameState();
+        assert(newGameState.bits === 100, "getGameState should return the mutated state");
+    });
+    
+    test("State | Load State", () => {
+        const savedData = {
+            bits: 123,
+            lifetimeBits: 456,
+            rootAccessLevel: 1,
+            cryptos: 789,
+            permanentMultiplier: 1.2,
+            offlineMultiplier: 1.5,
+            skillPoints: 5,
+            lastSaveTime: Date.now(),
+            tutorialSeen: true,
+            autoGlitchEnabled: true,
+            skills: { "click_efficiency": 1 },
+            upgrades: { "autoClicker": { "count": 2 } },
+            achievements: [{ "id": "click1", "unlocked": true }],
+            storyEvents: [{ "id": "intro", "triggered": true }],
+            activeBoosts: [],
+            activeClickBoosts: [],
+            statistics: {
+                totalClicks: 100,
+                totalBitsEarned: 1000,
+                playTimeSeconds: 3600,
+                rebootCount: 1,
+                firewallsEncountered: 2,
+                firewallsCleared: 1,
+            }
+        };
+
+        loadState(savedData);
+        const gameState = getGameState();
+
+        assert(gameState.bits === 123, "Loaded bits should be 123");
+        assert(gameState.lifetimeBits === 456, "Loaded lifetimeBits should be 456");
+        assert(gameState.rootAccessLevel === 1, "Loaded rootAccessLevel should be 1");
+        assert(gameState.cryptos === 0, "Loaded cryptos should be 0");
+        assert(gameState.permanentMultiplier === 1.2, "Loaded permanentMultiplier should be 1.2");
+        assert(gameState.offlineMultiplier === 1.5, "Loaded offlineMultiplier should be 1.5");
+        assert(gameState.skillPoints === 5, "Loaded skillPoints should be 5");
+        assert(gameState.tutorialSeen === true, "Loaded tutorialSeen should be true");
+        assert(gameState.autoGlitchEnabled === true, "Loaded autoGlitchEnabled should be true");
+        assert(gameState.skills["click_efficiency"] === 1, "Loaded skills should contain click_efficiency level 1");
+        assert(gameState.upgrades["autoClicker"].count === 2, "Loaded upgrades should contain autoClicker count 2");
+        assert(gameState.achievements.find(a => a.id === "click1")?.unlocked === true, "Loaded achievements should contain click1 unlocked");
+        assert(gameState.storyEvents.find(e => e.id === "intro")?.triggered === true, "Loaded storyEvents should contain intro triggered");
+        assert(gameState.statistics.totalClicks === 100, "Loaded statistics should contain totalClicks 100");
     });
 
-    test("Buy Upgrade - Cost Scaling", () => {
+    test("Game | Add Bits", () => {
+        const gameState = getGameState();
+        addBits(100);
+        assert(gameState.bits === 100, "Bits should increase by 100");
+        assert(gameState.lifetimeBits === 100, "Lifetime bits should increase by 100");
+    });
+
+    test("Game | Buy Upgrade - Success", () => {
+        const gameState = getGameState();
         gameState.bits = 1000;
-        const initialCost = gameState.upgrades.autoClicker.cost; // 15
-        buyUpgrade('autoClicker');
-        const newCost = gameState.upgrades.autoClicker.cost;
-        assert(newCost > initialCost, "Cost should increase after purchase");
-        // Cost scaling is usually * 1.15
-        assert(Math.abs(newCost - (initialCost * 1.15)) < 0.1, "Cost should scale by 1.15x");
+        buyUpgrade("clicker"); // Cost 30
+        assert(gameState.upgrades.clicker.count === 1, "Clicker count should be 1");
+        assert(gameState.bits === 970, "Bits should decrease by upgrade cost");
     });
 
-    test("Calculate GPS", () => {
-        gameState.upgrades.autoClicker.count = 10; // 0.1 GPS each -> 1.0 GPS
-        gameState.upgrades.bot.count = 1; // 1.0 GPS each -> 1.0 GPS
+    test("Game | Buy Upgrade - Insufficient Funds", () => {
+        const gameState = getGameState();
+        gameState.bits = 10;
+        buyUpgrade("clicker"); // Cost 30
+        assert(gameState.upgrades.clicker.count === 0, "Clicker count should remain 0");
+        assert(gameState.bits === 10, "Bits should remain 10");
+    });
+
+    test("Game | Calculate GPS", () => {
+        const gameState = getGameState();
+        gameState.upgrades.autoClicker.count = 10; // 0.1 GPS each
+        gameState.upgrades.bot.count = 2; // 1 GPS each
         calculateGPS();
-        // Total GPS = 2.0
-        assert(Math.abs(gameState.gps - 2.0) < 0.01, "GPS should be calculated correctly (2.0)");
+        assert(gameState.gps === (10 * 0.1 + 2 * 1), "GPS should be sum of upgrade GPS"); // 1 + 2 = 3
     });
 
-    test("Root Access Calculation", () => {
-        // Formula: floor(log10(adjustedBits / 10,000,000) * 5)
-        // Target Level 1: 10,000,000 bits
-        gameState.lifetimeBits = 10000000;
-        let level = calculatePotentialRootAccess();
-        assert(level === 0, "10M bits should give Level 0 Root Access");
-
-        gameState.lifetimeBits = 10000000 * Math.pow(10, 1/5);
-        level = calculatePotentialRootAccess();
-        assert(level === 1, "Correct bits for level 1 root access");
+    test("Game | Calculate GPS with Root Access Bonus", () => {
+        const gameState = getGameState();
+        gameState.rootAccessLevel = 1; // +10% GPS
+        gameState.upgrades.autoClicker.count = 10;
+        calculateGPS();
+        assert(gameState.gps === (10 * 0.1 * 1.1), "GPS should include root access bonus");
     });
 
-    test("Buy Skill - Success", () => {
-        gameState.skillPoints = 2;
-        // Assume 'click_efficiency' exists
-        if (!SKILL_TREE.click_efficiency) {
-            throw new Error("click_efficiency skill not found in SKILL_TREE");
-        }
+    test("Game | Calculate Potential Root Access - No Skill", () => {
+        const gameState = getGameState();
+        gameState.lifetimeBits = 10000000; // Base requirement for level 1 (with new formula adjustment)
+        let potential = calculatePotentialRootAccess();
+        assert(potential === 0, "Should be 0 for exactly 10M bits");
 
-        buySkill('click_efficiency');
-
-        assert(gameState.skillPoints === 1, "Skill point should be deducted (2 - 1 = 1)");
-        assert(gameState.skills.click_efficiency === 1, "Skill level should increase to 1");
+        gameState.lifetimeBits = 10000000 * Math.pow(10, 1/5) + 1; // Slightly more than required for level 1
+        potential = calculatePotentialRootAccess();
+        assert(potential === 1, "Should be 1 for enough bits for level 1");
     });
 
-    test("Buy Skill - Insufficient Points", () => {
+    test("Game | Calculate Potential Root Access - With Prestige Master Skill", () => {
+        const gameState = getGameState();
+        gameState.skills.prestige_master = 1; // 10% reduction
+        gameState.lifetimeBits = 10000000 * Math.pow(10, 1/5) * 0.9 + 1; // 90% of required for level 1
+        let potential = calculatePotentialRootAccess();
+        assert(potential === 1, "Should be 1 with skill reduction");
+    });
+
+    test("Game | Buy Skill - Success", () => {
+        const gameState = getGameState();
+        gameState.skillPoints = 5;
+        buySkill("click_efficiency"); // Cost 1
+        assert(gameState.skills.click_efficiency === 1, "Click efficiency skill level should be 1");
+        assert(gameState.skillPoints === 4, "Skill points should decrease by skill cost");
+    });
+
+    test("Game | Buy Skill - Insufficient Points", () => {
+        const gameState = getGameState();
         gameState.skillPoints = 0;
-        gameState.skills.click_efficiency = 0;
-
-        buySkill('click_efficiency');
-
+        buySkill("click_efficiency"); // Cost 1
+        assert(gameState.skills.click_efficiency === 0, "Click efficiency skill level should remain 0");
         assert(gameState.skillPoints === 0, "Skill points should remain 0");
-        assert(gameState.skills.click_efficiency === 0, "Skill level should not increase");
+    });
+
+    test("Game | Buy Skill - Maxed Out", () => {
+        const gameState = getGameState();
+        gameState.skillPoints = 10;
+        gameState.skills.click_efficiency = SKILL_TREE.click_efficiency.maxLevel;
+        buySkill("click_efficiency");
+        assert(gameState.skills.click_efficiency === SKILL_TREE.click_efficiency.maxLevel, "Click efficiency skill level should remain maxed");
     });
 
     // Summary

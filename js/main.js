@@ -1,14 +1,20 @@
 // @ts-check
-import { initState, loadState } from './state.js';
-import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, firewallInput } from './ui.js';
+import { initState, loadState, getGameState } from './state.js';
+import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, firewallInput, formatNumber, updateRebootButton } from './ui.js';
 import { loadGame, saveGame } from './storage.js';
-import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach } from './game.js';
+import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
 import { SoundManager } from './sound.js';
-import { gameState } from './state.js';
+import { calculatePotentialRootAccess } from './formulas.js';
+
+let gameLoopId;
+let autoSaveId;
+let eventLoopId;
+let rebootBtnId;
 
 // Initialization
 function init() {
     try {
+        const gameState = getGameState();
         // Clear existing intervals if any (for reboot)
         if (gameLoopId) cancelAnimationFrame(gameLoopId);
         if (autoSaveId) clearInterval(autoSaveId);
@@ -25,12 +31,11 @@ function init() {
             firewallInput = newInput;
 
             firewallInput.addEventListener('input', checkFirewallInput);
-            // Removed forced focus on blur to prevent mobile keyboard issues
         }
 
         // Global Keydown Listener for Firewall
         document.addEventListener('keydown', (e) => {
-            if (gameState.firewallActive) {
+            if (getGameState().firewallActive) {
                 const key = e.key.toUpperCase();
                 if ("0123456789ABCDEF".includes(key) && firewallInput.value.length < 4) {
                     firewallInput.value += key;
@@ -55,9 +60,9 @@ function init() {
 
         // Calculate offline progress
         const now = Date.now();
-        const offlineTime = now - gameState.lastSaveTime;
+        const offlineTime = now - getGameState().lastSaveTime;
         if (offlineTime > 10000) { // More than 10 seconds
-            const offlineGps = gameState.gps * (gameState.offlineMultiplier || 1);
+            const offlineGps = getGameState().gps * (getGameState().offlineMultiplier || 1);
             const offlineBits = Math.floor((offlineGps * offlineTime) / 1000);
             if (offlineBits > 0) {
                 addBits(offlineBits);
@@ -88,9 +93,9 @@ function init() {
         const hackButton = document.getElementById('hack-button');
         if (hackButton) {
             hackButton.addEventListener('click', () => {
-                addBits(gameState.clickPower);
-                if (gameState.statistics) {
-                    gameState.statistics.totalClicks++;
+                addBits(getGameState().clickPower);
+                if (getGameState().statistics) {
+                    getGameState().statistics.totalClicks++;
                 }
                 SoundManager.playSFX('click');
                 animateHackButton();
@@ -132,7 +137,7 @@ function gameLoop(timestamp) {
     const deltaTime = (timestamp - lastTimestamp) / 1000; // seconds
     lastTimestamp = timestamp;
 
-    addBits(gameState.gps * deltaTime);
+    addBits(getGameState().gps * deltaTime);
     updateDisplay();
 
     gameLoopId = requestAnimationFrame(gameLoop);

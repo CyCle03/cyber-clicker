@@ -1,7 +1,8 @@
 // @ts-check
-import { gameState } from "./state.js";
+import { getGameState } from "./state.js";
 import { BLACK_MARKET_ITEMS, SKILL_TREE } from "./constants.js";
-import { calculateGPSContribution, calculateEfficiency, getEfficiencyRating, calculatePotentialRootAccess } from "./game.js";
+import { calculateGPSContribution, calculateEfficiency, getEfficiencyRating, calculatePotentialRootAccess } from "./formulas.js";
+import { addBits, startDataBreach } from "./game.js";
 
 // DOM Elements
 /** @type {HTMLElement} */
@@ -217,6 +218,7 @@ export function logMessage(msg) {
 }
 
 export function updateDisplay() {
+    const gameState = getGameState();
     if (bitsDisplay) {
         bitsDisplay.innerText = formatNumber(gameState.bits);
     } else {
@@ -365,6 +367,7 @@ export function createBinaryParticle(x, y) {
  * @param {(arg0: string) => void} buyCallback 
  */
 export function renderShop(buyCallback) {
+    const gameState = getGameState();
     shopContainer.innerHTML = '';
     for (const key in gameState.upgrades) {
         const upgrade = gameState.upgrades[key];
@@ -427,6 +430,7 @@ export function renderShop(buyCallback) {
  * @param {(arg0: string) => void} buyCallback 
  */
 export function renderBlackMarket(buyCallback) {
+    const gameState = getGameState();
     blackMarketContainer.innerHTML = '';
     // DIRECT ACCESS TO BLACK_MARKET_ITEMS for bundle
     for (const key in BLACK_MARKET_ITEMS) {
@@ -459,6 +463,7 @@ export function renderBlackMarket(buyCallback) {
  * @param {(arg0: string) => void} buyCallback 
  */
 export function renderSkillTree(buyCallback) {
+    const gameState = getGameState();
     if (!skillTreeContainer) return;
     skillTreeContainer.innerHTML = '';
 
@@ -494,6 +499,7 @@ export function renderSkillTree(buyCallback) {
 }
 
 export function renderActiveEffects() {
+    const gameState = getGameState();
     const container = document.getElementById('active-effects-container');
     if (!container) return;
 
@@ -539,6 +545,7 @@ export function renderActiveEffects() {
 }
 
 export function updateShopUI() {
+    const gameState = getGameState();
     for (const key in gameState.upgrades) {
         const upgrade = gameState.upgrades[key];
         const el = document.getElementById(`upgrade-${key}`);
@@ -553,6 +560,7 @@ export function updateShopUI() {
 }
 
 export function renderAchievements() {
+    const gameState = getGameState();
     achievementsContainer.innerHTML = '';
     gameState.achievements.forEach(/** @type {any} */(ach) => {
         const item = document.createElement('div');
@@ -592,6 +600,7 @@ export function showAchievementNotification(ach) {
 }
 
 export function renderStatistics() {
+    const gameState = getGameState();
     if (!gameState.statistics) return;
 
     // Format time as HH:MM:SS
@@ -627,6 +636,7 @@ export function renderStatistics() {
  * @param {number} potentialLevel 
  */
 export function updateRebootButton(potentialLevel) {
+    const gameState = getGameState();
     const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
     if (potentialLevel > gameState.rootAccessLevel) {
         if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;

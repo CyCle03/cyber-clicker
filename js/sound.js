@@ -12,6 +12,7 @@
  * @property {function(number, OscillatorType, number, number=): void} playTone
  * @property {function(): void} saveSettings
  * @property {function(): void} updateUI
+ * @property {function(): void} toggleMute
  */
 
 /** @type {SoundManagerType} */
@@ -132,5 +133,11 @@ export const SoundManager = {
             muteBtn.innerText = this.muted ? "UNMUTE SOUND" : "MUTE SOUND";
             muteBtn.classList.toggle('danger', this.muted);
         }
+    },
+
+    toggleMute: function() {
+        this.muted = !this.muted;
+        this.saveSettings();
+        this.updateUI();
     }
 };

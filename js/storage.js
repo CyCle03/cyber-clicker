@@ -1,12 +1,13 @@
 // @ts-check
-import { gameState, loadState } from "./state.js";
-import { logMessage, renderAchievements, renderBlackMarket, renderShop, renderSkillTree, updateDisplay } from "./ui.js";
+import { getGameState, loadState } from "./state.js";
+import { logMessage, renderAchievements, renderBlackMarket, renderShop, renderSkillTree, updateDisplay, closeSettings } from "./ui.js"; // ADDED closeSettings
 import { buyBlackMarketItem, buySkill, buyUpgrade, calculateClickPower, calculateGPS } from "./game.js";
 import { SoundManager } from "./sound.js";
 
 const SAVE_KEY = 'cyberClickerSave';
 
 export function saveGame() {
+    const gameState = getGameState();
     const saveData = {
         bits: gameState.bits,
         lifetimeBits: gameState.lifetimeBits,
@@ -65,7 +66,7 @@ export function clearSave() {
 
 export function exportSave() {
     try {
-        const json = JSON.stringify(gameState);
+        const json = JSON.stringify(getGameState());
         const b64 = btoa(json);
 
         const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
@@ -125,14 +126,10 @@ export function importSave() {
             logMessage("SYSTEM RESTORED: Save imported successfully.");
             SoundManager.playSFX('success');
         }
-    } catch (e) {
+    }
+    catch (e) {
         console.error("Import failed:", e);
         logMessage("ERROR: Invalid save string.");
         SoundManager.playSFX('error');
     }
-}
-
-function closeSettings() {
-    const modal = document.getElementById('settings-modal');
-    if (modal) modal.classList.remove('visible');
 }

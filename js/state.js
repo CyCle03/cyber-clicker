@@ -7,52 +7,57 @@ import { SoundManager } from "./sound.js";
  */
 
 /** @type {GameState} */
-export let gameState = /** @type {any} */ ({});
+const gameState = /** @type {any} */ ({});
+
+export const getGameState = () => gameState;
 
 export function initState() {
-    gameState.bits = 0;
-    gameState.lifetimeBits = 0;
-    gameState.gps = 0;
-    gameState.clickPower = 1;
-    gameState.rootAccessLevel = 0;
-    gameState.cryptos = 0;
-    gameState.permanentMultiplier = 1;
-    gameState.offlineMultiplier = 1;
-    gameState.skillPoints = 0;
-    gameState.skills = {}; // id -> level
-    gameState.firewallActive = false;
-    gameState.firewallCode = "";
-    gameState.autoGlitchEnabled = false;
+    const newState = {
+        bits: 0,
+        lifetimeBits: 0,
+        gps: 0,
+        clickPower: 1,
+        rootAccessLevel: 0,
+        cryptos: 0,
+        permanentMultiplier: 1,
+        offlineMultiplier: 1,
+        skillPoints: 0,
+        skills: {}, // id -> level
+        firewallActive: false,
+        firewallCode: "",
+        autoGlitchEnabled: false,
 
-    // Statistics tracking
-    gameState.statistics = {
-        totalClicks: 0,
-        totalBitsEarned: 0,
-        playTimeSeconds: 0,
-        rebootCount: 0,
-        firewallsEncountered: 0,
-        firewallsCleared: 0,
-        sessionStartTime: Date.now()
+        // Statistics tracking
+        statistics: {
+            totalClicks: 0,
+            totalBitsEarned: 0,
+            playTimeSeconds: 0,
+            rebootCount: 0,
+            firewallsEncountered: 0,
+            firewallsCleared: 0,
+            sessionStartTime: Date.now()
+        },
+
+        // Deep copy upgrades to avoid mutating the constant definition
+        upgrades: JSON.parse(JSON.stringify(UPGRADES)),
+
+        // Initialize skills
+        achievements: ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false })),
+
+        // Story events state
+        storyEvents: STORY_EVENTS.map(evt => ({ ...evt, triggered: false })),
+
+        tutorialSeen: false,
+        activeBoosts: [], // Array of { multiplier, endTime }
+        activeClickBoosts: [], // Array of { clickMultiplier, endTime }
+        lastSaveTime: Date.now()
     };
 
-    // Deep copy upgrades to avoid mutating the constant definition
-    gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES));
-
-    // Initialize skills
     for (const key in SKILL_TREE) {
-        gameState.skills[key] = 0;
+        newState.skills[key] = 0;
     }
 
-    // Achievements need to keep their functions, so we map them
-    gameState.achievements = ACHIEVEMENTS.map(ach => ({ ...ach, unlocked: false }));
-
-    // Story events state
-    gameState.storyEvents = STORY_EVENTS.map(evt => ({ ...evt, triggered: false }));
-
-    gameState.tutorialSeen = false;
-    gameState.activeBoosts = []; // Array of { multiplier, endTime }
-    gameState.activeClickBoosts = []; // Array of { clickMultiplier, endTime }
-    gameState.lastSaveTime = Date.now();
+    Object.assign(gameState, newState);
 }
 
 /**
@@ -65,17 +70,17 @@ export function loadState(savedData) {
         gameState.bits = savedData.bits || 0;
         gameState.lifetimeBits = savedData.lifetimeBits || 0;
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
-        gameState.cryptos = savedData.cryptos || 0;
-        gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
-        gameState.offlineMultiplier = savedData.offlineMultiplier || 1;
-        gameState.skillPoints = savedData.skillPoints || 0;
-        gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
-        gameState.tutorialSeen = savedData.tutorialSeen || false;
-        gameState.autoGlitchEnabled = savedData.autoGlitchEnabled || false;
+        cryptos: savedData.cryptos || 0,
+        permanentMultiplier: savedData.permanentMultiplier || 1,
+        offlineMultiplier: savedData.offlineMultiplier || 1,
+        skillPoints: savedData.skillPoints || 0,
+        lastSaveTime: savedData.lastSaveTime || Date.now(),
+        tutorialSeen: savedData.tutorialSeen || false,
+        autoGlitchEnabled: savedData.autoGlitchEnabled || false,
 
         // Load Skills
         if (savedData.skills) {
-            gameState.skills = { ...gameState.skills, ...savedData.skills };
+            Object.assign(gameState.skills, savedData.skills);
         }
 
         // Load Upgrades
@@ -130,7 +135,7 @@ export function loadState(savedData) {
         if (savedData.statistics) {
             // Merge saved statistics with current (initial) statistics.
             // This ensures new stats fields are initialized correctly if they didn't exist in old saves.
-            gameState.statistics = { ...gameState.statistics, ...savedData.statistics };
+            Object.assign(gameState.statistics, savedData.statistics);
         }
 
         // Migration: Grant skill points to players who rebirthed before skill tree was added
@@ -150,36 +155,17 @@ export function loadState(savedData) {
 
 /** @param {number} newRootLevel */
 export function resetStateForPrestige(newRootLevel) {
-    gameState.bits = 0;
-    gameState.lifetimeBits = 0;
-    gameState.gps = 0;
-    gameState.clickPower = 1;
-    gameState.rootAccessLevel = newRootLevel;
-    gameState.permanentMultiplier *= 1.1; // +10% permanent bonus per reboot
-    gameState.skillPoints += (newRootLevel - gameState.rootAccessLevel); // Earn points for new levels
-    // Actually, skill points should be total based on level, but let's just add new ones for now.
-    // Better: Skill Points = Root Level (Total). Used points are tracked in skills.
-    // Let's simplify: You get 1 SP per Root Level.
-    // On Prestige, you keep your skills? Or reset them?
-    // Standard idle game: Skills usually persist or you get points to rebuy.
-    // Let's say Skills PERSIST across reboots (permanent perks).
-    // So we just update skill points based on level increase.
-    // Wait, if I reboot from lvl 0 to 1, I get 1 point.
-    // If I reboot again from 0 to 2 (total), do I get 2 points?
-    // Root Access Level is cumulative or reset?
-    // "Root Access: LVL X". It seems permanent.
-    // So:
     const levelsGained = newRootLevel - gameState.rootAccessLevel;
-    if (levelsGained > 0) {
-        gameState.skillPoints += levelsGained;
-    }
-
-    gameState.activeBoosts = [];
-
-
-    // Reset Upgrades
-    for (const key in gameState.upgrades) {
-        gameState.upgrades[key].count = 0;
-        gameState.upgrades[key].cost = UPGRADES[/** @type {keyof typeof UPGRADES} */(key)].cost;
-    }
+    
+    Object.assign(gameState, {
+        bits: 0,
+        lifetimeBits: 0,
+        gps: 0,
+        clickPower: 1,
+        rootAccessLevel: newRootLevel,
+        permanentMultiplier: gameState.permanentMultiplier * 1.1, // +10% permanent bonus per reboot
+        skillPoints: gameState.skillPoints + (levelsGained > 0 ? levelsGained : 0),
+        activeBoosts: [],
+        upgrades: JSON.parse(JSON.stringify(UPGRADES)), // Reset upgrades
+    });
 }

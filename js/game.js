@@ -1,14 +1,14 @@
 // @ts-check
-import { gameState, resetStateForPrestige } from './state.js';
-import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallInput } from './ui.js';
+import { getGameState, resetStateForPrestige } from './state.js';
+import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
-import { saveGame } from './storage.js';
+import { saveGame, hardReset, exportSave, importSave } from './storage.js';
 import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
-import * as UI from './ui.js';
+import { calculatePotentialRootAccess } from './formulas.js';
 
 // Tutorial Logic
 let currentTutorialStep = 0;
-function showTutorial() {
+export function showTutorial() {
     const overlay = document.getElementById('tutorial-overlay');
     const content = document.getElementById('tutorial-content');
     const nextBtn = document.getElementById('tutorial-next-btn');
@@ -25,7 +25,7 @@ function showTutorial() {
             updateTutorialStep();
         } else {
             overlay.classList.remove('visible');
-            gameState.tutorialSeen = true;
+            getGameState().tutorialSeen = true;
             saveGame();
         }
     };
@@ -44,44 +44,19 @@ function updateTutorialStep() {
 // Core Functions
 /** @param {number} amount */
 export function addBits(amount) {
-    // UI.logMessage(`DEBUG: addBits called with ${amount}`);
+    const gameState = getGameState();
     gameState.bits += amount;
     gameState.lifetimeBits += amount;
     if (gameState && gameState.statistics) {
         gameState.statistics.totalBitsEarned += amount;
     }
-    UI.updateDisplay();
+    updateDisplay();
     checkUnlocks();
     checkStoryEvents();
 }
 
-// Helper functions for upgrade information
-/** @param {string} upgradeKey */
-export function calculateGPSContribution(upgradeKey) {
-    const upgrade = gameState.upgrades[upgradeKey];
-    const contribution = upgrade.gps * upgrade.count;
-    const percentage = gameState.gps > 0 ? (contribution / gameState.gps) * 100 : 0;
-    return { contribution, percentage };
-}
-
-/** @param {any} upgrade */
-export function calculateEfficiency(upgrade) {
-    if (upgrade.gps === 0) return Infinity; // Click upgrades have no GPS efficiency
-    return upgrade.cost / upgrade.gps; // Lower is better
-}
-
-/** @param {number} efficiency */
-export function getEfficiencyRating(efficiency) {
-    if (efficiency === Infinity) return { text: 'N/A', class: 'neutral' };
-    if (efficiency < 500) return { text: 'Excellent', class: 'excellent' };
-    if (efficiency < 2000) return { text: 'Good', class: 'good' };
-    if (efficiency < 10000) return { text: 'Fair', class: 'fair' };
-    return { text: 'Poor', class: 'poor' };
-}
-
-
-
 export function calculateClickPower() {
+    const gameState = getGameState();
     let power = 1; // Base power
     for (const key in gameState.upgrades) {
         const upgrade = gameState.upgrades[key];
@@ -101,6 +76,7 @@ export function calculateClickPower() {
 }
 
 export function calculateGPS() {
+    const gameState = getGameState();
     let gps = 0;
     for (const key in gameState.upgrades) {
         const upgrade = gameState.upgrades[key];
@@ -122,7 +98,7 @@ export function calculateGPS() {
     // Temporary Boosts
     const now = Date.now();
     let boostMultiplier = 1;
-    gameState.activeBoosts = gameState.activeBoosts.filter(/** @type {any} */(b) => b.endTime > now); // Cleanup expired
+    gameState.activeBoosts = gameState.activeBoosts.filter((b) => b.endTime > now); // Cleanup expired
     gameState.activeBoosts.forEach(b => {
         boostMultiplier *= b.multiplier;
     });
@@ -137,6 +113,7 @@ export function calculateGPS() {
 }
 
 function checkUnlocks() {
+    const gameState = getGameState();
     gameState.achievements.forEach(ach => {
         if (!ach.unlocked && ach.condition(gameState)) {
             ach.unlocked = true;
@@ -145,7 +122,7 @@ function checkUnlocks() {
             showAchievementNotification(ach);
             logMessage(`ACHIEVEMENT UNLOCKED: ${ach.name} (+${ach.reward} CRYPTOS)`);
             renderAchievements();
-            UI.updateDisplay(); // Update Crypto display
+            updateDisplay(); // Update Crypto display
             saveGame();
         }
     });
@@ -153,6 +130,7 @@ function checkUnlocks() {
 }
 
 function checkStoryEvents() {
+    const gameState = getGameState();
     gameState.storyEvents.forEach(evt => {
         if (!evt.triggered && evt.condition(gameState)) {
             evt.triggered = true;
@@ -164,6 +142,7 @@ function checkStoryEvents() {
 
 /** @param {string} key */
 export function buyUpgrade(key) {
+    const gameState = getGameState();
     const upgrade = gameState.upgrades[/** @type {keyof typeof gameState.upgrades} */(key)];
     if (gameState.bits >= upgrade.cost) {
         gameState.bits -= upgrade.cost;
@@ -173,13 +152,13 @@ export function buyUpgrade(key) {
         SoundManager.playSFX('buy');
         calculateGPS();
         calculateClickPower();
-        UI.updateDisplay();
+        updateDisplay();
 
         // Save scroll position before re-rendering
         const shopPane = document.getElementById('tab-shop');
         const scrollPos = shopPane ? shopPane.scrollTop : 0;
 
-        UI.renderShop(buyUpgrade); // Re-render to update costs and counts
+        renderShop(buyUpgrade); // Re-render to update costs and counts
 
         // Restore scroll position after re-rendering
         if (shopPane) {
@@ -196,6 +175,7 @@ export function buyUpgrade(key) {
 
 /** @param {string} key */
 export function buyBlackMarketItem(key) {
+    const gameState = getGameState();
     const item = BLACK_MARKET_ITEMS[/** @type {keyof typeof BLACK_MARKET_ITEMS} */(key)];
     if (gameState.cryptos >= item.cost) {
         gameState.cryptos -= item.cost;
@@ -238,8 +218,8 @@ export function buyBlackMarketItem(key) {
         }
 
         calculateGPS();
-        UI.updateDisplay();
-        UI.renderBlackMarket(buyBlackMarketItem);
+        updateDisplay();
+        renderBlackMarket(buyBlackMarketItem);
         saveGame();
     } else {
         SoundManager.playSFX('error');
@@ -249,6 +229,7 @@ export function buyBlackMarketItem(key) {
 
 /** @param {string} skillId */
 export function buySkill(skillId) {
+    const gameState = getGameState();
     const skill = SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */(skillId)];
     if (!skill) return;
 
@@ -262,15 +243,12 @@ export function buySkill(skillId) {
         gameState.skillPoints -= skill.cost;
         gameState.skills[skillId] = currentLevel + 1;
 
-        // Apply immediate effects if any logic requires it
-        // Most effects are calculated continuously (GPS, Click Power)
-
         SoundManager.playSFX('buy');
 
         calculateGPS();
         calculateClickPower();
-        UI.updateDisplay();
-        UI.renderSkillTree(buySkill);
+        updateDisplay();
+        renderSkillTree(buySkill);
         saveGame();
         logMessage(`Skill Acquired: ${skill.name}`);
     } else {
@@ -280,25 +258,8 @@ export function buySkill(skillId) {
 }
 
 // Prestige System
-export function calculatePotentialRootAccess() {
-    // Exponential scaling: Each level requires 10x more bits than the previous tier
-    // Level 1: 10M bits
-    // Level 2: 31.6M bits  
-    // Level 3: 100M bits
-    // Level 4: 316M bits
-    // Level 5: 1B bits
-    // Minimum requirement increased to 10M for better game pacing
-    if (gameState.lifetimeBits < 10000000) return 0;
-
-    // Apply Prestige Master skill to reduce requirements
-    const prestigeMasterLevel = gameState.skills.prestige_master || 0;
-    const reductionMultiplier = 1 - (prestigeMasterLevel * 0.1); // 10% reduction per level
-    const adjustedBits = gameState.lifetimeBits / reductionMultiplier;
-
-    return Math.floor(Math.log10(adjustedBits / 10000000) * 5);
-}
-
 export function rebootSystem() {
+    const gameState = getGameState();
     const potentialLevel = calculatePotentialRootAccess();
     if (potentialLevel > gameState.rootAccessLevel) {
         const cryptosGained = potentialLevel - gameState.rootAccessLevel;
@@ -320,29 +281,26 @@ export function rebootSystem() {
 }
 
 // Glitch System
-function spawnGlitch() {
+export function spawnGlitch() {
     const time = Math.random() * (GLITCH_CONFIG.maxSpawnTime - GLITCH_CONFIG.minSpawnTime) + GLITCH_CONFIG.minSpawnTime;
     setTimeout(() => {
         const glitchEl = createGlitchElement(handleGlitchClick);
 
-        // Auto-glitch bot logic
-        if (gameState.autoGlitchEnabled && Math.random() < 0.5) {
-            // Auto-click after a small delay for visual effect
+        if (getGameState().autoGlitchEnabled && Math.random() < 0.5) {
             setTimeout(() => {
                 if (glitchEl.parentNode) {
                     handleGlitchClick();
                     glitchEl.remove();
                     logMessage("Auto-Glitch Bot collected the glitch!");
-                    spawnGlitch(); // Schedule next one
+                    spawnGlitch(); 
                 }
             }, 100 + Math.random() * 400);
         } else {
-            // Despawn after duration if not auto-collected
             setTimeout(() => {
                 if (glitchEl.parentNode) {
                     glitchEl.remove();
                     logMessage("Glitch signal lost...");
-                    spawnGlitch(); // Schedule next one even if missed
+                    spawnGlitch();
                 }
             }, GLITCH_CONFIG.duration);
         }
@@ -351,21 +309,22 @@ function spawnGlitch() {
 }
 
 function handleGlitchClick() {
+    const gameState = getGameState();
     const baseReward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
-    // Apply Crypto Magnet skill bonus
     const cryptoMagnetBonus = gameState.skills.crypto_magnet || 0;
     const reward = baseReward + cryptoMagnetBonus;
 
     gameState.cryptos += reward;
-    UI.updateDisplay();
+    updateDisplay();
     logMessage(`GLITCH HACKED! Recovered ${reward} Cryptos.`);
     createFloatingText(window.innerWidth / 2, window.innerHeight / 2, `+${reward} 🪙`);
     saveGame();
-    spawnGlitch(); // Schedule next one
+    spawnGlitch();
 }
 
 // Firewall Logic
-function spawnFirewall() {
+export function spawnFirewall() {
+    const gameState = getGameState();
     if (gameState.firewallActive) return;
 
     gameState.firewallActive = true;
@@ -373,24 +332,23 @@ function spawnFirewall() {
         gameState.statistics.firewallsEncountered++;
     }
 
-    // Generate Random Hex Code (4 chars)
     const chars = "0123456789ABCDEF";
     let code = "";
     for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
     gameState.firewallCode = code;
 
     firewallOverlay.classList.add('visible');
-    UI.firewallCodeDisplay.innerText = code;
+    firewallCodeDisplay.innerText = code;
     firewallInput.value = "";
-    // firewallInput.focus(); // Removed to prevent mobile keyboard popup
 
     SoundManager.playSFX('alert');
     logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
     calculateGPS();
-    UI.updateDisplay();
+    updateDisplay();
 }
 
-function checkFirewallInput() {
+export function checkFirewallInput() {
+    const gameState = getGameState();
     if (!gameState.firewallActive) return;
 
     const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
@@ -418,12 +376,13 @@ export function handleKeypadInput(key) {
     } else {
         if (input.value.length < 4) {
             input.value += key;
-            checkFirewallInput(); // Check immediately on input
+            checkFirewallInput();
         }
     }
 }
 
 function clearFirewall() {
+    const gameState = getGameState();
     gameState.firewallActive = false;
     if (gameState.statistics) {
         gameState.statistics.firewallsCleared++;
@@ -431,15 +390,13 @@ function clearFirewall() {
 
     firewallOverlay.classList.remove('visible');
 
-    // Reward: 5 minutes of UNMUTE GPS
-    // We need to recalculate GPS first to remove the penalty
     calculateGPS();
     const reward = gameState.gps * 300;
     addBits(reward);
 
     SoundManager.playSFX('success');
     logMessage(`FIREWALL BREACHED! REWARD: +${formatNumber(reward)} BITS`);
-    UI.updateDisplay();
+    updateDisplay();
 }
 
 // Data Breach Mini-game
@@ -459,10 +416,17 @@ let breachScore = 0;
 let breachTotalData = 0;
 let breachActive = false;
 
+export function initDataBreach() {
+    breachOverlay = /** @type {HTMLElement} */ (document.getElementById('breach-overlay'));
+    breachGrid = /** @type {HTMLElement} */ (document.getElementById('breach-grid'));
+    breachTimerDisplay = /** @type {HTMLElement} */ (document.getElementById('breach-timer'));
+    breachScoreDisplay = /** @type {HTMLElement} */ (document.getElementById('breach-score'));
+}
+
 export function startDataBreach() {
     if (breachActive) return;
     breachActive = true;
-    breachTimeLeft = 10; // 10 seconds
+    breachTimeLeft = 10;
     breachScore = 0;
     breachTotalData = 0;
 
@@ -482,14 +446,13 @@ export function startDataBreach() {
 function generateBreachGrid() {
     if (!breachGrid) return;
     breachGrid.innerHTML = '';
-    const gridSize = 25; // 5x5
-    const dataCount = 5 + Math.floor(Math.random() * 5); // 5-10 data nodes
-    const iceCount = 3 + Math.floor(Math.random() * 3); // 3-5 ICE nodes
+    const gridSize = 25;
+    const dataCount = 5 + Math.floor(Math.random() * 5);
+    const iceCount = 3 + Math.floor(Math.random() * 3);
     breachTotalData = dataCount;
 
     let nodes = Array(gridSize).fill('empty');
 
-    // Place Data
     let placed = 0;
     while (placed < dataCount) {
         const idx = Math.floor(Math.random() * gridSize);
@@ -499,7 +462,6 @@ function generateBreachGrid() {
         }
     }
 
-    // Place ICE
     placed = 0;
     while (placed < iceCount) {
         const idx = Math.floor(Math.random() * gridSize);
@@ -509,7 +471,6 @@ function generateBreachGrid() {
         }
     }
 
-    // Render Grid
     nodes.forEach((type, index) => {
         const node = document.createElement('div');
         node.className = `breach-node ${type}`;
@@ -540,10 +501,9 @@ function handleNodeClick(node, type) {
         node.classList.add('revealed');
         node.innerText = 'X';
         SoundManager.playSFX('error');
-        breachTimeLeft -= 2.0; // Penalty
+        breachTimeLeft -= 2.0;
         createFloatingText(node.getBoundingClientRect().left, node.getBoundingClientRect().top, "-2s");
     } else {
-        // Empty
         node.classList.add('revealed');
     }
     updateBreachUI();
@@ -558,13 +518,14 @@ function updateBreachUI() {
  * @param {boolean} success 
  */
 function endDataBreach(success) {
+    const gameState = getGameState();
     breachActive = false;
     if(breachInterval) clearInterval(breachInterval);
 
     setTimeout(() => {
         if (breachOverlay) breachOverlay.classList.add('hidden');
         if (success) {
-            const reward = gameState.gps * 60 * 5; // 5 minutes of GPS
+            const reward = gameState.gps * 60 * 5;
             addBits(reward);
             logMessage(`BREACH SUCCESSFUL! Stolen Data Value: ${formatNumber(reward)} Bits`);
             SoundManager.playSFX('success');
@@ -577,11 +538,11 @@ function endDataBreach(success) {
 
 // Expose functions to the global scope for HTML onclick handlers
 window.handleKeypadInput = handleKeypadInput;
-window.hardReset = UI.hardReset;
-window.openSettings = UI.openSettings;
-window.closeSettings = UI.closeSettings;
+window.hardReset = hardReset;
+window.openSettings = openSettings;
+window.closeSettings = closeSettings;
 window.toggleMute = SoundManager.toggleMute;
-window.exportSave = UI.exportSave;
-window.importSave = UI.importSave;
-window.switchMobileTab = UI.switchMobileTab;
+window.exportSave = exportSave;
+window.importSave = importSave;
+window.switchMobileTab = switchMobileTab;
 window.startDataBreach = startDataBreach;
