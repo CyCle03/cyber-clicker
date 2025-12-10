@@ -579,6 +579,19 @@ function loadState(savedData) {
             // This ensures new stats fields are initialized correctly if they didn't exist in old saves.
             gameState.statistics = { ...gameState.statistics, ...savedData.statistics };
         }
+
+        // Migration: Grant skill points to players who rebirthed before skill tree was added
+        // If player has root access level but no skill points, grant them retroactively
+        if (gameState.rootAccessLevel > 0 && gameState.skillPoints === 0) {
+            // Calculate total skill points that should have been earned
+            let totalSkillPointsEarned = 0;
+            for (const skillId in gameState.skills) {
+                totalSkillPointsEarned += gameState.skills[skillId] * SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */ (skillId)].cost;
+            }
+            // Grant skill points = root level - already spent points
+            gameState.skillPoints = gameState.rootAccessLevel - totalSkillPointsEarned;
+            console.log(`Migration: Granted ${gameState.skillPoints} skill points based on Root Access Level ${gameState.rootAccessLevel}`);
+        }
     }
 }
 
