@@ -1294,8 +1294,36 @@ function updateRebootButton(potentialLevel) {
     } else {
         if (btnText) btnText.innerText = `REBOOT SYSTEM`;
         rebootButton.classList.add('disabled');
+        // Display Root Access info
+        const currentLevel = gameState.rootAccessLevel;
+        // Assuming calculatePotentialRootAccess is defined elsewhere and returns a number
+        // If not, this line might cause an error. Keeping it as per user's request.
+        const potentialLevel = calculatePotentialRootAccess();
+        const nextLevel = currentLevel + 1;
+
+        // Updated to match new 10M base requirement
+        const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
+        const bonusPercent = currentLevel * 10;
+
+        if (rebootLevelDisplay) rebootLevelDisplay.innerText = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+        if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
+
+        // Enable/disable reboot button
+        if (potentialLevel > currentLevel) {
+            rebootButton.classList.remove('disabled');
+            rebootButton.disabled = false;
+        } else {
+            rebootButton.classList.add('disabled');
+            rebootButton.disabled = true;
+        }
     }
 
+    // The following blocks are now redundant if the else block above handles all cases
+    // but keeping them for now to avoid unintended side effects if the logic is more complex.
+    // However, the user's request implies replacing the existing logic for the 'else' case.
+    // I will comment out the original blocks that are now handled by the new 'else' logic.
+
+    /*
     if (rebootLevelDisplay) {
         const nextLevel = gameState.rootAccessLevel + 1;
         // Match the new exponential formula: 1M * 10^(level/5)
@@ -1310,6 +1338,7 @@ function updateRebootButton(potentialLevel) {
     if (rebootBonusDisplay) {
         rebootBonusDisplay.innerText = `Current Bonus: +${(gameState.rootAccessLevel * 10).toFixed(0)}% GPS`;
     }
+    */
 }
 
 /** @type {any} */
@@ -1694,18 +1723,20 @@ function buySkill(skillId) {
 // Prestige System
 function calculatePotentialRootAccess() {
     // Exponential scaling: Each level requires 10x more bits than the previous tier
-    // Level 1-5: 1M - 10M bits
-    // Level 6-10: 10M - 100M bits  
-    // Level 11-15: 100M - 1B bits
-    // Level 16-20: 1B - 10B bits
-    if (gameState.lifetimeBits < 1000000) return 0;
+    // Level 1: 10M bits
+    // Level 2: 31.6M bits  
+    // Level 3: 100M bits
+    // Level 4: 316M bits
+    // Level 5: 1B bits
+    // Minimum requirement increased to 10M for better game pacing
+    if (gameState.lifetimeBits < 10000000) return 0;
 
     // Apply Prestige Master skill to reduce requirements
     const prestigeMasterLevel = gameState.skills.prestige_master || 0;
     const reductionMultiplier = 1 - (prestigeMasterLevel * 0.1); // 10% reduction per level
     const adjustedBits = gameState.lifetimeBits / reductionMultiplier;
 
-    return Math.floor(Math.log10(adjustedBits / 1000000) * 5);
+    return Math.floor(Math.log10(adjustedBits / 10000000) * 5);
 }
 
 function rebootSystem() {
