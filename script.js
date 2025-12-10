@@ -137,7 +137,10 @@ const SKILL_TREE = {
     click_efficiency: { id: 'click_efficiency', name: 'Click Efficiency', desc: 'Increases click power by 50%', cost: 1, maxLevel: 5 },
     gps_overclock: { id: 'gps_overclock', name: 'GPS Overclock', desc: 'Increases GPS by 10%', cost: 2, maxLevel: 5 },
     firewall_bypass: { id: 'firewall_bypass', name: 'Firewall Bypass', desc: 'Reduces firewall penalty by 10%', cost: 3, maxLevel: 3 },
-    lucky_hacker: { id: 'lucky_hacker', name: 'Lucky Hacker', desc: 'Increases Glitch spawn rate', cost: 5, maxLevel: 3 }
+    lucky_hacker: { id: 'lucky_hacker', name: 'Lucky Hacker', desc: 'Increases Glitch spawn rate', cost: 5, maxLevel: 3 },
+    crypto_magnet: { id: 'crypto_magnet', name: 'Crypto Magnet', desc: 'Increases Crypto drops by 1 per level', cost: 3, maxLevel: 3 },
+    offline_optimizer: { id: 'offline_optimizer', name: 'Offline Optimizer', desc: '+5% offline earnings per level', cost: 4, maxLevel: 5 },
+    prestige_master: { id: 'prestige_master', name: 'Prestige Master', desc: 'Reduces rebirth requirements by 10% per level', cost: 6, maxLevel: 3 }
 };
 
 const TUTORIAL_STEPS = [
@@ -1686,7 +1689,13 @@ function calculatePotentialRootAccess() {
     // Level 11-15: 100M - 1B bits
     // Level 16-20: 1B - 10B bits
     if (gameState.lifetimeBits < 1000000) return 0;
-    return Math.floor(Math.log10(gameState.lifetimeBits / 1000000) * 5);
+
+    // Apply Prestige Master skill to reduce requirements
+    const prestigeMasterLevel = gameState.skills.prestige_master || 0;
+    const reductionMultiplier = 1 - (prestigeMasterLevel * 0.1); // 10% reduction per level
+    const adjustedBits = gameState.lifetimeBits / reductionMultiplier;
+
+    return Math.floor(Math.log10(adjustedBits / 1000000) * 5);
 }
 
 function rebootSystem() {
@@ -1742,7 +1751,11 @@ function spawnGlitch() {
 }
 
 function handleGlitchClick() {
-    const reward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
+    const baseReward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
+    // Apply Crypto Magnet skill bonus
+    const cryptoMagnetBonus = gameState.skills.crypto_magnet || 0;
+    const reward = baseReward + cryptoMagnetBonus;
+
     gameState.cryptos += reward;
     UI.updateDisplay();
     UI.logMessage(`GLITCH HACKED! Recovered ${reward} Cryptos.`);
@@ -1992,7 +2005,10 @@ function init() {
                 const now = Date.now();
                 const secondsOffline = (now - gameState.lastSaveTime) / 1000;
                 if (secondsOffline > 60 && gameState.gps > 0) { // Minimum 60 seconds
-                    const offlineEarnings = secondsOffline * gameState.gps * gameState.offlineMultiplier;
+                    // Apply offline multiplier and Offline Optimizer skill
+                    const offlineOptimizerBonus = (gameState.skills.offline_optimizer || 0) * 0.05;
+                    const totalOfflineMultiplier = gameState.offlineMultiplier * (1 + offlineOptimizerBonus);
+                    const offlineEarnings = secondsOffline * gameState.gps * totalOfflineMultiplier;
                     addBits(offlineEarnings);
 
                     // Show Overlay
