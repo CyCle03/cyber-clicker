@@ -1189,6 +1189,44 @@ body {
     text-align: center;
 }
 
+/* Modal Buttons - Rectangular style */
+.modal-button {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--primary-cyan);
+    color: var(--primary-cyan);
+    padding: 12px 24px;
+    font-family: var(--font-header);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    user-select: none;
+    min-width: 120px;
+}
+
+.modal-button:hover {
+    background: rgba(0, 255, 234, 0.2);
+    box-shadow: 0 0 15px var(--primary-cyan);
+    transform: translateY(-2px);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+}
+
+.export-import-controls {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.export-import-controls .modal-button {
+    flex: 1;
+    min-width: 140px;
+}
+
 /* Save Indicator */
 .save-indicator {
     position: fixed;
