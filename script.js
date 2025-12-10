@@ -125,7 +125,7 @@ const ACHIEVEMENTS = [
     {
         id: 'skill_master', name: 'Skill Master', desc: 'Max out any skill', condition: (s) => Object.values(s.skills).some(level => {
             const skillId = Object.keys(s.skills).find(id => s.skills[id] === level);
-            return skillId && SKILL_TREE[skillId] && level >= SKILL_TREE[skillId].maxLevel;
+            return skillId && SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */ (skillId)] && level >= SKILL_TREE[/** @type {keyof typeof SKILL_TREE} */ (skillId)].maxLevel;
         }), unlocked: false, reward: 40
     },
     { id: 'ascension', name: 'Ascension', desc: 'Reach Root Access Level 10', condition: (s) => s.rootAccessLevel >= 10, unlocked: false, reward: 100 },
