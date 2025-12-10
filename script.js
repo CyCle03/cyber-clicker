@@ -1311,10 +1311,10 @@ function updateRebootButton(potentialLevel) {
         // Enable/disable reboot button
         if (potentialLevel > currentLevel) {
             rebootButton.classList.remove('disabled');
-            rebootButton.disabled = false;
+            /** @type {HTMLButtonElement} */ (rebootButton).disabled = false;
         } else {
             rebootButton.classList.add('disabled');
-            rebootButton.disabled = true;
+            /** @type {HTMLButtonElement} */ (rebootButton).disabled = true;
         }
     }
 
