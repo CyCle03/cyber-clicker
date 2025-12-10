@@ -119,7 +119,17 @@ const ACHIEVEMENTS = [
     { id: 'hacker_elite', name: 'Hacker Elite', desc: 'Reach Root Access Level 5', condition: (s) => s.rootAccessLevel >= 5, unlocked: false, reward: 15 },
     { id: 'the_architect', name: 'The Architect', desc: 'Own 1 Matrix Builder', condition: (s) => s.upgrades.matrix.count >= 1, unlocked: false, reward: 25 },
     { id: 'god_mode', name: 'God Mode', desc: 'Own 1 Reality Bender', condition: (s) => s.upgrades.bender.count >= 1, unlocked: false, reward: 50 },
-    { id: 'singularity', name: 'Singularity', desc: 'Reach 1 Billion GPS', condition: (s) => s.gps >= 1000000000, unlocked: false, reward: 100 }
+    { id: 'singularity', name: 'Singularity', desc: 'Reach 1 Billion GPS', condition: (s) => s.gps >= 1000000000, unlocked: false, reward: 100 },
+    { id: 'crypto_collector', name: 'Crypto Collector', desc: 'Collect 100 Cryptos', condition: (s) => s.cryptos >= 100, unlocked: false, reward: 50 },
+    { id: 'firewall_breaker', name: 'Firewall Breaker', desc: 'Clear 50 Firewalls', condition: (s) => (s.statistics.firewallsCleared || 0) >= 50, unlocked: false, reward: 25 },
+    {
+        id: 'skill_master', name: 'Skill Master', desc: 'Max out any skill', condition: (s) => Object.values(s.skills).some(level => {
+            const skillId = Object.keys(s.skills).find(id => s.skills[id] === level);
+            return skillId && SKILL_TREE[skillId] && level >= SKILL_TREE[skillId].maxLevel;
+        }), unlocked: false, reward: 40
+    },
+    { id: 'ascension', name: 'Ascension', desc: 'Reach Root Access Level 10', condition: (s) => s.rootAccessLevel >= 10, unlocked: false, reward: 100 },
+    { id: 'click_legend', name: 'Click Legend', desc: 'Click 10,000 times', condition: (s) => s.statistics.totalClicks >= 10000, unlocked: false, reward: 30 }
 ];
 
 /** @type {Array<StoryEvent>} */
