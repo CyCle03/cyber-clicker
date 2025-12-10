@@ -24,12 +24,14 @@
  * @property {number} rootAccessLevel
  * @property {number} cryptos
  * @property {number} permanentMultiplier
+ * @property {number} offlineMultiplier
  * @property {boolean} firewallActive
  * @property {string} firewallCode
  * @property {Object.<string, Upgrade>} upgrades
  * @property {Array<{id: string, unlocked: boolean, name: string, desc: string, reward: number, condition: function(GameState):boolean}>} achievements
  * @property {Array<{id: string, triggered: boolean, message: string, condition: function(GameState):boolean}>} storyEvents
  * @property {Array<{multiplier: number, endTime: number}>} activeBoosts
+ * @property {Array<{clickMultiplier: number, endTime: number}>} activeClickBoosts
  * @property {Object} statistics
  * @property {number} statistics.totalClicks
  * @property {number} statistics.totalBitsEarned
@@ -87,11 +89,13 @@ const UPGRADES = {
 const BLACK_MARKET_ITEMS = {
     boost: { id: 'boost', name: 'Signal Boost', cost: 5, desc: '+100% GPS for 30s', type: 'consumable', duration: 30000, multiplier: 2 },
     overdrive: { id: 'overdrive', name: 'Overdrive Chip', cost: 10, desc: '+400% GPS for 15s', type: 'consumable', duration: 15000, multiplier: 5 },
+    clickMultiplier: { id: 'clickMultiplier', name: 'Click Multiplier', cost: 30, desc: '+500% Click Power for 20s', type: 'consumable', duration: 20000, clickMultiplier: 6 },
     warp: { id: 'warp', name: 'Time Warp', cost: 20, desc: 'Instant 1 Hour GPS', type: 'instant', hours: 1 },
     cache: { id: 'cache', name: 'Deep Net Cache', cost: 60, desc: 'Instant 4 Hours GPS', type: 'instant', hours: 4 },
     core: { id: 'core', name: 'Quantum Core', cost: 50, desc: '+10% GPS Permanently', type: 'permanent', multiplier: 0.1 },
     rootkit: { id: 'rootkit', name: 'Root Kit', cost: 100, desc: '+25% GPS Permanently', type: 'permanent', multiplier: 0.25 },
-    autoGlitch: { id: 'autoGlitch', name: 'Auto-Glitch Bot', cost: 150, desc: '50% chance to auto-collect glitches', type: 'permanent', autoGlitchChance: 0.5 }
+    autoGlitch: { id: 'autoGlitch', name: 'Auto-Glitch Bot', cost: 150, desc: '50% chance to auto-collect glitches', type: 'permanent', autoGlitchChance: 0.5 },
+    offlineBoost: { id: 'offlineBoost', name: 'Offline Accelerator', cost: 200, desc: '+50% Offline Earnings', type: 'permanent', offlineMultiplier: 0.5 }
 };
 
 const GLITCH_CONFIG = {
@@ -478,6 +482,7 @@ function initState() {
     gameState.rootAccessLevel = 0;
     gameState.cryptos = 0;
     gameState.permanentMultiplier = 1;
+    gameState.offlineMultiplier = 1;
     gameState.skillPoints = 0;
     gameState.skills = {}; // id -> level
     gameState.firewallActive = false;
@@ -511,6 +516,7 @@ function initState() {
 
     gameState.tutorialSeen = false;
     gameState.activeBoosts = []; // Array of { multiplier, endTime }
+    gameState.activeClickBoosts = []; // Array of { clickMultiplier, endTime }
     gameState.lastSaveTime = Date.now();
 }
 
@@ -526,6 +532,7 @@ function loadState(savedData) {
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
         gameState.cryptos = savedData.cryptos || 0;
         gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
+        gameState.offlineMultiplier = savedData.offlineMultiplier || 1;
         gameState.skillPoints = savedData.skillPoints || 0;
         gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
         gameState.tutorialSeen = savedData.tutorialSeen || false;
@@ -574,6 +581,14 @@ function loadState(savedData) {
             gameState.activeBoosts = savedData.activeBoosts.filter((/** @type {any} */ b) => b.endTime > now);
         } else {
             gameState.activeBoosts = [];
+        }
+
+        // Load Active Click Boosts
+        if (savedData.activeClickBoosts) {
+            const now = Date.now();
+            gameState.activeClickBoosts = savedData.activeClickBoosts.filter((/** @type {any} */ b) => b.endTime > now);
+        } else {
+            gameState.activeClickBoosts = [];
         }
 
         // Load Statistics
@@ -1469,7 +1484,14 @@ function calculateClickPower() {
             power += upgrade.click * upgrade.count;
         }
     }
-    // Apply multipliers if any (currently none for click, but good for future)
+
+    // Apply active click boost multipliers
+    const now = Date.now();
+    gameState.activeClickBoosts = gameState.activeClickBoosts.filter(b => b.endTime > now);
+    for (const boost of gameState.activeClickBoosts) {
+        power *= boost.clickMultiplier;
+    }
+
     gameState.clickPower = power;
 }
 
@@ -1575,17 +1597,30 @@ function buyBlackMarketItem(key) {
 
         if (item.type === 'consumable') {
             const consumable = /** @type {any} */ (item);
-            gameState.activeBoosts.push({
-                multiplier: consumable.multiplier,
-                endTime: Date.now() + consumable.duration
-            });
-            UI.logMessage(`ACTIVATED: ${item.name}`);
+            // Handle click multiplier separately
+            if (consumable.clickMultiplier) {
+                gameState.activeClickBoosts.push({
+                    clickMultiplier: consumable.clickMultiplier,
+                    endTime: Date.now() + consumable.duration
+                });
+                UI.logMessage(`ACTIVATED: ${item.name} - Click power boosted!`);
+            } else {
+                // GPS boost
+                gameState.activeBoosts.push({
+                    multiplier: consumable.multiplier,
+                    endTime: Date.now() + consumable.duration
+                });
+                UI.logMessage(`ACTIVATED: ${item.name}`);
+            }
         } else if (item.type === 'permanent') {
             const permanent = /** @type {any} */ (item);
             // Special handling for auto-glitch bot
             if (item.id === 'autoGlitch') {
                 gameState.autoGlitchEnabled = true;
                 UI.logMessage(`UPGRADED: ${item.name} - Glitches will be auto-collected!`);
+            } else if (item.id === 'offlineBoost') {
+                gameState.offlineMultiplier += permanent.offlineMultiplier;
+                UI.logMessage(`UPGRADED: ${item.name} - Offline earnings increased!`);
             } else {
                 gameState.permanentMultiplier += permanent.multiplier;
                 UI.logMessage(`UPGRADED: ${item.name}`);
@@ -1957,7 +1992,7 @@ function init() {
                 const now = Date.now();
                 const secondsOffline = (now - gameState.lastSaveTime) / 1000;
                 if (secondsOffline > 60 && gameState.gps > 0) { // Minimum 60 seconds
-                    const offlineEarnings = secondsOffline * gameState.gps;
+                    const offlineEarnings = secondsOffline * gameState.gps * gameState.offlineMultiplier;
                     addBits(offlineEarnings);
 
                     // Show Overlay
