@@ -42,6 +42,7 @@
  * @property {boolean} tutorialSeen
  * @property {number} skillPoints
  * @property {Object.<string, number>} skills
+ * @property {boolean} autoGlitchEnabled
  */
 
 /**
@@ -86,7 +87,8 @@ const BLACK_MARKET_ITEMS = {
     warp: { id: 'warp', name: 'Time Warp', cost: 20, desc: 'Instant 1 Hour GPS', type: 'instant', hours: 1 },
     cache: { id: 'cache', name: 'Deep Net Cache', cost: 60, desc: 'Instant 4 Hours GPS', type: 'instant', hours: 4 },
     core: { id: 'core', name: 'Quantum Core', cost: 50, desc: '+10% GPS Permanently', type: 'permanent', multiplier: 0.1 },
-    rootkit: { id: 'rootkit', name: 'Root Kit', cost: 100, desc: '+25% GPS Permanently', type: 'permanent', multiplier: 0.25 }
+    rootkit: { id: 'rootkit', name: 'Root Kit', cost: 100, desc: '+25% GPS Permanently', type: 'permanent', multiplier: 0.25 },
+    autoGlitch: { id: 'autoGlitch', name: 'Auto-Glitch Bot', cost: 150, desc: '50% chance to auto-collect glitches', type: 'permanent', autoGlitchChance: 0.5 }
 };
 
 const GLITCH_CONFIG = {
@@ -477,6 +479,7 @@ function initState() {
     gameState.skills = {}; // id -> level
     gameState.firewallActive = false;
     gameState.firewallCode = "";
+    gameState.autoGlitchEnabled = false;
 
     // Statistics tracking
     gameState.statistics = {
@@ -523,6 +526,7 @@ function loadState(savedData) {
         gameState.skillPoints = savedData.skillPoints || 0;
         gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
         gameState.tutorialSeen = savedData.tutorialSeen || false;
+        gameState.autoGlitchEnabled = savedData.autoGlitchEnabled || false;
 
         // Load Skills
         if (savedData.skills) {
@@ -1043,6 +1047,12 @@ function renderBlackMarket(buyCallback) {
     // DIRECT ACCESS TO BLACK_MARKET_ITEMS for bundle
     for (const key in BLACK_MARKET_ITEMS) {
         const item = BLACK_MARKET_ITEMS[/** @type {keyof typeof BLACK_MARKET_ITEMS} */ (key)];
+
+        // Hide auto-glitch bot if already purchased
+        if (item.id === 'autoGlitch' && gameState.autoGlitchEnabled) {
+            continue;
+        }
+
         const el = document.createElement('div');
         el.className = 'market-item';
         el.onclick = () => buyCallback(key);
@@ -1556,8 +1566,14 @@ function buyBlackMarketItem(key) {
             UI.logMessage(`ACTIVATED: ${item.name}`);
         } else if (item.type === 'permanent') {
             const permanent = /** @type {any} */ (item);
-            gameState.permanentMultiplier += permanent.multiplier;
-            UI.logMessage(`UPGRADED: ${item.name}`);
+            // Special handling for auto-glitch bot
+            if (item.id === 'autoGlitch') {
+                gameState.autoGlitchEnabled = true;
+                UI.logMessage(`UPGRADED: ${item.name} - Glitches will be auto-collected!`);
+            } else {
+                gameState.permanentMultiplier += permanent.multiplier;
+                UI.logMessage(`UPGRADED: ${item.name}`);
+            }
         } else if (item.type === 'instant') {
             const instant = /** @type {any} */ (item);
             const reward = gameState.gps * 3600 * instant.hours;
@@ -1649,14 +1665,27 @@ function spawnGlitch() {
     setTimeout(() => {
         const glitchEl = UI.createGlitchElement(handleGlitchClick);
 
-        // Despawn after duration
-        setTimeout(() => {
-            if (glitchEl.parentNode) {
-                glitchEl.remove();
-                UI.logMessage("Glitch signal lost...");
-                spawnGlitch(); // Schedule next one even if missed
-            }
-        }, GLITCH_CONFIG.duration);
+        // Auto-glitch bot logic
+        if (gameState.autoGlitchEnabled && Math.random() < 0.5) {
+            // Auto-click after a small delay for visual effect
+            setTimeout(() => {
+                if (glitchEl.parentNode) {
+                    handleGlitchClick();
+                    glitchEl.remove();
+                    UI.logMessage("Auto-Glitch Bot collected the glitch!");
+                    spawnGlitch(); // Schedule next one
+                }
+            }, 100 + Math.random() * 400);
+        } else {
+            // Despawn after duration if not auto-collected
+            setTimeout(() => {
+                if (glitchEl.parentNode) {
+                    glitchEl.remove();
+                    UI.logMessage("Glitch signal lost...");
+                    spawnGlitch(); // Schedule next one even if missed
+                }
+            }, GLITCH_CONFIG.duration);
+        }
 
     }, time);
 }
