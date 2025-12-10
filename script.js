@@ -75,9 +75,12 @@ const UPGRADES = {
     server: { id: 'server', name: "Home Server", cost: 1100, gps: 8, click: 0, count: 0, desc: "Dedicated server for processing." },
     farm: { id: 'farm', name: "Server Farm", cost: 12000, gps: 47, click: 0, count: 0, desc: "Rack of servers working in parallel." },
     ai: { id: 'ai', name: "Weak AI", cost: 130000, gps: 260, click: 0, count: 0, desc: "Learning algorithm to optimize mining." },
+    neural: { id: 'neural', name: "Neural Network", cost: 500000, gps: 800, click: 0, count: 0, desc: "Deep learning network that predicts optimal mining patterns." },
     quantum: { id: 'quantum', name: "Quantum Core", cost: 1400000, gps: 1400, click: 0, count: 0, desc: "Entangled bits for instant processing." },
+    blockchain: { id: 'blockchain', name: "Blockchain Miner", cost: 5000000, gps: 4000, click: 0, count: 0, desc: "Distributed ledger system mining across multiple chains." },
     overlord: { id: 'overlord', name: 'AI Overlord', cost: 14000000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.' },
     matrix: { id: 'matrix', name: 'Matrix Builder', cost: 150000000, gps: 120000, click: 0, count: 0, desc: 'Constructs a simulated reality for infinite mining.' },
+    shifter: { id: 'shifter', name: 'Dimension Shifter', cost: 600000000, gps: 500000, click: 0, count: 0, desc: 'Phases between dimensions to access parallel mining operations.' },
     bender: { id: 'bender', name: 'Reality Bender', cost: 2000000000, gps: 1500000, click: 0, count: 0, desc: 'Warps the fabric of spacetime to extract bits from the void.' }
 };
 
