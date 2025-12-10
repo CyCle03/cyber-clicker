@@ -1,73 +1,12 @@
 // @ts-check
-
-/**
- * @typedef {Object} Upgrade
- * @property {string} id
- * @property {string} name
- * @property {number} cost
- * @property {number} gps
- * @property {number} click
- * @property {number} count
- * @property {string} desc
- */
-
-/**
- * @typedef {Object} GameState
- * @property {number} bits
- * @property {number} lifetimeBits
- * @property {number} gps
- * @property {number} clickPower
- * @property {number} rootAccessLevel
- * @property {number} cryptos
- * @property {number} permanentMultiplier
- * @property {boolean} firewallActive
- * @property {string} firewallCode
- * @property {Object.<string, Upgrade>} upgrades
- * @property {Array<any>} achievements
- * @property {Array<any>} storyEvents
- * @property {Array<any>} activeBoosts
- * @property {Object} statistics
- * @property {number} statistics.totalClicks
- * @property {number} statistics.totalBitsEarned
- * @property {number} statistics.playTimeSeconds
- * @property {number} statistics.rebootCount
- * @property {number} statistics.firewallsEncountered
- * @property {number} statistics.firewallsCleared
- * @property {number} statistics.sessionStartTime
- * @property {number} lastSaveTime
- * @property {boolean} tutorialSeen
- * @property {number} skillPoints
- * @property {Object.<string, number>} skills
- */
+import { gameState, initState } from './js/state.js';
+import { UPGRADES, SKILL_TREE } from './js/constants.js';
+import { addBits, buyUpgrade, calculateGPS, calculatePotentialRootAccess, buySkill } from './js/game.js';
 
 (function () {
     const resultsDiv = /** @type {HTMLElement} */ (document.getElementById('test-results'));
     let passed = 0;
     let failed = 0;
-
-    // Access globals safely
-    // @ts-ignore
-    /** @type {GameState} */
-    const gameState = /** @type {any} */ (window).gameState;
-    // @ts-ignore
-    const UPGRADES = /** @type {any} */ (window).UPGRADES;
-    // @ts-ignore
-    /** @type {(amount: number) => void} */
-    const addBits = /** @type {any} */ (window).addBits;
-    // @ts-ignore
-    /** @type {(upgradeKey: string) => void} */
-    const buyUpgrade = /** @type {any} */ (window).buyUpgrade;
-    // @ts-ignore
-    /** @type {() => void} */
-    const calculateGPS = /** @type {any} */ (window).calculateGPS;
-    // @ts-ignore
-    /** @type {() => number} */
-    const calculatePotentialRootAccess = /** @type {any} */ (window).calculatePotentialRootAccess;
-    // @ts-ignore
-    const SKILL_TREE = /** @type {any} */ (window).SKILL_TREE;
-    // @ts-ignore
-    /** @type {(skillId: string) => void} */
-    const buySkill = /** @type {any} */ (window).buySkill;
 
     /**
      * @param {string} name 
@@ -111,26 +50,7 @@
 
     function resetGameState() {
         // Reset global gameState object
-        gameState.bits = 0;
-        gameState.lifetimeBits = 0;
-        gameState.gps = 0;
-        gameState.clickPower = 1;
-        gameState.rootAccessLevel = 0;
-        gameState.cryptos = 0;
-        gameState.permanentMultiplier = 1;
-        gameState.skillPoints = 0;
-        gameState.skills = {};
-        gameState.upgrades = JSON.parse(JSON.stringify(UPGRADES)); // Deep copy
-        gameState.activeBoosts = [];
-        gameState.statistics = {
-            totalClicks: 0,
-            totalBitsEarned: 0,
-            playTimeSeconds: 0,
-            rebootCount: 0,
-            firewallsEncountered: 0,
-            firewallsCleared: 0,
-            sessionStartTime: Date.now()
-        };
+        initState();
     }
 
     // --- TESTS ---
@@ -174,16 +94,15 @@
     });
 
     test("Root Access Calculation", () => {
-        // Formula: floor(cbrt(lifetimeBits / 1,000,000))
-        // Target Level 1: 1,000,000 bits
-        gameState.lifetimeBits = 1000000;
-        const level = calculatePotentialRootAccess();
-        assert(level === 1, "1M bits should give Level 1 Root Access");
+        // Formula: floor(log10(adjustedBits / 10,000,000) * 5)
+        // Target Level 1: 10,000,000 bits
+        gameState.lifetimeBits = 10000000;
+        let level = calculatePotentialRootAccess();
+        assert(level === 0, "10M bits should give Level 0 Root Access");
 
-        // Target Level 2: 8,000,000 bits (2^3 * 1M)
-        gameState.lifetimeBits = 8000000;
-        const level2 = calculatePotentialRootAccess();
-        assert(level2 === 2, "8M bits should give Level 2 Root Access");
+        gameState.lifetimeBits = 10000000 * Math.pow(10, 1/5);
+        level = calculatePotentialRootAccess();
+        assert(level === 1, "Correct bits for level 1 root access");
     });
 
     test("Buy Skill - Success", () => {
