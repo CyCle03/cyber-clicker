@@ -167,7 +167,6 @@ body {
     border: 1px solid var(--border-color);
     padding: 20px;
     align-items: center;
-    justify-content: space-between;
     overflow-y: auto; /* Changed from hidden to auto */
 }
 
@@ -199,7 +198,7 @@ body {
 
 .tab-content {
     flex: 1;
-    overflow: hidden;
+    /* overflow: hidden; Removed to allow internal content to scroll via tab-pane */
     position: relative;
 }
 

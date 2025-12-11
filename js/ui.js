@@ -38,6 +38,27 @@ let firewallInput;
 export function getFirewallInput() { return firewallInput; }
 export function setFirewallInput(element) { firewallInput = element; }
 
+// Shop Pagination State
+let shopCurrentPage = 1;
+const shopItemsPerPage = 5; // Display 5 upgrades per page
+
+export function nextShopPage() {
+    const gameState = getGameState();
+    const totalUpgrades = Object.keys(gameState.upgrades).length;
+    const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
+    if (shopCurrentPage < maxPage) {
+        shopCurrentPage++;
+        renderShop(buyUpgrade);
+    }
+}
+
+export function prevShopPage() {
+    if (shopCurrentPage > 1) {
+        shopCurrentPage--;
+        renderShop(buyUpgrade);
+    }
+}
+
 /**
  * Safely get DOM element by ID with type assertion
  * @template {HTMLElement} T
@@ -491,8 +512,19 @@ export function createBinaryParticle(x, y) {
  */
 export function renderShop(buyCallback) {
     const gameState = getGameState();
-    shopContainer.innerHTML = '';
-    for (const key in gameState.upgrades) {
+    shopContainer.innerHTML = ''; // Clear previous items
+
+    const upgradeKeys = Object.keys(gameState.upgrades);
+    const totalUpgrades = upgradeKeys.length;
+    const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
+
+    const startIndex = (shopCurrentPage - 1) * shopItemsPerPage;
+    const endIndex = Math.min(startIndex + shopItemsPerPage, totalUpgrades);
+
+    const upgradesToRender = upgradeKeys.slice(startIndex, endIndex);
+
+    // Render upgrades for the current page
+    upgradesToRender.forEach(key => {
         const upgrade = gameState.upgrades[key];
         const item = document.createElement('div');
         item.className = 'upgrade-item';
@@ -553,7 +585,18 @@ export function renderShop(buyCallback) {
     </div>
 `;
         shopContainer.appendChild(item);
+    });
+
+    // Add pagination controls
+    const paginationControlsContainer = document.getElementById('shop-pagination-controls');
+    if (paginationControlsContainer) {
+        paginationControlsContainer.innerHTML = `
+            <button class="modal-button" onclick="prevShopPage()" ${shopCurrentPage === 1 ? 'disabled' : ''}>PREV</button>
+            <span>Page ${shopCurrentPage} / ${maxPage}</span>
+            <button class="modal-button" onclick="nextShopPage()" ${shopCurrentPage === maxPage ? 'disabled' : ''}>NEXT</button>
+        `;
     }
+
     updateShopUI();
 }
 
@@ -677,17 +720,51 @@ export function renderActiveEffects() {
 
 export function updateShopUI() {
     const gameState = getGameState();
-    for (const key in gameState.upgrades) {
-        const upgrade = gameState.upgrades[key];
-        const el = document.getElementById(`upgrade-${key}`);
-        if (el) {
+    // Iterate only over currently displayed upgrade items
+    const shopItems = shopContainer.querySelectorAll('.upgrade-item');
+    shopItems.forEach(itemEl => {
+        const upgradeId = itemEl.id.replace('upgrade-', '');
+        const upgrade = gameState.upgrades[upgradeId];
+        if (upgrade) {
             if (gameState.bits < upgrade.cost) {
-                el.classList.add('disabled');
+                itemEl.classList.add('disabled');
             } else {
-                el.classList.remove('disabled');
+                itemEl.classList.remove('disabled');
+            }
+            // Update progress bar and text for currently displayed items
+            const canAfford = gameState.bits >= upgrade.cost;
+            const progressPercent = canAfford ? 100 : Math.min(100, (gameState.bits / upgrade.cost) * 100);
+            const bitsNeeded = Math.max(0, upgrade.cost - gameState.bits);
+
+            const progressBar = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-bar'));
+            const progressText = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-text'));
+            const upgradeInfo = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-info'));
+            
+            if (progressBar) progressBar.style.width = `${progressPercent}%`;
+            if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
+
+            const progressContainer = itemEl.querySelector('.upgrade-progress-container');
+            if (progressContainer) {
+                if (canAfford) {
+                    progressContainer.style.display = 'block';
+                    if (progressText) progressText.innerText = "READY!";
+                    if (progressBar) {
+                        progressBar.style.width = `100%`;
+                        progressBar.style.background = `var(--success-color)`;
+                    }
+                    upgradeInfo.style.marginBottom = '8px';
+                } else {
+                    progressContainer.style.display = 'block';
+                    if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
+                    if (progressBar) {
+                        progressBar.style.width = `${progressPercent}%`;
+                        progressBar.style.background = `linear-gradient(90deg, var(--primary-cyan), var(--primary-pink))`;
+                    }
+                    upgradeInfo.style.marginBottom = '8px';
+                }
             }
         }
-    }
+    });
 }
 
 export function renderAchievements() {
