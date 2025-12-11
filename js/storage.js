@@ -5,10 +5,12 @@ import { buyBlackMarketItem, buySkill, buyUpgrade, calculateClickPower, calculat
 import { SoundManager } from "./sound.js";
 
 const SAVE_KEY = 'cyberClickerSave';
+const SAVE_VERSION = 1; // Increment this when save format changes
 
 export function saveGame() {
     const gameState = getGameState();
     const saveData = {
+        version: SAVE_VERSION,
         bits: gameState.bits,
         lifetimeBits: gameState.lifetimeBits,
         upgrades: gameState.upgrades,
@@ -37,12 +39,39 @@ export function saveGame() {
     }
 }
 
+/**
+ * Migrate save data from older versions to current version
+ * @param {any} data - Save data to migrate
+ * @returns {any} Migrated save data
+ */
+function migrateSaveData(data) {
+    const version = data.version || 0;
+    
+    // Version 0 -> 1: Add missing fields if they don't exist
+    if (version < 1) {
+        if (data.offlineMultiplier === undefined) {
+            data.offlineMultiplier = 1;
+        }
+        if (data.autoGlitchEnabled === undefined) {
+            data.autoGlitchEnabled = false;
+        }
+        if (data.activeClickBoosts === undefined) {
+            data.activeClickBoosts = [];
+        }
+    }
+    
+    data.version = SAVE_VERSION;
+    return data;
+}
+
 export function loadGame() {
     const saved = localStorage.getItem(SAVE_KEY);
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            loadState(data);
+            // Migrate save data if needed
+            const migratedData = migrateSaveData(data);
+            loadState(migratedData);
             return true;
         } catch (e) {
             console.error("Save file corrupted", e);

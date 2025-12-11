@@ -71,10 +71,15 @@ function init() {
 
         // Calculate offline progress
         const now = Date.now();
-        const offlineTime = now - getGameState().lastSaveTime;
-        if (offlineTime > 10000) { // More than 10 seconds
+        const offlineTimeMs = now - getGameState().lastSaveTime;
+        const MAX_OFFLINE_TIME_MS = 7 * 24 * 60 * 60 * 1000; // 7 days max
+        
+        if (offlineTimeMs > 10000) { // More than 10 seconds
+            // Cap offline time to prevent excessive gains
+            const cappedOfflineTimeMs = Math.min(offlineTimeMs, MAX_OFFLINE_TIME_MS);
             const offlineGps = getGameState().gps * (getGameState().offlineMultiplier || 1);
-            const offlineBits = Math.floor((offlineGps * offlineTime) / 1000);
+            const offlineBits = Math.floor((offlineGps * cappedOfflineTimeMs) / 1000);
+            
             if (offlineBits > 0) {
                 addBits(offlineBits);
                 const offlineOverlay = document.getElementById('offline-overlay');
@@ -82,7 +87,10 @@ function init() {
                     const offlineAmount = document.getElementById('offline-amount-display');
                     const offlineTimeDisplay = document.getElementById('offline-time-display');
                     if (offlineAmount) offlineAmount.innerText = `+${formatNumber(offlineBits)} BITS`;
-                    if (offlineTimeDisplay) offlineTimeDisplay.innerText = `Time Offline: ${Math.floor(offlineTime / 1000)}s`;
+                    if (offlineTimeDisplay) {
+                        const formattedTime = formatOfflineTime(offlineTimeMs);
+                        offlineTimeDisplay.innerText = `Time Offline: ${formattedTime}`;
+                    }
                     offlineOverlay.classList.add('visible');
                 }
             }
@@ -145,15 +153,45 @@ function init() {
     }
 }
 
+// Format offline time for display
+/**
+ * @param {number} timeMs - Time in milliseconds
+ * @returns {string} Formatted time string
+ */
+function formatOfflineTime(timeMs) {
+    const seconds = Math.floor(timeMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+        return `${days}d ${hours % 24}h ${minutes % 60}m`;
+    } else if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+    } else if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+    } else {
+        return `${seconds}s`;
+    }
+}
+
 // Game Loop
 let lastTimestamp = 0;
+let lastUpdateTime = 0;
+const UPDATE_INTERVAL = 100; // Update display every 100ms instead of every frame
+
 function gameLoop(timestamp) {
     if (!lastTimestamp) lastTimestamp = timestamp;
     const deltaTime = (timestamp - lastTimestamp) / 1000; // seconds
     lastTimestamp = timestamp;
 
     addBits(getGameState().gps * deltaTime);
-    updateDisplay();
+    
+    // Throttle display updates for better performance
+    if (timestamp - lastUpdateTime >= UPDATE_INTERVAL) {
+        updateDisplay();
+        lastUpdateTime = timestamp;
+    }
 
     gameLoopId = requestAnimationFrame(gameLoop);
 }
