@@ -5,12 +5,19 @@ import { loadGame, saveGame } from './storage.js';
 import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
 import { SoundManager } from './sound.js';
 import { calculatePotentialRootAccess } from './formulas.js';
+import { GAME_CONSTANTS } from './constants.js';
 
 let gameLoopId;
 let autoSaveId;
 let eventLoopId;
 let rebootBtnId;
 let firewallKeydownHandler = null;
+/** @type {(() => void) | null} */
+let _hackButtonListener = null;
+/** @type {(() => void) | null} */
+let _rebootButtonListener = null;
+/** @type {((event: Event) => void) | null} */
+let _firewallInputListener = null;
 
 // Initialization
 function init() {
@@ -26,13 +33,18 @@ function init() {
 
         // Firewall Input Listener
         let currentFirewallInputEl = getFirewallInput();
-        if (currentFirewallInputEl && currentFirewallInputEl.parentNode) {
-            const newFirewallInputEl = /** @type {HTMLInputElement} */ (currentFirewallInputEl.cloneNode(true));
-            currentFirewallInputEl.parentNode.replaceChild(newFirewallInputEl, currentFirewallInputEl);
+        if (currentFirewallInputEl) {
+            // Ensure ui.js has the correct, current reference to the firewall input element
+            setFirewallInput(currentFirewallInputEl);
 
-            setFirewallInput(newFirewallInputEl);
-
-            newFirewallInputEl.addEventListener('input', checkFirewallInput);
+            // Remove previous listener if it exists to prevent duplicates on re-init
+            if (_firewallInputListener) {
+                currentFirewallInputEl.removeEventListener('input', _firewallInputListener);
+            }
+            // Create a new handler to ensure 'this' context if needed, or just bind checkFirewallInput
+            const newFirewallInputHandler = () => checkFirewallInput();
+            currentFirewallInputEl.addEventListener('input', newFirewallInputHandler);
+            _firewallInputListener = newFirewallInputHandler; // Store reference to the handler
         }
 
         // Global Keydown Listener for Firewall - Remove old listener if exists
@@ -110,11 +122,10 @@ function init() {
         // Calculate offline progress
         const now = Date.now();
         const offlineTimeMs = now - getGameState().lastSaveTime;
-        const MAX_OFFLINE_TIME_MS = 7 * 24 * 60 * 60 * 1000; // 7 days max
         
-        if (offlineTimeMs > 10000) { // More than 10 seconds
+        if (offlineTimeMs > GAME_CONSTANTS.OFFLINE_PROGRESS_THRESHOLD) { // More than 10 seconds
             // Cap offline time to prevent excessive gains
-            const cappedOfflineTimeMs = Math.min(offlineTimeMs, MAX_OFFLINE_TIME_MS);
+            const cappedOfflineTimeMs = Math.min(offlineTimeMs, GAME_CONSTANTS.MAX_OFFLINE_TIME_MS);
             const offlineGps = getGameState().gps * (getGameState().offlineMultiplier || 1);
             const offlineBits = Math.floor((offlineGps * cappedOfflineTimeMs) / 1000);
             
@@ -130,6 +141,9 @@ function init() {
                         offlineTimeDisplay.innerText = `Time Offline: ${formattedTime}`;
                     }
                     offlineOverlay.classList.add('visible');
+                    setTimeout(() => {
+                        offlineOverlay.classList.remove('visible');
+                    }, GAME_CONSTANTS.OFFLINE_OVERLAY_DISPLAY_DURATION);
                 }
             }
         }
@@ -147,39 +161,47 @@ function init() {
         renderAchievements();
 
         // Event Listeners - Clone nodes to prevent duplicate listeners
+        let hackButtonHandler = () => {
+            addBits(getGameState().clickPower);
+            // Update click statistics
+            const gameState = getGameState();
+            if (gameState && gameState.statistics) {
+                gameState.statistics.totalClicks = (gameState.statistics.totalClicks || 0) + 1;
+            }
+            SoundManager.playSFX('click');
+            animateHackButton();
+            for (let i = 0; i < GAME_CONSTANTS.BINARY_PARTICLE_COUNT; i++) {
+                createBinaryParticle(window.innerWidth / 2, window.innerHeight / 2);
+            }
+        };
+
         const hackButton = document.getElementById('hack-button');
-        if (hackButton && hackButton.parentNode) {
-            const newHackButton = /** @type {HTMLButtonElement} */ (hackButton.cloneNode(true));
-            hackButton.parentNode.replaceChild(newHackButton, hackButton);
-            newHackButton.addEventListener('click', () => {
-                addBits(getGameState().clickPower);
-                // Update click statistics
-                const gameState = getGameState();
-                if (gameState && gameState.statistics) {
-                    gameState.statistics.totalClicks = (gameState.statistics.totalClicks || 0) + 1;
-                }
-                SoundManager.playSFX('click');
-                animateHackButton();
-                for (let i = 0; i < 3; i++) {
-                    createBinaryParticle(window.innerWidth / 2, window.innerHeight / 2);
-                }
-            });
+        if (hackButton) {
+            // Remove previous listener if it exists to prevent duplicates on re-init
+            if (_hackButtonListener) {
+                hackButton.removeEventListener('click', _hackButtonListener);
+            }
+            hackButton.addEventListener('click', hackButtonHandler);
+            _hackButtonListener = hackButtonHandler; // Store reference to the handler
         }
 
         const rebootBtn = document.getElementById('reboot-button');
-        if (rebootBtn && rebootBtn.parentNode) {
-            const newRebootBtn = /** @type {HTMLButtonElement} */ (rebootBtn.cloneNode(true));
-            rebootBtn.parentNode.replaceChild(newRebootBtn, rebootBtn);
-            newRebootBtn.addEventListener('click', rebootSystem);
+        if (rebootBtn) {
+            // Remove previous listener if it exists to prevent duplicates on re-init
+            if (_rebootButtonListener) {
+                rebootBtn.removeEventListener('click', _rebootButtonListener);
+            }
+            rebootBtn.addEventListener('click', rebootSystem);
+            _rebootButtonListener = rebootSystem; // Store reference to the handler
         }
 
         // Start Game Loops
         gameLoopId = requestAnimationFrame(gameLoop);
-        autoSaveId = setInterval(saveGame, 15000); // Save every 15s
+        autoSaveId = setInterval(saveGame, GAME_CONSTANTS.AUTO_SAVE_INTERVAL); // Save every 15s
         eventLoopId = setInterval(() => {
-            if (Math.random() < 0.1) spawnFirewall();
-        }, 60000); // Check for firewall every minute
-        rebootBtnId = setInterval(() => updateRebootButton(calculatePotentialRootAccess()), 5000);
+            if (Math.random() < GAME_CONSTANTS.FIREWALL_SPAWN_CHANCE) spawnFirewall();
+        }, GAME_CONSTANTS.EVENT_LOOP_INTERVAL); // Check for firewall every minute
+        rebootBtnId = setInterval(() => updateRebootButton(calculatePotentialRootAccess()), GAME_CONSTANTS.REBOOT_BUTTON_UPDATE_INTERVAL);
 
         spawnGlitch();
         logMessage("System Online.");
@@ -218,7 +240,7 @@ function formatOfflineTime(timeMs) {
 // Game Loop
 let lastTimestamp = 0;
 let lastUpdateTime = 0;
-const UPDATE_INTERVAL = 100; // Update display every 100ms instead of every frame
+const UPDATE_INTERVAL = GAME_CONSTANTS.UI_UPDATE_INTERVAL; // Update display every 100ms instead of every frame
 
 function gameLoop(timestamp) {
     if (!lastTimestamp) lastTimestamp = timestamp;

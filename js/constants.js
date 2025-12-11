@@ -95,3 +95,17 @@ export const TUTORIAL_STEPS = [
     { text: "SYSTEM REBOOT<br><br>When you have enough BITS, REBOOT the system to gain Root Access and permanent bonuses." },
     { text: "GOOD LUCK<br><br>The network is waiting. Begin operations." }
 ];
+
+// Game Configuration Constants
+export const GAME_CONSTANTS = {
+    AUTO_SAVE_INTERVAL: 15000, // milliseconds (15 seconds)
+    EVENT_LOOP_INTERVAL: 60000, // milliseconds (1 minute)
+    FIREWALL_SPAWN_CHANCE: 0.1, // chance (0.1 = 10%)
+    REBOOT_BUTTON_UPDATE_INTERVAL: 5000, // milliseconds (5 seconds)
+    UI_UPDATE_INTERVAL: 100, // milliseconds
+    OFFLINE_PROGRESS_THRESHOLD: 10000, // milliseconds (10 seconds)
+    MAX_OFFLINE_TIME_MS: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    BINARY_PARTICLE_COUNT: 3, // Number of particles to create on hack button click
+    OFFLINE_OVERLAY_DISPLAY_DURATION: 5000 // milliseconds (5 seconds)
+};
+
