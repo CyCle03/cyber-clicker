@@ -92,6 +92,11 @@ export function initState() {
  * @param {any} savedData 
  */
 export function loadState(savedData) {
+    // Ensure gameState is initialized before loading
+    if (!gameState.achievements || !Array.isArray(gameState.achievements)) {
+        initState();
+    }
+    
     if (savedData) {
         gameState.bits = savedData.bits || 0;
         gameState.lifetimeBits = savedData.lifetimeBits || 0;

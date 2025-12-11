@@ -26,7 +26,8 @@ export const SoundManager = {
             // @ts-ignore
             const Win = /** @type {any} */ (window);
             Win.AudioContext = Win.AudioContext || Win.webkitAudioContext;
-            this.audioCtx = new AudioContext();
+            // Don't create AudioContext immediately - wait for user interaction
+            // AudioContext will be created lazily in initAudio() when needed
             this.loadSettings();
         } catch (e) {
             console.error("Web Audio API not supported");
@@ -55,9 +56,16 @@ export const SoundManager = {
      * @param {string} name 
      */
     playSFX: function (name) {
-        if (!this.audioCtx) this.init(); // Use init to ensure audioCtx is created and settings loaded
+        if (!this.audioCtx) this.initAudio(); // Create AudioContext lazily on first use
         if (!this.audioCtx) return;
         if (this.muted) return;
+        
+        // Resume AudioContext if it's suspended (required after user gesture)
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {
+                // Ignore errors if resume fails
+            });
+        }
 
         switch (name) {
             case 'click':
@@ -101,6 +109,19 @@ export const SoundManager = {
     playTone: function (freq, type, duration, vol = 1) {
         if (!this.audioCtx) return;
         
+        // If AudioContext is suspended, try to resume it
+        // If resume fails or context is still suspended, skip playback to avoid warnings
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {
+                // If resume fails, don't play the sound
+                return;
+            });
+            // If still suspended after resume attempt, skip playback
+            if (this.audioCtx.state === 'suspended') {
+                return;
+            }
+        }
+        
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
 
@@ -113,8 +134,12 @@ export const SoundManager = {
         osc.connect(gain);
         gain.connect(this.audioCtx.destination);
 
-        osc.start();
-        osc.stop(this.audioCtx.currentTime + duration);
+        try {
+            osc.start();
+            osc.stop(this.audioCtx.currentTime + duration);
+        } catch (e) {
+            // Ignore errors if AudioContext is not allowed to start
+        }
     },
 
     saveSettings: function () {
