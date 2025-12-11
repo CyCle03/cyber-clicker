@@ -35,8 +35,8 @@ export let firewallOverlay;
 export let firewallCodeDisplay;
 /** @type {HTMLInputElement} */
 let firewallInput;
-export function getFirewallInput() { return firewallInput; }
-export function setFirewallInput(element) { firewallInput = element; }
+export function getFirewallInput() { return firewallInput.value; }
+export function setFirewallInput(value) { firewallInput.value = value; }
 
 /**
  * Safely get DOM element by ID with type assertion
@@ -156,6 +156,34 @@ export function initUI() {
     if (skillTree) skillTree.style.display = 'none';
     // exportImport handling removed as it's now part of the settings modal
 
+
+    // Debug Buttons (only in non-deployed environments)
+    const isDeployed = window.location.hostname === 'cycle03.github.io';
+    if (!isDeployed) {
+        const debugBtn = document.createElement('button');
+        debugBtn.innerText = "DEBUG: +1M Bits";
+        debugBtn.onclick = () => addBits(1000000);
+        debugBtn.style.position = 'fixed';
+        debugBtn.style.bottom = '10px';
+        debugBtn.style.left = '10px';
+        debugBtn.style.zIndex = '9999';
+        document.body.appendChild(debugBtn);
+
+        const breachBtn = document.createElement('button');
+        breachBtn.innerText = "DEBUG: Start Breach";
+        breachBtn.onclick = () => {
+            if (typeof startDataBreach === 'function') {
+                startDataBreach();
+            } else {
+                console.error("startDataBreach not found");
+            }
+        };
+        breachBtn.style.position = 'fixed';
+        breachBtn.style.bottom = '40px';
+        breachBtn.style.left = '10px';
+        breachBtn.style.zIndex = '9999';
+        document.body.appendChild(breachBtn);
+    }
 
     // Debug Toggle
     const debugToggle = document.getElementById('debug-toggle-btn');
@@ -421,35 +449,6 @@ export function createGlitchElement(onClick) {
  * @param {string} text 
  */
 export function createFloatingText(x, y, text) {
-    // Add a check for deployment environment
-    const isDeployed = window.location.hostname === 'cycle03.github.io';
-
-    if (!isDeployed) { // Only create debug buttons in non-deployed environments
-        const debugBtn = document.createElement('button');
-        debugBtn.innerText = "DEBUG: +1M Bits";
-        debugBtn.onclick = () => addBits(1000000);
-        debugBtn.style.position = 'fixed';
-        debugBtn.style.bottom = '10px';
-        debugBtn.style.left = '10px';
-        debugBtn.style.zIndex = '9999';
-        document.body.appendChild(debugBtn);
-
-        const breachBtn = document.createElement('button');
-        breachBtn.innerText = "DEBUG: Start Breach";
-        breachBtn.onclick = () => {
-            if (typeof startDataBreach === 'function') {
-                startDataBreach();
-            } else {
-                console.error("startDataBreach not found");
-            }
-        };
-        breachBtn.style.position = 'fixed';
-        breachBtn.style.bottom = '40px';
-        breachBtn.style.left = '10px';
-        breachBtn.style.zIndex = '9999';
-        document.body.appendChild(breachBtn);
-    }
-
     const el = document.createElement('div');
     el.className = 'floating-text';
     el.innerText = text;
