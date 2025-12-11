@@ -646,13 +646,20 @@ export function renderShop(buyCallback) {
     });
 
     // Add pagination controls
-    const paginationControlsContainer = document.getElementById('shop-pagination-controls');
-    if (paginationControlsContainer) {
-        paginationControlsContainer.innerHTML = `
+    const paginationHtml = `
             <button class="modal-button" onclick="prevShopPage()" ${shopCurrentPage === 1 ? 'disabled' : ''}>PREV</button>
             <span>Page ${shopCurrentPage} / ${maxPage}</span>
             <button class="modal-button" onclick="nextShopPage()" ${shopCurrentPage === maxPage || maxPage === 0 ? 'disabled' : ''}>NEXT</button>
         `;
+
+    const topPaginationContainer = document.getElementById('shop-pagination-controls');
+    if (topPaginationContainer) {
+        topPaginationContainer.innerHTML = paginationHtml;
+    }
+
+    const bottomPaginationContainer = document.getElementById('shop-pagination-controls-bottom');
+    if (bottomPaginationContainer) {
+        bottomPaginationContainer.innerHTML = paginationHtml;
     }
 
     updateShopUI();

@@ -120,6 +120,11 @@ body {
     margin-bottom: 20px;
 }
 
+/* Shop Categories - Temporarily hidden as per user request */
+.shop-categories {
+    display: none;
+}
+
 .tab-btn {
     flex: 1;
     padding: 10px 5px;
