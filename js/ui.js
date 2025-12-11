@@ -507,7 +507,7 @@ export function createBinaryParticle(x, y) {
     const colors = ['particle-cyan', 'particle-pink', 'particle-gold'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    el.className = `binary-particle ${randomColor}`;
+    el.className = `particle ${randomColor}`; // Corrected class name
     el.innerText = Math.random() > 0.5 ? '1' : '0';
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
