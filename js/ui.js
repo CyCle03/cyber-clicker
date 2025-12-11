@@ -32,7 +32,7 @@ let hackButton;
 /** @type {HTMLElement} */
 export let firewallOverlay;
 /** @type {HTMLElement} */
-let firewallCodeDisplay;
+export let firewallCodeDisplay;
 /** @type {HTMLInputElement} */
 let firewallInput;
 export function getFirewallInput() { return firewallInput; }

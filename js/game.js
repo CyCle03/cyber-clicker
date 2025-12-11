@@ -1,6 +1,6 @@
 // @ts-check
 import { getGameState, resetStateForPrestige } from './state.js';
-import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
+import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallCodeDisplay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
 import { saveGame, hardReset, exportSave, importSave } from './storage.js';
 import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
@@ -356,7 +356,6 @@ export function spawnFirewall() {
 
     gameState.firewallActive = true;
     updateStatistic('firewallsEncountered', 1);
-    }
 
     const chars = "0123456789ABCDEF";
     let code = "";
@@ -411,7 +410,6 @@ function clearFirewall() {
     const gameState = getGameState();
     gameState.firewallActive = false;
     updateStatistic('firewallsCleared', 1);
-    }
 
     firewallOverlay.classList.remove('visible');
 
