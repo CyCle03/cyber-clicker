@@ -23,6 +23,7 @@ body {
     color: var(--text-color);
     font-family: var(--font-main);
     /* overflow: hidden; Removed to allow scrolling on mobile */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -1240,9 +1241,9 @@ body {
 }
 
 /* Save Indicator */
-.save-indicator {
+#save-indicator {
     position: fixed;
-    top: 70px;
+    top: 110px; /* Adjusted to prevent overlap with debug button */
     right: 10px;
     background: rgba(0, 255, 0, 0.2);
     border: 1px solid #0f0;
@@ -1253,9 +1254,6 @@ body {
     opacity: 0;
     transition: opacity 0.3s;
     z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 5px;
 }
 
 .save-indicator.show {
@@ -1540,10 +1538,10 @@ body {
     }
 
     .app-container {
-        padding-bottom: 60px; /* Add space for the fixed mobile nav */
+        padding-bottom: 80px; /* Increased space for the fixed mobile nav */
     }
     .main-interface {
-        height: calc(100vh - 110px); /* Fixed height for mobile */
+        height: calc(100vh - 140px); /* Adjusted fixed height for mobile (hud + mobile-nav) */
     }
 }
 
