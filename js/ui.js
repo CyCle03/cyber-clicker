@@ -329,6 +329,32 @@ export function updateDisplay() {
             const progressText = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-text'));
             const costDisplay = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-cost'));
             const upgradeInfo = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-info'));
+            const contributionEl = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-contribution'));
+            const efficiencyEl = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-efficiency'));
+
+            // Update contribution visibility and text
+            if (contributionEl) {
+                if (upgrade.gps > 0 && upgrade.count > 0) {
+                    const contribution = calculateGPSContribution(upgradeId);
+                    contributionEl.innerText = `Current: ${contribution.contribution.toFixed(1)} GPS (${contribution.percentage.toFixed(1)}%)`;
+                    contributionEl.style.display = 'block';
+                } else {
+                    contributionEl.style.display = 'none';
+                }
+            }
+
+            // Update efficiency visibility and text
+            if (efficiencyEl) {
+                if (upgrade.gps > 0) {
+                    const efficiency = calculateEfficiency(upgrade);
+                    const rating = getEfficiencyRating(efficiency);
+                    efficiencyEl.innerText = rating.text;
+                    efficiencyEl.className = `upgrade-efficiency ${rating.class}`;
+                    efficiencyEl.style.display = 'flex';
+                } else {
+                    efficiencyEl.style.display = 'none';
+                }
+            }
 
 
             if (progressBar) progressBar.style.width = `${progressPercent}%`;
@@ -345,10 +371,20 @@ export function updateDisplay() {
             const progressContainer = itemEl.querySelector('.upgrade-progress-container');
             if (progressContainer) {
                 if (canAfford) {
-                    progressContainer.style.display = 'none';
-                    upgradeInfo.style.marginBottom = '0px'; // Remove bottom margin if no progress bar
+                    progressContainer.style.display = 'block'; // Always show it
+                    if (progressText) progressText.innerText = "READY!";
+                    if (progressBar) {
+                        progressBar.style.width = `100%`;
+                        progressBar.style.background = `var(--success-color)`; // Green
+                    }
+                    upgradeInfo.style.marginBottom = '8px'; // Keep margin consistent
                 } else {
                     progressContainer.style.display = 'block';
+                    if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
+                    if (progressBar) {
+                        progressBar.style.width = `${progressPercent}%`;
+                        progressBar.style.background = `linear-gradient(90deg, var(--primary-cyan), var(--primary-pink))`;
+                    }
                     upgradeInfo.style.marginBottom = '8px'; // Add bottom margin if progress bar is present
                 }
             }
@@ -473,34 +509,26 @@ export function renderShop(buyCallback) {
         const progressPercent = canAfford ? 100 : Math.min(100, (gameState.bits / upgrade.cost) * 100);
         const bitsNeeded = Math.max(0, upgrade.cost - gameState.bits);
 
-        // Calculate additional info
-        const contribution = calculateGPSContribution(key);
-        const efficiency = calculateEfficiency(upgrade);
-        const rating = getEfficiencyRating(efficiency);
-
         // Build contribution text
-        let contributionHTML = '';
-        if (upgrade.gps > 0 && upgrade.count > 0) {
-            contributionHTML = `
-                <div class="upgrade-contribution">
-                    Current: ${contribution.contribution.toFixed(1)} GPS (${contribution.percentage.toFixed(1)}%)
-                </div>
-            `;
-        }
+        const contribution = calculateGPSContribution(key);
+        let contributionHTML = `
+            <div class="upgrade-contribution" style="display: ${upgrade.gps > 0 && upgrade.count > 0 ? 'block' : 'none'};">
+                Current: ${contribution.contribution.toFixed(1)} GPS (${contribution.percentage.toFixed(1)}%)
+            </div>
+        `;
 
         // Build efficiency badge
-        let efficiencyHTML = '';
-        if (upgrade.gps > 0) {
-            efficiencyHTML = `
-                <div class="upgrade-efficiency ${rating.class}">
-                    ${rating.text}
-                </div>
-            `;
-        }
+        const efficiency = calculateEfficiency(upgrade);
+        const rating = getEfficiencyRating(efficiency);
+        let efficiencyHTML = `
+            <div class="upgrade-efficiency ${rating.class}" style="display: ${upgrade.gps > 0 ? 'flex' : 'none'};">
+                ${rating.text}
+            </div>
+        `;
 
         // Build progress bar HTML
         const progressBarHTML = `
-            <div class="upgrade-progress-container" style="margin-top: 8px; display: ${canAfford ? 'none' : 'block'};">
+            <div class="upgrade-progress-container" style="margin-top: 8px; display: ${canAfford ? 'block' : 'block'};">
                 <div class="upgrade-progress-bar" style="width: ${progressPercent}%; background: linear-gradient(90deg, var(--primary-cyan), var(--primary-pink)); height: 4px; border-radius: 2px;"></div>
                 <div class="upgrade-progress-text" style="font-size: 0.75em; color: #aaa; margin-top: 4px;">
                     ${formatNumber(bitsNeeded)} BITS needed
