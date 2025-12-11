@@ -596,3 +596,4 @@ window.exportSave = exportSave;
 window.importSave = importSave;
 window.switchMobileTab = switchMobileTab;
 window.startDataBreach = startDataBreach;
+window.buyUpgrade = buyUpgrade;
