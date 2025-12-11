@@ -183,13 +183,22 @@ export function buyUpgrade(key) {
 
         // Save scroll position before re-rendering
         const shopPane = document.getElementById('tab-shop');
-        const scrollPos = shopPane ? shopPane.scrollTop : 0;
+        const shopScrollPos = shopPane ? shopPane.scrollTop : 0;
+
+        // Save terminal scroll position before re-rendering
+        const gameLogEl = document.getElementById('game-log');
+        const gameLogScrollPos = gameLogEl ? gameLogEl.scrollTop : 0;
 
         renderShop(buyUpgrade); // Re-render to update costs and counts
 
-        // Restore scroll position after re-rendering
+        // Restore shop scroll position after re-rendering
         if (shopPane) {
-            shopPane.scrollTop = scrollPos;
+            shopPane.scrollTop = shopScrollPos;
+        }
+
+        // Restore terminal scroll position after re-rendering
+        if (gameLogEl) {
+            gameLogEl.scrollTop = gameLogScrollPos;
         }
 
         saveGame(); // Auto-save on purchase

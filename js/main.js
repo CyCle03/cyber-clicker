@@ -90,27 +90,6 @@ function init() {
                     hackButton.click();
                 }
             }
-            
-            // Number keys 1-9: Switch tabs
-            if (e.code >= 'Digit1' && e.code <= 'Digit9') {
-                const tabNumber = parseInt(e.code.replace('Digit', ''));
-                const tabMap = {
-                    1: 'terminal',
-                    2: 'shop',
-                    3: 'black-market',
-                    4: 'skill-tree',
-                    5: 'achievements',
-                    6: 'statistics',
-                    7: 'settings'
-                };
-                const tabId = tabMap[tabNumber];
-                if (tabId) {
-                    const tabButton = document.querySelector(`[data-tab="${tabId}"]`);
-                    if (tabButton) {
-                        tabButton.click();
-                    }
-                }
-            }
         });
 
 

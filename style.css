@@ -16,6 +16,11 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%; /* Ensure html also takes full height */
+    overflow-x: hidden; /* Prevent horizontal scrolling at html level */
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -24,6 +29,7 @@ body {
     font-family: var(--font-main);
     /* overflow: hidden; Removed to allow scrolling on mobile */
     overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: hidden; /* Prevent vertical scrolling of the entire body */
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -53,6 +59,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    overflow: hidden; /* Added to clip overflowing content */
 }
 
 /* HUD */

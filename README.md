@@ -158,23 +158,11 @@ Run the test suite by opening `tests.html` in a browser. Tests verify:
 
 
 
+
+
+
+
 -   **Spacebar**: Click the HACK_SYSTEM button.
-
--   **Number Keys (1-7)**: Switch directly to corresponding tabs:
-
-    -   `1`: Terminal
-
-    -   `2`: Shop
-
-    -   `3`: Black Market
-
-    -   `4`: Skill Tree
-
-    -   `5`: Achievements
-
-    -   `6`: Statistics
-
-    -   `7`: Settings
 
 
 
