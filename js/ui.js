@@ -312,6 +312,48 @@ export function updateDisplay() {
     if (document.getElementById('active-effects-container')) {
         renderActiveEffects();
     }
+
+    // Update shop item progress bars and "BITS needed" text
+    const shopItems = shopContainer.querySelectorAll('.upgrade-item');
+    const gameStateBits = gameState.bits || 0;
+
+    shopItems.forEach(itemEl => {
+        const upgradeId = itemEl.id.replace('upgrade-', '');
+        const upgrade = gameState.upgrades[upgradeId];
+        if (upgrade) {
+            const canAfford = gameStateBits >= upgrade.cost;
+            const progressPercent = canAfford ? 100 : Math.min(100, (gameStateBits / upgrade.cost) * 100);
+            const bitsNeeded = Math.max(0, upgrade.cost - gameStateBits);
+
+            const progressBar = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-bar'));
+            const progressText = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-text'));
+            const costDisplay = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-cost'));
+            const upgradeInfo = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-info'));
+
+
+            if (progressBar) progressBar.style.width = `${progressPercent}%`;
+            if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
+
+            // Re-evaluate disabled state for the item itself
+            if (canAfford) {
+                itemEl.classList.remove('disabled');
+            } else {
+                itemEl.classList.add('disabled');
+            }
+            
+            // Only show progress bar if not affordable
+            const progressContainer = itemEl.querySelector('.upgrade-progress-container');
+            if (progressContainer) {
+                if (canAfford) {
+                    progressContainer.style.display = 'none';
+                    upgradeInfo.style.marginBottom = '0px'; // Remove bottom margin if no progress bar
+                } else {
+                    progressContainer.style.display = 'block';
+                    upgradeInfo.style.marginBottom = '8px'; // Add bottom margin if progress bar is present
+                }
+            }
+        }
+    });
 }
 
 /**

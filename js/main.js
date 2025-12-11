@@ -34,9 +34,6 @@ function init() {
         // Firewall Input Listener
         let currentFirewallInputEl = getFirewallInput();
         if (currentFirewallInputEl) {
-            // Ensure ui.js has the correct, current reference to the firewall input element
-            setFirewallInput(currentFirewallInputEl);
-
             // Remove previous listener if it exists to prevent duplicates on re-init
             if (_firewallInputListener) {
                 currentFirewallInputEl.removeEventListener('input', _firewallInputListener);

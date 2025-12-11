@@ -364,7 +364,10 @@ export function spawnFirewall() {
 
     firewallOverlay.classList.add('visible');
     firewallCodeDisplay.innerText = code;
-    getFirewallInput().value = "";
+    const firewallInputEl = getFirewallInput();
+    if (firewallInputEl) {
+        firewallInputEl.value = "";
+    }
 
     SoundManager.playSFX('alert');
     logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");
