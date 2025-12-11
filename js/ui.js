@@ -657,7 +657,7 @@ export function updateRebootButton(potentialLevel) {
         const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
         const bonusPercent = currentLevel * 10;
 
-        if (rebootLevelDisplay) rebootLevelDisplay.innerText = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
         if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
 
         // Enable/disable reboot button
