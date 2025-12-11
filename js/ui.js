@@ -499,14 +499,14 @@ export function renderShop(buyCallback) {
         }
 
         // Build progress bar HTML
-        const progressBarHTML = !canAfford ? `
-            <div class="upgrade-progress-container" style="margin-top: 8px;">
+        const progressBarHTML = `
+            <div class="upgrade-progress-container" style="margin-top: 8px; display: ${canAfford ? 'none' : 'block'};">
                 <div class="upgrade-progress-bar" style="width: ${progressPercent}%; background: linear-gradient(90deg, var(--primary-cyan), var(--primary-pink)); height: 4px; border-radius: 2px;"></div>
                 <div class="upgrade-progress-text" style="font-size: 0.75em; color: #aaa; margin-top: 4px;">
                     ${formatNumber(bitsNeeded)} BITS needed
                 </div>
             </div>
-        ` : '';
+        `;
 
         item.innerHTML = `
     <div class="upgrade-info">
