@@ -1,5 +1,7 @@
 # Antigravity
 
+🌐 **Play Online**: https://cycle03.github.io/cyber-clicker/
+
 An incremental clicker game with a space theme.
 
 ## 🎮 Game Overview
