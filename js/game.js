@@ -377,50 +377,71 @@ export function spawnFirewall() {
     }
 }
 
-export function checkFirewallInput() {
+
+export function handleKeypadInput(value) {
     const gameState = getGameState();
     if (!gameState.firewallActive) return;
 
+    let currentInput = getFirewallInput();
+
+    if (value === 'CLR') {
+        currentInput = '';
+        SoundManager.playSFX('back');
+    } else if (value === 'OK') {
+        checkFirewallInput();
+        SoundManager.playSFX('confirm');
+        return; 
+    } else {
+        if (currentInput.length < 4) {
+            currentInput += value;
+            SoundManager.playSFX('type');
+        } else {
+            SoundManager.playSFX('error');
+        }
+    }
+    setFirewallInput(currentInput);
+}
+
+export function checkFirewallInput() {
+    const gameState = getGameState();
+    if (!gameState.firewallActive) {
+        console.log("DEBUG: checkFirewallInput returned early because firewallActive is false.");
+        return;
+    }
+
     const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
     if (input) {
+        console.log(`DEBUG: Firewall Input: "${input.value.toUpperCase()}", Expected Code: "${gameState.firewallCode}"`);
         if (input.value.toUpperCase() === gameState.firewallCode) {
+            console.log("DEBUG: Input matches code, clearing firewall.");
             clearFirewall();
             input.value = "";
         } else {
+            console.log("DEBUG: Input does not match code.");
             input.style.borderColor = 'red';
             setTimeout(() => input.style.borderColor = 'var(--primary-cyan)', 500);
             SoundManager.playSFX('error');
         }
-    }
-}
-
-/** @param {string} key */
-export function handleKeypadInput(key) {
-    const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
-    if (!input) return;
-
-    if (key === 'CLR') {
-        input.value = "";
-    } else if (key === 'OK') {
-        checkFirewallInput();
     } else {
-        if (input.value.length < 4) {
-            input.value += key;
-            checkFirewallInput();
-        }
+        console.error("ERROR: Firewall input element not found in checkFirewallInput!");
     }
 }
 
 function clearFirewall() {
     const gameState = getGameState();
+    console.log("DEBUG: clearFirewall called. Setting firewallActive to false.");
     gameState.firewallActive = false;
     updateStatistic('firewallsCleared', 1);
 
-    firewallOverlay.classList.remove('visible');
-
-    calculateGPS();
-    const reward = gameState.gps * 300;
+    // Calculate reward based on GPS for 2 minutes
+    const reward = gameState.gps * 60 * 2;
     addBits(reward);
+
+    if (firewallOverlay) {
+        firewallOverlay.classList.remove('active'); // Changed from 'visible' to 'active'
+    } else {
+        console.error("ERROR: firewallOverlay is null or undefined in clearFirewall!");
+    }
 
     SoundManager.playSFX('success');
     logMessage(`FIREWALL BREACHED! REWARD: +${formatNumber(reward)} BITS`);
