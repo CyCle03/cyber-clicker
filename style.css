@@ -155,18 +155,21 @@ body {
     width: 100%;
     height: 100%;
     gap: 20px;
+    align-items: stretch; /* Ensure children stretch to fill height */
 }
 
 /* Left Panel: Terminal */
 .terminal-section {
     flex: 0 0 40%;
     /* Fixed 40% width */
+    height: 100%; /* Ensure it stretches to full height of split-layout */
     display: flex;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid var(--border-color);
     padding: 20px;
-    align-items: center;
+    align-items: center; /* Centers items horizontally */
+    /* justify-content: space-between; Removed to allow more controlled vertical spacing */
     overflow-y: auto; /* Changed from hidden to auto */
 }
 
@@ -174,6 +177,7 @@ body {
 .auxiliary-section {
     flex: 1;
     /* Takes remaining space */
+    height: 100%; /* Ensure it stretches to full height of split-layout */
     display: flex;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.8);
