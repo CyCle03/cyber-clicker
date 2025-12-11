@@ -18,6 +18,7 @@ let _hackButtonListener = null;
 let _rebootButtonListener = null;
 /** @type {((event: Event) => void) | null} */
 let _firewallInputListener = null;
+let audioContextResumed = false;
 
 // Initialization
 function init() {
@@ -159,6 +160,10 @@ function init() {
 
         // Event Listeners - Clone nodes to prevent duplicate listeners
         let hackButtonHandler = () => {
+            if (!audioContextResumed) {
+                SoundManager.resumeAudioContext();
+                audioContextResumed = true;
+            }
             addBits(getGameState().clickPower);
             // Update click statistics
             const gameState = getGameState();

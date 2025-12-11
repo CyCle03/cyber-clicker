@@ -164,5 +164,16 @@ export const SoundManager = {
         this.muted = !this.muted;
         this.saveSettings();
         this.updateUI();
+    },
+
+    resumeAudioContext: function() {
+        if (!this.audioCtx) this.initAudio();
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().then(() => {
+                console.log('AudioContext resumed successfully');
+            }).catch(e => {
+                console.error('Error resuming AudioContext:', e);
+            });
+        }
     }
 };

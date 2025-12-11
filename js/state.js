@@ -108,6 +108,10 @@ export function loadState(savedData) {
         gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
         gameState.tutorialSeen = savedData.tutorialSeen || false;
         gameState.autoGlitchEnabled = savedData.autoGlitchEnabled || false;
+        gameState.firewallActive = savedData.firewallActive || false;
+        gameState.firewallCode = savedData.firewallCode || "";
+        gameState.firewallActive = savedData.firewallActive || false;
+        gameState.firewallCode = savedData.firewallCode || "";
 
         // Load Skills
         if (savedData.skills) {
