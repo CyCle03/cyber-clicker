@@ -31,11 +31,25 @@ export function saveGame() {
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
 
-    // Show Save Indicator
+    // Show Save Indicator with improved feedback
     const indicator = document.getElementById('save-indicator');
     if (indicator) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        indicator.textContent = `✓ Saved at ${timeString}`;
         indicator.classList.add('visible');
-        setTimeout(() => indicator.classList.remove('visible'), 2000);
+        
+        // Add animation class for better visual feedback
+        indicator.style.opacity = '1';
+        indicator.style.transform = 'translateY(0)';
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            indicator.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 300);
+        }, 2000);
     }
 }
 

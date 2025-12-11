@@ -1,6 +1,6 @@
 // @ts-check
 import { initState, loadState, getGameState } from './state.js';
-import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton } from './ui.js';
+import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton, switchTab } from './ui.js';
 import { loadGame, saveGame } from './storage.js';
 import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
 import { SoundManager } from './sound.js';
@@ -58,6 +58,44 @@ function init() {
         };
         
         document.addEventListener('keydown', firewallKeydownHandler);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in input fields
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+            
+            // Spacebar: Click hack button
+            if (e.code === 'Space' && !e.repeat) {
+                e.preventDefault();
+                const hackButton = document.getElementById('hack-button');
+                if (hackButton && !hackButton.disabled) {
+                    hackButton.click();
+                }
+            }
+            
+            // Number keys 1-9: Switch tabs
+            if (e.code >= 'Digit1' && e.code <= 'Digit9') {
+                const tabNumber = parseInt(e.code.replace('Digit', ''));
+                const tabMap = {
+                    1: 'terminal',
+                    2: 'shop',
+                    3: 'black-market',
+                    4: 'skill-tree',
+                    5: 'achievements',
+                    6: 'statistics',
+                    7: 'settings'
+                };
+                const tabId = tabMap[tabNumber];
+                if (tabId) {
+                    const tabButton = document.querySelector(`[data-tab="${tabId}"]`);
+                    if (tabButton) {
+                        tabButton.click();
+                    }
+                }
+            }
+        });
 
 
         const hasSave = loadGame();

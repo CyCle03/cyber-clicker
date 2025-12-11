@@ -426,6 +426,11 @@ export function renderShop(buyCallback) {
             statText += `+${upgrade.click} Click`;
         }
 
+        // Calculate progress to next purchase
+        const canAfford = gameState.bits >= upgrade.cost;
+        const progressPercent = canAfford ? 100 : Math.min(100, (gameState.bits / upgrade.cost) * 100);
+        const bitsNeeded = Math.max(0, upgrade.cost - gameState.bits);
+
         // Calculate additional info
         const contribution = calculateGPSContribution(key);
         const efficiency = calculateEfficiency(upgrade);
@@ -451,11 +456,22 @@ export function renderShop(buyCallback) {
             `;
         }
 
+        // Build progress bar HTML
+        const progressBarHTML = !canAfford ? `
+            <div class="upgrade-progress-container" style="margin-top: 8px;">
+                <div class="upgrade-progress-bar" style="width: ${progressPercent}%; background: linear-gradient(90deg, var(--primary-cyan), var(--primary-pink)); height: 4px; border-radius: 2px;"></div>
+                <div class="upgrade-progress-text" style="font-size: 0.75em; color: #aaa; margin-top: 4px;">
+                    ${formatNumber(bitsNeeded)} BITS needed
+                </div>
+            </div>
+        ` : '';
+
         item.innerHTML = `
     <div class="upgrade-info">
         <h3>${upgrade.name} <span style="font-size:0.8em; color:#fff;">(x${upgrade.count})</span></h3>
         <p>${upgrade.desc} (${statText})</p>
         ${contributionHTML}
+        ${progressBarHTML}
     </div>
     <div class="upgrade-cost">
         ${formatNumber(upgrade.cost)} BITS
