@@ -1,6 +1,6 @@
 // @ts-check
 import { initState, loadState, getGameState } from './state.js';
-import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, firewallInput, formatNumber, updateRebootButton } from './ui.js';
+import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton } from './ui.js';
 import { loadGame, saveGame } from './storage.js';
 import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
 import { SoundManager } from './sound.js';
@@ -24,13 +24,14 @@ function init() {
         initUI(); // Initialize UI elements first
 
         // Firewall Input Listener
-        if (firewallInput && firewallInput.parentNode) {
-            // Remove old listener
-            const newInput = /** @type {HTMLInputElement} */ (firewallInput.cloneNode(true));
-            firewallInput.parentNode.replaceChild(newInput, firewallInput);
-            firewallInput = newInput;
+        let currentFirewallInputEl = getFirewallInput();
+        if (currentFirewallInputEl && currentFirewallInputEl.parentNode) {
+            const newFirewallInputEl = /** @type {HTMLInputElement} */ (currentFirewallInputEl.cloneNode(true));
+            currentFirewallInputEl.parentNode.replaceChild(newFirewallInputEl, currentFirewallInputEl);
 
-            firewallInput.addEventListener('input', checkFirewallInput);
+            setFirewallInput(newFirewallInputEl);
+
+            newFirewallInputEl.addEventListener('input', checkFirewallInput);
         }
 
         // Global Keydown Listener for Firewall

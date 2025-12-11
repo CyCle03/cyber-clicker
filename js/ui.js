@@ -34,7 +34,9 @@ export let firewallOverlay;
 /** @type {HTMLElement} */
 let firewallCodeDisplay;
 /** @type {HTMLInputElement} */
-export let firewallInput;
+let firewallInput;
+export function getFirewallInput() { return firewallInput; }
+export function setFirewallInput(element) { firewallInput = element; }
 
 /**
  * @param {string} tabId 

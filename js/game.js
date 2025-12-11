@@ -1,6 +1,6 @@
 // @ts-check
 import { getGameState, resetStateForPrestige } from './state.js';
-import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
+import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
 import { saveGame, hardReset, exportSave, importSave } from './storage.js';
 import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
@@ -339,7 +339,7 @@ export function spawnFirewall() {
 
     firewallOverlay.classList.add('visible');
     firewallCodeDisplay.innerText = code;
-    firewallInput.value = "";
+    getFirewallInput().value = "";
 
     SoundManager.playSFX('alert');
     logMessage("⚠️ WARNING: FIREWALL DETECTED! GPS REDUCED!");

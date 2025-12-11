@@ -3,7 +3,35 @@ import { ACHIEVEMENTS, SKILL_TREE, STORY_EVENTS, UPGRADES } from "./constants.js
 import { SoundManager } from "./sound.js";
 
 /**
- * @typedef {import('../script.js').GameState} GameState
+ * @typedef {object} GameState
+ * @property {number} bits
+ * @property {number} lifetimeBits
+ * @property {number} gps
+ * @property {number} clickPower
+ * @property {number} rootAccessLevel
+ * @property {number} cryptos
+ * @property {number} permanentMultiplier
+ * @property {number} offlineMultiplier
+ * @property {number} skillPoints
+ * @property {Object.<string, number>} skills
+ * @property {boolean} firewallActive
+ * @property {string} firewallCode
+ * @property {boolean} autoGlitchEnabled
+ * @property {object} statistics
+ * @property {number} statistics.totalClicks
+ * @property {number} statistics.totalBitsEarned
+ * @property {number} statistics.playTimeSeconds
+ * @property {number} statistics.rebootCount
+ * @property {number} statistics.firewallsEncountered
+ * @property {number} statistics.firewallsCleared
+ * @property {number} statistics.sessionStartTime
+ * @property {Object.<string, import('./constants.js').Upgrade>} upgrades
+ * @property {Array.<import('./constants.js').Achievement & {unlocked: boolean}>} achievements
+ * @property {Array.<import('./constants.js').StoryEvent & {triggered: boolean}>} storyEvents
+ * @property {boolean} tutorialSeen
+ * @property {Array.<{multiplier: number, endTime: number}>} activeBoosts
+ * @property {Array.<{clickMultiplier: number, endTime: number}>} activeClickBoosts
+ * @property {number} lastSaveTime
  */
 
 /** @type {GameState} */
@@ -64,19 +92,17 @@ export function initState() {
  * @param {any} savedData 
  */
 export function loadState(savedData) {
-    initState(); // Start with fresh state
-
     if (savedData) {
         gameState.bits = savedData.bits || 0;
         gameState.lifetimeBits = savedData.lifetimeBits || 0;
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
-        cryptos: savedData.cryptos || 0,
-        permanentMultiplier: savedData.permanentMultiplier || 1,
-        offlineMultiplier: savedData.offlineMultiplier || 1,
-        skillPoints: savedData.skillPoints || 0,
-        lastSaveTime: savedData.lastSaveTime || Date.now(),
-        tutorialSeen: savedData.tutorialSeen || false,
-        autoGlitchEnabled: savedData.autoGlitchEnabled || false,
+        gameState.cryptos = savedData.cryptos || 0;
+        gameState.permanentMultiplier = savedData.permanentMultiplier || 1;
+        gameState.offlineMultiplier = savedData.offlineMultiplier || 1;
+        gameState.skillPoints = savedData.skillPoints || 0;
+        gameState.lastSaveTime = savedData.lastSaveTime || Date.now();
+        gameState.tutorialSeen = savedData.tutorialSeen || false;
+        gameState.autoGlitchEnabled = savedData.autoGlitchEnabled || false;
 
         // Load Skills
         if (savedData.skills) {

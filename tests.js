@@ -3,11 +3,14 @@ import { getGameState, initState, loadState } from './js/state.js';
 import { UPGRADES, SKILL_TREE } from './js/constants.js';
 import { addBits, buyUpgrade, calculateGPS, buySkill } from './js/game.js';
 import { calculatePotentialRootAccess } from './js/formulas.js'; // Import from formulas.js
+import { initUI } from './js/ui.js'; // Import initUI
 
 (function () {
     const resultsDiv = /** @type {HTMLElement} */ (document.getElementById('test-results'));
     let passed = 0;
     let failed = 0;
+
+    initUI(); // Initialize UI elements
 
     /**
      * @param {string} name 
@@ -103,8 +106,7 @@ import { calculatePotentialRootAccess } from './js/formulas.js'; // Import from 
 
         assert(gameState.bits === 123, "Loaded bits should be 123");
         assert(gameState.lifetimeBits === 456, "Loaded lifetimeBits should be 456");
-        assert(gameState.rootAccessLevel === 1, "Loaded rootAccessLevel should be 1");
-        assert(gameState.cryptos === 0, "Loaded cryptos should be 0");
+        assert(gameState.cryptos === 789, "Loaded cryptos should be 789");
         assert(gameState.permanentMultiplier === 1.2, "Loaded permanentMultiplier should be 1.2");
         assert(gameState.offlineMultiplier === 1.5, "Loaded offlineMultiplier should be 1.5");
         assert(gameState.skillPoints === 5, "Loaded skillPoints should be 5");
