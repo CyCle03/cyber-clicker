@@ -382,24 +382,25 @@ export function handleKeypadInput(value) {
     const gameState = getGameState();
     if (!gameState.firewallActive) return;
 
-    let currentInput = getFirewallInput();
+    const firewallInputEl = getFirewallInput(); // Now correctly returns HTMLElement
+    let currentInputValue = firewallInputEl.value; 
 
     if (value === 'CLR') {
-        currentInput = '';
+        currentInputValue = '';
         SoundManager.playSFX('back');
     } else if (value === 'OK') {
         checkFirewallInput();
         SoundManager.playSFX('confirm');
         return; 
     } else {
-        if (currentInput.length < 4) {
-            currentInput += value;
+        if (currentInputValue.length < 4) {
+            currentInputValue += value;
             SoundManager.playSFX('type');
         } else {
             SoundManager.playSFX('error');
         }
     }
-    setFirewallInput(currentInput);
+    firewallInputEl.value = currentInputValue; // Set the value directly
 }
 
 export function checkFirewallInput() {

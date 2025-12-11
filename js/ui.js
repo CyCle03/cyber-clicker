@@ -35,8 +35,8 @@ export let firewallOverlay;
 export let firewallCodeDisplay;
 /** @type {HTMLInputElement} */
 let firewallInput;
-export function getFirewallInput() { return firewallInput.value; }
-export function setFirewallInput(value) { firewallInput.value = value; }
+export function getFirewallInput() { return firewallInput; }
+export function setFirewallInput(element) { firewallInput = element; }
 
 /**
  * Safely get DOM element by ID with type assertion
