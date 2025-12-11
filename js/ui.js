@@ -44,12 +44,15 @@ export function setFirewallInput(element) { firewallInput = element; }
 // Shop Pagination State
 let shopCurrentPage = 1;
 const shopItemsPerPage = 5; // Display 5 upgrades per page
-let currentShopCategory = 'Production'; // Default category
+let currentShopCategory = 'All'; // Default category set to All
 
 export function nextShopPage() {
     const gameState = getGameState();
     const allUpgrades = Object.values(gameState.upgrades);
-    const filteredUpgrades = allUpgrades.filter(upgrade => upgrade.category === currentShopCategory);
+    const filteredUpgrades = allUpgrades.filter(upgrade => {
+        if (currentShopCategory === 'All') return true;
+        return upgrade.category === currentShopCategory;
+    });
     const totalUpgrades = filteredUpgrades.length;
     const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
     if (shopCurrentPage < maxPage) {
@@ -378,7 +381,7 @@ export function updateDisplay() {
     }
 
     // Update shop item progress bars and "BITS needed" text
-    const shopItems = shopContainer.querySelectorAll('.upgrade-item');
+    const shopItems = shopItemList.querySelectorAll('.upgrade-item');
     const gameStateBits = gameState.bits || 0;
 
     shopItems.forEach(itemEl => {
@@ -534,8 +537,9 @@ export function renderShop(buyCallback) {
     }
 
     // Define categories based on upgrade properties (or from a constant if preferred)
-    const categories = ['Production', 'Click']; // Order matters for display
+    const categories = ['All', 'Production', 'Click']; // Order matters for display
     const categoryDisplayNames = {
+        'All': 'ALL UPGRADES',
         'Production': 'PRODUCTION',
         'Click': 'CLICK'
     };
@@ -552,7 +556,10 @@ export function renderShop(buyCallback) {
 
     // Filter upgrades by current category
     const allUpgrades = Object.values(gameState.upgrades);
-    const filteredUpgrades = allUpgrades.filter(upgrade => upgrade.category === currentShopCategory);
+    const filteredUpgrades = allUpgrades.filter(upgrade => {
+        if (currentShopCategory === 'All') return true;
+        return upgrade.category === currentShopCategory;
+    });
     
     // Sort upgrades by cost
     filteredUpgrades.sort((a, b) => a.cost - b.cost);
@@ -772,7 +779,7 @@ export function renderActiveEffects() {
 export function updateShopUI() {
     const gameState = getGameState();
     // Iterate only over currently displayed upgrade items
-    const shopItems = shopContainer.querySelectorAll('.upgrade-item');
+    const shopItems = shopItemList.querySelectorAll('.upgrade-item');
     shopItems.forEach(itemEl => {
         const upgradeId = itemEl.id.replace('upgrade-', '');
         const upgrade = gameState.upgrades[upgradeId];
