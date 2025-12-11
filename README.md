@@ -144,9 +144,49 @@ Run the test suite by opening `tests.html` in a browser. Tests verify:
 
 ## 🎮 Controls
 
-- **Click**: HACK_SYSTEM button to generate bits
-- **Tabs**: Click tab buttons to switch between SHOP, BLACK MARKET, SKILL TREE, etc.
-- **Settings**: Access settings, statistics, and save management
+
+
+-   **Click**: HACK_SYSTEM button to generate bits
+
+-   **Tabs**: Click tab buttons to switch between SHOP, BLACK MARKET, SKILL TREE, etc.
+
+-   **Settings**: Access settings, statistics, and save management
+
+
+
+### Keyboard Shortcuts
+
+
+
+-   **Spacebar**: Click the HACK_SYSTEM button.
+
+-   **Number Keys (1-7)**: Switch directly to corresponding tabs:
+
+    -   `1`: Terminal
+
+    -   `2`: Shop
+
+    -   `3`: Black Market
+
+    -   `4`: Skill Tree
+
+    -   `5`: Achievements
+
+    -   `6`: Statistics
+
+    -   `7`: Settings
+
+
+
+### Regarding Ctrl+S / Cmd+S
+
+
+
+-   The `Ctrl+S` (or `Cmd+S` on macOS) shortcut does **not** save your game progress within the application. This key combination is typically a browser-level shortcut for "Save Page As...", which will attempt to download the current HTML page.
+
+-   Your game progress is automatically saved every 15 seconds.
+
+-   You can also manually save, export, or import your game data through the **Settings** tab.
 
 ## 🔧 Development
 
