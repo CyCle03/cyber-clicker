@@ -81,7 +81,7 @@ import { getGameState, initState, loadState } from '../js/state.js';
             autoGlitchEnabled: true,
             skills: { "click_efficiency": 1 },
             upgrades: { "autoClicker": { "count": 2 } },
-            achievements: [{ "id": "click1", "unlocked": true }],
+            achievements: [{ "id": "first_click", "unlocked": true }],
             storyEvents: [{ "id": "intro", "triggered": true }],
             activeBoosts: [],
             activeClickBoosts: [],
@@ -101,7 +101,7 @@ import { getGameState, initState, loadState } from '../js/state.js';
         assert(gameState.bits === 123, "Loaded bits should be 123");
         assert(gameState.lifetimeBits === 456, "Loaded lifetimeBits should be 456");
         assert(gameState.rootAccessLevel === 1, "Loaded rootAccessLevel should be 1");
-        assert(gameState.cryptos === 0, "Loaded cryptos should be 0");
+        assert(gameState.cryptos === 789, "Loaded cryptos should be 789");
         assert(gameState.permanentMultiplier === 1, "Loaded permanentMultiplier should be 1");
         assert(gameState.offlineMultiplier === 1, "Loaded offlineMultiplier should be 1");
         assert(gameState.skillPoints === 5, "Loaded skillPoints should be 5");
@@ -109,7 +109,7 @@ import { getGameState, initState, loadState } from '../js/state.js';
         assert(gameState.autoGlitchEnabled === true, "Loaded autoGlitchEnabled should be true");
         assert(gameState.skills["click_efficiency"] === 1, "Loaded skills should contain click_efficiency level 1");
         assert(gameState.upgrades["autoClicker"].count === 2, "Loaded upgrades should contain autoClicker count 2");
-        assert(gameState.achievements.find(a => a.id === "click1")?.unlocked === true, "Loaded achievements should contain click1 unlocked");
+        assert(gameState.achievements.find(a => a.id === "first_click")?.unlocked === true, "Loaded achievements should contain first_click unlocked");
         assert(gameState.storyEvents.find(e => e.id === "intro")?.triggered === true, "Loaded storyEvents should contain intro triggered");
         assert(gameState.statistics.totalClicks === 100, "Loaded statistics should contain totalClicks 100");
     });
