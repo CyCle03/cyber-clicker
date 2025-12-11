@@ -1537,11 +1537,17 @@ body {
         gap: 5px; /* Reduce gap between items */
     }
 
+    .hud {
+        display: none; /* Hide top navigation on mobile */
+    }
+
     .app-container {
         padding-bottom: 80px; /* Increased space for the fixed mobile nav */
     }
     .main-interface {
-        height: calc(100vh - 140px); /* Adjusted fixed height for mobile (hud + mobile-nav) */
+        flex: 1; /* Allow main interface to grow and shrink dynamically */
+        min-height: 0; /* Allow main interface to shrink below content size */
+        /* Removed fixed height calculation as it will now flex */
     }
 }
 
