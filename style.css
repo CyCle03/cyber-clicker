@@ -48,7 +48,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 20px;
+    padding: 10px; /* Reduced padding */
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
@@ -62,7 +62,7 @@ body {
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
     box-shadow: 0 0 10px var(--border-color);
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Reduced margin */
     font-family: var(--font-header);
 }
 
@@ -140,7 +140,8 @@ body {
 
 /* Main Interface */
 .main-interface {
-    flex: 1;
+    /* flex: 1; Removed flex-grow to use fixed height */
+    height: calc(100vh - 60px); /* Fixed height for desktop */
     position: relative;
     /* overflow: hidden; Removed to allow internal scrolling */
     /* border: 1px solid var(--border-color);  Removed border from main container */
@@ -160,7 +161,7 @@ body {
 
 /* Left Panel: Terminal */
 .terminal-section {
-    flex: 0 0 40%;
+    flex: 0 0 50%; /* Increased width to 50% */
     /* Fixed 40% width */
     height: 100%; /* Ensure it stretches to full height of split-layout */
     display: flex;
@@ -1540,6 +1541,9 @@ body {
 
     .app-container {
         padding-bottom: 60px; /* Add space for the fixed mobile nav */
+    }
+    .main-interface {
+        height: calc(100vh - 110px); /* Fixed height for mobile */
     }
 }
 
