@@ -352,8 +352,12 @@ function handleGlitchClick() {
 // Firewall Logic
 export function spawnFirewall() {
     const gameState = getGameState();
-    if (gameState.firewallActive) return;
+    if (gameState.firewallActive) {
+        console.log("DEBUG: spawnFirewall returned early because firewallActive is true.");
+        return;
+    }
 
+    console.log("DEBUG: spawnFirewall called, proceeding to activate firewall.");
     gameState.firewallActive = true;
     updateStatistic('firewallsEncountered', 1);
 
@@ -362,8 +366,22 @@ export function spawnFirewall() {
     for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
     gameState.firewallCode = code;
 
-    firewallOverlay.classList.add('visible');
-    firewallCodeDisplay.innerText = code;
+    console.log("DEBUG: firewallOverlay element:", firewallOverlay);
+    console.log("DEBUG: firewallCodeDisplay element:", firewallCodeDisplay);
+
+    if (firewallOverlay) {
+        firewallOverlay.classList.add('visible');
+        console.log("DEBUG: firewallOverlay classList after adding visible:", firewallOverlay.classList);
+    } else {
+        console.error("ERROR: firewallOverlay is null or undefined!");
+    }
+
+    if (firewallCodeDisplay) {
+        firewallCodeDisplay.innerText = code;
+    } else {
+        console.error("ERROR: firewallCodeDisplay is null or undefined!");
+    }
+    
     const firewallInputEl = getFirewallInput();
     if (firewallInputEl) {
         firewallInputEl.value = "";
