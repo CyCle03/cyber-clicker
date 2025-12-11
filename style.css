@@ -1489,15 +1489,18 @@ body {
 @media (max-width: 768px) {
     .split-layout {
         flex-direction: column;
+        gap: 10px; /* Reduce gap on mobile */
     }
 
     .terminal-section {
         flex: 0 0 auto;
         min-height: 300px;
+        padding: 10px; /* Reduce padding on mobile */
     }
 
     .auxiliary-section {
         flex: 1;
+        padding: 10px; /* Reduce padding on mobile */
     }
 
     .mobile-nav {
@@ -1527,6 +1530,10 @@ body {
         justify-content: center !important;
         font-size: 1em; /* Reduce font size */
         gap: 5px; /* Reduce gap between items */
+    }
+
+    .app-container {
+        padding-bottom: 60px; /* Add space for the fixed mobile nav */
     }
 }
 
@@ -1659,4 +1666,28 @@ body {
     .export-import-controls .modal-button {
         min-width: 120px;
     }
+}
+
+.pagination-controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+
+.pagination-controls-container span {
+    font-size: 1em;
+    color: var(--primary-cyan);
+    font-family: var(--font-header);
+}
+
+.pagination-controls-container .modal-button {
+    padding: 8px 15px;
+    font-size: 0.8em;
+    min-width: auto;
 }

@@ -12,7 +12,7 @@ let gpsDisplay;
 /** @type {HTMLElement} */
 let cryptoDisplay;
 /** @type {HTMLElement} */
-let shopContainer;
+let shopItemList;
 /** @type {HTMLElement} */
 let blackMarketContainer;
 /** @type {HTMLElement} */
@@ -33,6 +33,9 @@ let hackButton;
 export let firewallOverlay;
 /** @type {HTMLElement} */
 export let firewallCodeDisplay;
+/** @type {HTMLElement} */
+let shopCategoriesNav; // New: Container for shop category tabs
+
 /** @type {HTMLInputElement} */
 let firewallInput;
 export function getFirewallInput() { return firewallInput; }
@@ -41,10 +44,13 @@ export function setFirewallInput(element) { firewallInput = element; }
 // Shop Pagination State
 let shopCurrentPage = 1;
 const shopItemsPerPage = 5; // Display 5 upgrades per page
+let currentShopCategory = 'Production'; // Default category
 
 export function nextShopPage() {
     const gameState = getGameState();
-    const totalUpgrades = Object.keys(gameState.upgrades).length;
+    const allUpgrades = Object.values(gameState.upgrades);
+    const filteredUpgrades = allUpgrades.filter(upgrade => upgrade.category === currentShopCategory);
+    const totalUpgrades = filteredUpgrades.length;
     const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
     if (shopCurrentPage < maxPage) {
         shopCurrentPage++;
@@ -55,6 +61,14 @@ export function nextShopPage() {
 export function prevShopPage() {
     if (shopCurrentPage > 1) {
         shopCurrentPage--;
+        renderShop(buyUpgrade);
+    }
+}
+
+export function switchShopCategory(category) {
+    if (currentShopCategory !== category) {
+        currentShopCategory = category;
+        shopCurrentPage = 1; // Reset page on category switch
         renderShop(buyUpgrade);
     }
 }
@@ -134,7 +148,8 @@ export function initUI() {
     bitsDisplay = /** @type {HTMLElement} */ (document.getElementById('bits-display'));
     gpsDisplay = /** @type {HTMLElement} */ (document.getElementById('gps-display'));
     cryptoDisplay = /** @type {HTMLElement} */ (document.getElementById('crypto-display'));
-    shopContainer = /** @type {HTMLElement} */ (document.getElementById('shop-container'));
+    shopItemList = /** @type {HTMLElement} */ (document.getElementById('shop-item-list')); // Renamed
+    shopCategoriesNav = /** @type {HTMLElement} */ (document.getElementById('shop-categories-nav')); // New
     blackMarketContainer = /** @type {HTMLElement} */ (document.getElementById('black-market-container'));
     gameLog = /** @type {HTMLElement} */ (document.getElementById('game-log'));
     achievementsContainer = /** @type {HTMLElement} */ (document.getElementById('achievements-container'));
@@ -512,24 +527,60 @@ export function createBinaryParticle(x, y) {
  */
 export function renderShop(buyCallback) {
     const gameState = getGameState();
-    shopContainer.innerHTML = ''; // Clear previous items
+    const shopCategoriesNav = document.getElementById('shop-categories-nav'); // Get the categories nav element
+    if (!shopCategoriesNav) {
+        console.error("ERROR: shopCategoriesNav not found!");
+        return;
+    }
 
-    const upgradeKeys = Object.keys(gameState.upgrades);
-    const totalUpgrades = upgradeKeys.length;
+    // Define categories based on upgrade properties (or from a constant if preferred)
+    const categories = ['Production', 'Click']; // Order matters for display
+    const categoryDisplayNames = {
+        'Production': 'PRODUCTION',
+        'Click': 'CLICK'
+    };
+
+    // Render category tabs
+    shopCategoriesNav.innerHTML = '';
+    categories.forEach(category => {
+        const tabButton = document.createElement('button');
+        tabButton.className = `shop-category-btn ${currentShopCategory === category ? 'active' : ''}`;
+        tabButton.innerText = categoryDisplayNames[category];
+        tabButton.onclick = () => switchShopCategory(category);
+        shopCategoriesNav.appendChild(tabButton);
+    });
+
+    // Filter upgrades by current category
+    const allUpgrades = Object.values(gameState.upgrades);
+    const filteredUpgrades = allUpgrades.filter(upgrade => upgrade.category === currentShopCategory);
+    
+    // Sort upgrades by cost
+    filteredUpgrades.sort((a, b) => a.cost - b.cost);
+
+    shopItemList.innerHTML = ''; // Clear previous items (renamed from shopContainer)
+
+    const totalUpgrades = filteredUpgrades.length;
     const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
+
+    // Ensure current page is valid for the current category
+    if (shopCurrentPage > maxPage && maxPage > 0) {
+        shopCurrentPage = maxPage;
+    } else if (maxPage === 0) {
+        shopCurrentPage = 1;
+    }
+
 
     const startIndex = (shopCurrentPage - 1) * shopItemsPerPage;
     const endIndex = Math.min(startIndex + shopItemsPerPage, totalUpgrades);
 
-    const upgradesToRender = upgradeKeys.slice(startIndex, endIndex);
+    const upgradesToRender = filteredUpgrades.slice(startIndex, endIndex);
 
-    // Render upgrades for the current page
-    upgradesToRender.forEach(key => {
-        const upgrade = gameState.upgrades[key];
+    // Render upgrades for the current page and category
+    upgradesToRender.forEach(upgrade => {
         const item = document.createElement('div');
         item.className = 'upgrade-item';
-        item.id = `upgrade-${key}`;
-        item.onclick = () => buyCallback(key);
+        item.id = `upgrade-${upgrade.id}`; // Use upgrade.id directly
+        item.onclick = () => buyCallback(upgrade.id);
 
         let statText = '';
         if (upgrade.gps > 0) {
@@ -546,7 +597,7 @@ export function renderShop(buyCallback) {
         const bitsNeeded = Math.max(0, upgrade.cost - gameState.bits);
 
         // Build contribution text
-        const contribution = calculateGPSContribution(key);
+        const contribution = calculateGPSContribution(upgrade.id);
         let contributionHTML = `
             <div class="upgrade-contribution" style="display: ${upgrade.gps > 0 && upgrade.count > 0 ? 'block' : 'none'};">
                 Current: ${contribution.contribution.toFixed(1)} GPS (${contribution.percentage.toFixed(1)}%)
@@ -584,7 +635,7 @@ export function renderShop(buyCallback) {
         ${efficiencyHTML}
     </div>
 `;
-        shopContainer.appendChild(item);
+        shopItemList.appendChild(item); // Appending to shopItemList
     });
 
     // Add pagination controls
@@ -593,7 +644,7 @@ export function renderShop(buyCallback) {
         paginationControlsContainer.innerHTML = `
             <button class="modal-button" onclick="prevShopPage()" ${shopCurrentPage === 1 ? 'disabled' : ''}>PREV</button>
             <span>Page ${shopCurrentPage} / ${maxPage}</span>
-            <button class="modal-button" onclick="nextShopPage()" ${shopCurrentPage === maxPage ? 'disabled' : ''}>NEXT</button>
+            <button class="modal-button" onclick="nextShopPage()" ${shopCurrentPage === maxPage || maxPage === 0 ? 'disabled' : ''}>NEXT</button>
         `;
     }
 
@@ -908,3 +959,4 @@ export function closeSettings() {
 // Expose pagination functions to the global scope for HTML onclick handlers
 window.prevShopPage = prevShopPage;
 window.nextShopPage = nextShopPage;
+window.switchShopCategory = switchShopCategory;

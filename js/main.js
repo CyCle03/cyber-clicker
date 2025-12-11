@@ -59,10 +59,16 @@ function init() {
                 if ("0123456789ABCDEF".includes(key) && firewallInputEl.value.length < 4) {
                     firewallInputEl.value += key;
                     checkFirewallInput();
+                    e.preventDefault(); // Prevent default browser action (e.g., scrolling)
+                    e.stopPropagation(); // Stop event from bubbling up to other listeners
                 } else if (e.key === 'Backspace') {
                     firewallInputEl.value = firewallInputEl.value.slice(0, -1);
+                    e.preventDefault(); // Prevent default browser action
+                    e.stopPropagation(); // Stop event from bubbling up
                 } else if (e.key === 'Enter') {
                     checkFirewallInput();
+                    e.preventDefault(); // Prevent default browser action (e.g., form submission)
+                    e.stopPropagation(); // Stop event from bubbling up
                 }
             }
         };

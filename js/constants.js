@@ -6,19 +6,19 @@
  */
 
 export const UPGRADES = {
-    clicker: { id: 'clicker', name: "Mech Switch", cost: 30, gps: 0, click: 1, count: 0, desc: "Mechanical switches for tactile feedback." },
-    autoClicker: { id: 'autoClicker', name: "Auto-Clicker", cost: 15, gps: 0.1, click: 0, count: 0, desc: "Basic script to automate clicking." },
-    bot: { id: 'bot', name: "Script Bot", cost: 100, gps: 1, click: 0, count: 0, desc: "Simple bot to farm bits." },
-    server: { id: 'server', name: "Home Server", cost: 1100, gps: 8, click: 0, count: 0, desc: "Dedicated server for processing." },
-    farm: { id: 'farm', name: "Server Farm", cost: 12000, gps: 47, click: 0, count: 0, desc: "Rack of servers working in parallel." },
-    ai: { id: 'ai', name: "Weak AI", cost: 130000, gps: 260, click: 0, count: 0, desc: "Learning algorithm to optimize mining." },
-    neural: { id: 'neural', name: "Neural Network", cost: 500000, gps: 800, click: 0, count: 0, desc: "Deep learning network that predicts optimal mining patterns." },
-    quantum: { id: 'quantum', name: "Quantum Core", cost: 1400000, gps: 1400, click: 0, count: 0, desc: "Entangled bits for instant processing." },
-    blockchain: { id: 'blockchain', name: "Blockchain Miner", cost: 5000000, gps: 4000, click: 0, count: 0, desc: "Distributed ledger system mining across multiple chains." },
-    overlord: { id: 'overlord', name: 'AI Overlord', cost: 14000000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.' },
-    matrix: { id: 'matrix', name: 'Matrix Builder', cost: 150000000, gps: 120000, click: 0, count: 0, desc: 'Constructs a simulated reality for infinite mining.' },
-    shifter: { id: 'shifter', name: 'Dimension Shifter', cost: 600000000, gps: 500000, click: 0, count: 0, desc: 'Phases between dimensions to access parallel mining operations.' },
-    bender: { id: 'bender', name: 'Reality Bender', cost: 2000000000, gps: 1500000, click: 0, count: 0, desc: 'Warps the fabric of spacetime to extract bits from the void.' }
+    clicker: { id: 'clicker', name: "Mech Switch", cost: 30, gps: 0, click: 1, count: 0, desc: "Mechanical switches for tactile feedback.", category: 'Click' },
+    autoClicker: { id: 'autoClicker', name: "Auto-Clicker", cost: 15, gps: 0.1, click: 0, count: 0, desc: "Basic script to automate clicking.", category: 'Production' },
+    bot: { id: 'bot', name: "Script Bot", cost: 100, gps: 1, click: 0, count: 0, desc: "Simple bot to farm bits.", category: 'Production' },
+    server: { id: 'server', name: "Home Server", cost: 1100, gps: 8, click: 0, count: 0, desc: "Dedicated server for processing.", category: 'Production' },
+    farm: { id: 'farm', name: "Server Farm", cost: 12000, gps: 47, click: 0, count: 0, desc: "Rack of servers working in parallel.", category: 'Production' },
+    ai: { id: 'ai', name: "Weak AI", cost: 130000, gps: 260, click: 0, count: 0, desc: "Learning algorithm to optimize mining.", category: 'Production' },
+    neural: { id: 'neural', name: "Neural Network", cost: 500000, gps: 800, click: 0, count: 0, desc: "Deep learning network that predicts optimal mining patterns.", category: 'Production' },
+    quantum: { id: 'quantum', name: "Quantum Core", cost: 1400000, gps: 1400, click: 0, count: 0, desc: "Entangled bits for instant processing.", category: 'Production' },
+    blockchain: { id: 'blockchain', name: "Blockchain Miner", cost: 5000000, gps: 4000, click: 0, count: 0, desc: "Distributed ledger system mining across multiple chains.", category: 'Production' },
+    overlord: { id: 'overlord', name: 'AI Overlord', cost: 14000000, gps: 10000, click: 0, count: 0, desc: 'Sentient network controller.', category: 'Production' },
+    matrix: { id: 'matrix', name: 'Matrix Builder', cost: 150000000, gps: 120000, click: 0, count: 0, desc: 'Constructs a simulated reality for infinite mining.', category: 'Production' },
+    shifter: { id: 'shifter', name: 'Dimension Shifter', cost: 600000000, gps: 500000, click: 0, count: 0, desc: 'Phases between dimensions to access parallel mining operations.', category: 'Production' },
+    bender: { id: 'bender', name: 'Reality Bender', cost: 2000000000, gps: 1500000, click: 0, count: 0, desc: 'Warps the fabric of spacetime to extract bits from the void.', category: 'Production' }
 };
 
 export const BLACK_MARKET_ITEMS = {
