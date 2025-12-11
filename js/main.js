@@ -115,8 +115,10 @@ function init() {
             hackButton.parentNode.replaceChild(newHackButton, hackButton);
             newHackButton.addEventListener('click', () => {
                 addBits(getGameState().clickPower);
-                if (getGameState().statistics) {
-                    getGameState().statistics.totalClicks++;
+                // Update click statistics
+                const gameState = getGameState();
+                if (gameState && gameState.statistics) {
+                    gameState.statistics.totalClicks = (gameState.statistics.totalClicks || 0) + 1;
                 }
                 SoundManager.playSFX('click');
                 animateHackButton();

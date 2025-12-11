@@ -39,6 +39,19 @@ export function getFirewallInput() { return firewallInput; }
 export function setFirewallInput(element) { firewallInput = element; }
 
 /**
+ * Safely get DOM element by ID with type assertion
+ * @template {HTMLElement} T
+ * @param {string} id - Element ID
+ * @param {new() => T} [type] - Optional type constructor
+ * @returns {T|null} Element or null if not found
+ */
+function getElementById(id, type) {
+    const element = document.getElementById(id);
+    if (!element) return null;
+    return /** @type {T} */ (element);
+}
+
+/**
  * @param {string} tabId 
  */
 export function switchTab(tabId) {
@@ -629,7 +642,7 @@ export function showAchievementNotification(ach) {
 
 export function renderStatistics() {
     const gameState = getGameState();
-    if (!gameState.statistics) return;
+    if (!gameState || !gameState.statistics) return;
 
     // Format time as HH:MM:SS
     /** @param {number} seconds */
@@ -641,8 +654,9 @@ export function renderStatistics() {
     };
 
     // Update play time
-    const currentSessionTime = Math.floor((Date.now() - gameState.statistics.sessionStartTime) / 1000);
-    const totalPlayTime = gameState.statistics.playTimeSeconds + currentSessionTime;
+    const sessionStartTime = gameState.statistics.sessionStartTime || Date.now();
+    const currentSessionTime = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const totalPlayTime = (gameState.statistics.playTimeSeconds || 0) + currentSessionTime;
 
     // Update DOM elements
     const statClicks = /** @type {HTMLElement} */ (document.getElementById('stat-clicks'));
@@ -652,10 +666,10 @@ export function renderStatistics() {
     const statFirewalls = /** @type {HTMLElement} */ (document.getElementById('stat-firewalls'));
     const statFirewallsCleared = /** @type {HTMLElement} */ (document.getElementById('stat-firewalls-cleared'));
 
-    if (statClicks) statClicks.innerText = formatNumber(gameState.statistics.totalClicks);
-    if (statBits) statBits.innerText = formatNumber(gameState.statistics.totalBitsEarned);
+    if (statClicks) statClicks.innerText = formatNumber(gameState.statistics.totalClicks || 0);
+    if (statBits) statBits.innerText = formatNumber(gameState.statistics.totalBitsEarned || 0);
     if (statTime) statTime.innerText = formatTime(totalPlayTime);
-    if (statReboots) statReboots.innerText = String(gameState.statistics.rebootCount);
+    if (statReboots) statReboots.innerText = String(gameState.statistics.rebootCount || 0);
     if (statFirewalls) statFirewalls.innerText = String(gameState.statistics.firewallsEncountered || 0);
     if (statFirewallsCleared) statFirewallsCleared.innerText = String(gameState.statistics.firewallsCleared || 0);
 }

@@ -6,6 +6,25 @@ import { saveGame, hardReset, exportSave, importSave } from './storage.js';
 import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
 import { calculatePotentialRootAccess } from './formulas.js';
 
+/**
+ * Safely update statistics field
+ * @param {string} field - Statistics field name
+ * @param {number|function} valueOrUpdater - Value to set or function that takes current value and returns new value
+ */
+function updateStatistic(field, valueOrUpdater) {
+    const gameState = getGameState();
+    if (!gameState || !gameState.statistics) {
+        console.warn(`updateStatistic: statistics not available for field ${field}`);
+        return;
+    }
+    
+    if (typeof valueOrUpdater === 'function') {
+        gameState.statistics[field] = valueOrUpdater(gameState.statistics[field] || 0);
+    } else {
+        gameState.statistics[field] = (gameState.statistics[field] || 0) + valueOrUpdater;
+    }
+}
+
 // Tutorial Logic
 let currentTutorialStep = 0;
 export function showTutorial() {
@@ -57,9 +76,7 @@ export function addBits(amount) {
     
     gameState.bits = (gameState.bits || 0) + amount;
     gameState.lifetimeBits = (gameState.lifetimeBits || 0) + amount;
-    if (gameState.statistics) {
-        gameState.statistics.totalBitsEarned = (gameState.statistics.totalBitsEarned || 0) + amount;
-    }
+    updateStatistic('totalBitsEarned', amount);
     updateDisplay();
     checkUnlocks();
     checkStoryEvents();
@@ -338,8 +355,7 @@ export function spawnFirewall() {
     if (gameState.firewallActive) return;
 
     gameState.firewallActive = true;
-    if (gameState && gameState.statistics) {
-        gameState.statistics.firewallsEncountered++;
+    updateStatistic('firewallsEncountered', 1);
     }
 
     const chars = "0123456789ABCDEF";
@@ -394,8 +410,7 @@ export function handleKeypadInput(key) {
 function clearFirewall() {
     const gameState = getGameState();
     gameState.firewallActive = false;
-    if (gameState.statistics) {
-        gameState.statistics.firewallsCleared++;
+    updateStatistic('firewallsCleared', 1);
     }
 
     firewallOverlay.classList.remove('visible');
