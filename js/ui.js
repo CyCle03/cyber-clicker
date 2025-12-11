@@ -421,29 +421,34 @@ export function createGlitchElement(onClick) {
  * @param {string} text 
  */
 export function createFloatingText(x, y, text) {
-    const debugBtn = document.createElement('button');
-    debugBtn.innerText = "DEBUG: +1M Bits";
-    debugBtn.onclick = () => addBits(1000000);
-    debugBtn.style.position = 'fixed';
-    debugBtn.style.bottom = '10px';
-    debugBtn.style.left = '10px';
-    debugBtn.style.zIndex = '9999';
-    document.body.appendChild(debugBtn);
+    // Add a check for deployment environment
+    const isDeployed = window.location.hostname === 'cycle03.github.io';
 
-    const breachBtn = document.createElement('button');
-    breachBtn.innerText = "DEBUG: Start Breach";
-    breachBtn.onclick = () => {
-        if (typeof startDataBreach === 'function') {
-            startDataBreach();
-        } else {
-            console.error("startDataBreach not found");
-        }
-    };
-    breachBtn.style.position = 'fixed';
-    breachBtn.style.bottom = '40px';
-    breachBtn.style.left = '10px';
-    breachBtn.style.zIndex = '9999';
-    document.body.appendChild(breachBtn);
+    if (!isDeployed) { // Only create debug buttons in non-deployed environments
+        const debugBtn = document.createElement('button');
+        debugBtn.innerText = "DEBUG: +1M Bits";
+        debugBtn.onclick = () => addBits(1000000);
+        debugBtn.style.position = 'fixed';
+        debugBtn.style.bottom = '10px';
+        debugBtn.style.left = '10px';
+        debugBtn.style.zIndex = '9999';
+        document.body.appendChild(debugBtn);
+
+        const breachBtn = document.createElement('button');
+        breachBtn.innerText = "DEBUG: Start Breach";
+        breachBtn.onclick = () => {
+            if (typeof startDataBreach === 'function') {
+                startDataBreach();
+            } else {
+                console.error("startDataBreach not found");
+            }
+        };
+        breachBtn.style.position = 'fixed';
+        breachBtn.style.bottom = '40px';
+        breachBtn.style.left = '10px';
+        breachBtn.style.zIndex = '9999';
+        document.body.appendChild(breachBtn);
+    }
 
     const el = document.createElement('div');
     el.className = 'floating-text';

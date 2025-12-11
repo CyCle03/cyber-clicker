@@ -2,7 +2,7 @@
 import { initState, loadState, getGameState } from './state.js';
 import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton, switchTab } from './ui.js';
 import { loadGame, saveGame } from './storage.js';
-import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, handleKeypadInput, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
+import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketItem, buySkill, rebootSystem, initDataBreach, showTutorial, spawnFirewall, spawnGlitch, checkFirewallInput } from './game.js';
 import { SoundManager } from './sound.js';
 import { calculatePotentialRootAccess } from './formulas.js';
 import { GAME_CONSTANTS } from './constants.js';
