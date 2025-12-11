@@ -904,3 +904,7 @@ export function closeSettings() {
     const modal = document.getElementById('settings-modal');
     if (modal) modal.classList.remove('visible');
 }
+
+// Expose pagination functions to the global scope for HTML onclick handlers
+window.prevShopPage = prevShopPage;
+window.nextShopPage = nextShopPage;
