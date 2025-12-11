@@ -17,11 +17,14 @@ export function saveGame() {
         rootAccessLevel: gameState.rootAccessLevel,
         cryptos: gameState.cryptos,
         permanentMultiplier: gameState.permanentMultiplier,
+        offlineMultiplier: gameState.offlineMultiplier,
         skillPoints: gameState.skillPoints,
         skills: gameState.skills,
         activeBoosts: gameState.activeBoosts,
+        activeClickBoosts: gameState.activeClickBoosts,
         statistics: gameState.statistics,
         tutorialSeen: gameState.tutorialSeen,
+        autoGlitchEnabled: gameState.autoGlitchEnabled,
         lastSaveTime: Date.now()
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));

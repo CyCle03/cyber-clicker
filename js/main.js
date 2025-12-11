@@ -10,6 +10,7 @@ let gameLoopId;
 let autoSaveId;
 let eventLoopId;
 let rebootBtnId;
+let firewallKeydownHandler = null;
 
 // Initialization
 function init() {
@@ -34,20 +35,29 @@ function init() {
             newFirewallInputEl.addEventListener('input', checkFirewallInput);
         }
 
-        // Global Keydown Listener for Firewall
-        document.addEventListener('keydown', (e) => {
+        // Global Keydown Listener for Firewall - Remove old listener if exists
+        if (firewallKeydownHandler) {
+            document.removeEventListener('keydown', firewallKeydownHandler);
+        }
+        
+        firewallKeydownHandler = (e) => {
             if (getGameState().firewallActive) {
+                const firewallInputEl = getFirewallInput();
+                if (!firewallInputEl) return;
+                
                 const key = e.key.toUpperCase();
-                if ("0123456789ABCDEF".includes(key) && firewallInput.value.length < 4) {
-                    firewallInput.value += key;
+                if ("0123456789ABCDEF".includes(key) && firewallInputEl.value.length < 4) {
+                    firewallInputEl.value += key;
                     checkFirewallInput();
                 } else if (e.key === 'Backspace') {
-                    firewallInput.value = firewallInput.value.slice(0, -1);
+                    firewallInputEl.value = firewallInputEl.value.slice(0, -1);
                 } else if (e.key === 'Enter') {
                     checkFirewallInput();
                 }
             }
-        });
+        };
+        
+        document.addEventListener('keydown', firewallKeydownHandler);
 
 
         const hasSave = loadGame();
@@ -90,10 +100,12 @@ function init() {
         renderSkillTree(buySkill);
         renderAchievements();
 
-        // Event Listeners
+        // Event Listeners - Clone nodes to prevent duplicate listeners
         const hackButton = document.getElementById('hack-button');
-        if (hackButton) {
-            hackButton.addEventListener('click', () => {
+        if (hackButton && hackButton.parentNode) {
+            const newHackButton = /** @type {HTMLButtonElement} */ (hackButton.cloneNode(true));
+            hackButton.parentNode.replaceChild(newHackButton, hackButton);
+            newHackButton.addEventListener('click', () => {
                 addBits(getGameState().clickPower);
                 if (getGameState().statistics) {
                     getGameState().statistics.totalClicks++;
@@ -107,8 +119,10 @@ function init() {
         }
 
         const rebootBtn = document.getElementById('reboot-button');
-        if (rebootBtn) {
-            rebootBtn.addEventListener('click', rebootSystem);
+        if (rebootBtn && rebootBtn.parentNode) {
+            const newRebootBtn = /** @type {HTMLButtonElement} */ (rebootBtn.cloneNode(true));
+            rebootBtn.parentNode.replaceChild(newRebootBtn, rebootBtn);
+            newRebootBtn.addEventListener('click', rebootSystem);
         }
 
         // Start Game Loops

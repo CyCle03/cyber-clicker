@@ -44,11 +44,21 @@ function updateTutorialStep() {
 // Core Functions
 /** @param {number} amount */
 export function addBits(amount) {
+    if (typeof amount !== 'number' || isNaN(amount) || !isFinite(amount)) {
+        console.error("addBits: Invalid amount", amount);
+        return;
+    }
+    
     const gameState = getGameState();
-    gameState.bits += amount;
-    gameState.lifetimeBits += amount;
-    if (gameState && gameState.statistics) {
-        gameState.statistics.totalBitsEarned += amount;
+    if (!gameState) {
+        console.error("addBits: gameState is null");
+        return;
+    }
+    
+    gameState.bits = (gameState.bits || 0) + amount;
+    gameState.lifetimeBits = (gameState.lifetimeBits || 0) + amount;
+    if (gameState.statistics) {
+        gameState.statistics.totalBitsEarned = (gameState.statistics.totalBitsEarned || 0) + amount;
     }
     updateDisplay();
     checkUnlocks();

@@ -174,17 +174,38 @@ export function initUI() {
  * @param {number} num 
  */
 export function formatNumber(num) {
-    if (num < 1000) return Math.floor(num).toLocaleString();
+    // Handle invalid inputs
+    if (typeof num !== 'number' || isNaN(num)) {
+        return '0';
+    }
+    
+    // Handle Infinity
+    if (!isFinite(num)) {
+        return num > 0 ? '∞' : '-∞';
+    }
+    
+    // Handle negative numbers
+    const isNegative = num < 0;
+    const absNum = Math.abs(num);
+    
+    if (absNum < 1000) {
+        return (isNegative ? '-' : '') + Math.floor(absNum).toLocaleString();
+    }
 
     const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
-    const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
+    const suffixNum = Math.floor(("" + Math.floor(absNum)).length / 3);
+    
+    // Prevent index out of bounds
+    if (suffixNum >= suffixes.length) {
+        return (isNegative ? '-' : '') + absNum.toExponential(3);
+    }
 
-    let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(5));
+    let shortValue = parseFloat((suffixNum !== 0 ? (absNum / Math.pow(1000, suffixNum)) : absNum).toPrecision(5));
     let shortValueStr = String(shortValue);
     if (shortValue % 1 !== 0) {
         shortValueStr = shortValue.toFixed(3);
     }
-    return shortValueStr + suffixes[suffixNum];
+    return (isNegative ? '-' : '') + shortValueStr + suffixes[suffixNum];
 }
 
 /**
@@ -221,14 +242,19 @@ export function logMessage(msg) {
 
 export function updateDisplay() {
     const gameState = getGameState();
+    if (!gameState) {
+        console.error("UI: gameState is null in updateDisplay");
+        return;
+    }
+    
     if (bitsDisplay) {
-        bitsDisplay.innerText = formatNumber(gameState.bits);
+        bitsDisplay.innerText = formatNumber(gameState.bits || 0);
     } else {
         console.error("UI: bitsDisplay is missing in updateDisplay");
     }
 
     if (gpsDisplay) {
-        gpsDisplay.innerText = gameState.gps.toFixed(1);
+        gpsDisplay.innerText = (gameState.gps || 0).toFixed(1);
 
         // Calculate and display total bonus
         const bonusEl = document.getElementById('gps-bonus');
@@ -639,6 +665,8 @@ export function renderStatistics() {
  */
 export function updateRebootButton(potentialLevel) {
     const gameState = getGameState();
+    if (!gameState || !rebootButton) return;
+    
     const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
     if (potentialLevel > gameState.rootAccessLevel) {
         if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
@@ -648,9 +676,7 @@ export function updateRebootButton(potentialLevel) {
         rebootButton.classList.add('disabled');
         // Display Root Access info
         const currentLevel = gameState.rootAccessLevel;
-        // Assuming calculatePotentialRootAccess is defined elsewhere and returns a number
-        // If not, this line might cause an error. Keeping it as per user's request.
-        const potentialLevel = calculatePotentialRootAccess();
+        const calculatedPotentialLevel = calculatePotentialRootAccess();
         const nextLevel = currentLevel + 1;
 
         // Updated to match new 10M base requirement
@@ -661,7 +687,7 @@ export function updateRebootButton(potentialLevel) {
         if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
 
         // Enable/disable reboot button
-        if (potentialLevel > currentLevel) {
+        if (calculatedPotentialLevel > currentLevel) {
             rebootButton.classList.remove('disabled');
             (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = false;
         } else {
