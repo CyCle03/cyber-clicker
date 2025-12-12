@@ -7,6 +7,27 @@ import { initUI } from './js/ui.js'; // Import initUI
 import { SoundManager } from './js/sound.js';
 
 (function () {
+    // Keep test output clean: filter noisy DEBUG logs during tests only.
+    /** @type {typeof console.log} */
+    const originalConsoleLog = console.log.bind(console);
+    /** @type {typeof console.debug} */
+    const originalConsoleDebug = (console.debug || console.log).bind(console);
+
+    /** @param {any[]} args */
+    function shouldSuppressConsoleArgs(args) {
+        return typeof args[0] === 'string' && args[0].startsWith('DEBUG:');
+    }
+
+    console.log = (...args) => {
+        if (shouldSuppressConsoleArgs(args)) return;
+        originalConsoleLog(...args);
+    };
+
+    console.debug = (...args) => {
+        if (shouldSuppressConsoleArgs(args)) return;
+        originalConsoleDebug(...args);
+    };
+
     // Tests should not depend on or overwrite the player's real save.
     try {
         localStorage.removeItem('cyberClickerSave');

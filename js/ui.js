@@ -470,7 +470,7 @@ export function updateDisplay() {
             }
             
             // Only show progress bar if not affordable
-            const progressContainer = itemEl.querySelector('.upgrade-progress-container');
+            const progressContainer = /** @type {HTMLElement|null} */ (itemEl.querySelector('.upgrade-progress-container'));
             if (progressContainer) {
                 if (canAfford) {
                     progressContainer.style.display = 'block'; // Always show it
@@ -573,6 +573,7 @@ export function renderShop(buyCallback) {
 
     // Define categories based on upgrade properties (or from a constant if preferred)
     const categories = ['All', 'Production', 'Click']; // Order matters for display
+    /** @type {Record<string, string>} */
     const categoryDisplayNames = {
         'All': 'ALL UPGRADES',
         'Production': 'PRODUCTION',
@@ -798,9 +799,9 @@ export function renderActiveEffects() {
             <div class="effects-header">ACTIVE EFFECTS</div>
             ${effectsHTML}
         `;
-        container.style.display = 'block';
+        (/** @type {HTMLElement} */ (container)).style.display = 'block';
     } else {
-        container.style.display = 'none';
+        (/** @type {HTMLElement} */ (container)).style.display = 'none';
     }
 }
 
@@ -829,7 +830,7 @@ export function updateShopUI() {
             if (progressBar) progressBar.style.width = `${progressPercent}%`;
             if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
 
-            const progressContainer = itemEl.querySelector('.upgrade-progress-container');
+            const progressContainer = /** @type {HTMLElement|null} */ (itemEl.querySelector('.upgrade-progress-container'));
             if (progressContainer) {
                 if (canAfford) {
                     progressContainer.style.display = 'block';
@@ -1003,6 +1004,6 @@ export function closeSettings() {
 }
 
 // Expose pagination functions to the global scope for HTML onclick handlers
-window.prevShopPage = prevShopPage;
-window.nextShopPage = nextShopPage;
-window.switchShopCategory = switchShopCategory;
+/** @type {any} */ (window).prevShopPage = prevShopPage;
+/** @type {any} */ (window).nextShopPage = nextShopPage;
+/** @type {any} */ (window).switchShopCategory = switchShopCategory;
