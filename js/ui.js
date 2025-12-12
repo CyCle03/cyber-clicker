@@ -53,6 +53,22 @@ let shopBuyCallback = null;
 let lastShopUIUpdateTime = 0;
 const SHOP_UI_UPDATE_INTERVAL_MS = 250;
 
+// Lightweight display caches (avoid unnecessary DOM writes)
+/** @type {string} */
+let lastBitsDisplayText = '';
+/** @type {string} */
+let lastGPSDisplayText = '';
+/** @type {string} */
+let lastCryptoDisplayText = '';
+
+// Throttle heavy UI sections
+/** @type {number} */
+let lastStatisticsUpdateTime = 0;
+const STATISTICS_UPDATE_INTERVAL_MS = 500;
+/** @type {number} */
+let lastActiveEffectsUpdateTime = 0;
+const ACTIVE_EFFECTS_UPDATE_INTERVAL_MS = 500;
+
 export function nextShopPage() {
     // Pagination removed: shop is now scroll-based.
     return;
@@ -358,7 +374,11 @@ export function updateDisplay() {
     }
     
     if (bitsDisplay) {
-        bitsDisplay.innerText = formatNumber(gameState.bits || 0);
+        const nextBitsText = formatNumber(gameState.bits || 0);
+        if (nextBitsText !== lastBitsDisplayText) {
+            bitsDisplay.innerText = nextBitsText;
+            lastBitsDisplayText = nextBitsText;
+        }
         bitsDisplay.dataset.exactValue = (gameState.bits || 0).toLocaleString();
         if (bitsTooltip && bitsTooltip.style.display !== 'none') {
             bitsTooltip.innerText = bitsDisplay.dataset.exactValue;
@@ -368,7 +388,11 @@ export function updateDisplay() {
     }
 
     if (gpsDisplay) {
-        gpsDisplay.innerText = (gameState.gps || 0).toFixed(1);
+        const nextGPSText = (gameState.gps || 0).toFixed(1);
+        if (nextGPSText !== lastGPSDisplayText) {
+            gpsDisplay.innerText = nextGPSText;
+            lastGPSDisplayText = nextGPSText;
+        }
 
         // Calculate and display total bonus
         const bonusEl = document.getElementById('gps-bonus');
@@ -400,18 +424,37 @@ export function updateDisplay() {
             }
         }
     }
-    if (cryptoDisplay) cryptoDisplay.innerText = formatNumber(gameState.cryptos);
+    if (cryptoDisplay) {
+        const nextCryptoText = formatNumber(gameState.cryptos);
+        if (nextCryptoText !== lastCryptoDisplayText) {
+            cryptoDisplay.innerText = nextCryptoText;
+            lastCryptoDisplayText = nextCryptoText;
+        }
+    }
 
     // Update reboot button state
     const potentialLevel = calculatePotentialRootAccess();
     updateRebootButton(potentialLevel);
 
     // Update statistics
-    renderStatistics();
+    {
+        const statsPane = document.getElementById('tab-statistics');
+        const now = Date.now();
+        if (statsPane && statsPane.classList.contains('active') && (now - lastStatisticsUpdateTime >= STATISTICS_UPDATE_INTERVAL_MS)) {
+            renderStatistics();
+            lastStatisticsUpdateTime = now;
+        }
+    }
 
     // Update active effects (for countdown timers)
-    if (document.getElementById('active-effects-container')) {
-        renderActiveEffects();
+    {
+        const effectsContainer = document.getElementById('active-effects-container');
+        const blackMarketPane = document.getElementById('tab-black-market');
+        const now = Date.now();
+        if (effectsContainer && blackMarketPane && blackMarketPane.classList.contains('active') && (now - lastActiveEffectsUpdateTime >= ACTIVE_EFFECTS_UPDATE_INTERVAL_MS)) {
+            renderActiveEffects();
+            lastActiveEffectsUpdateTime = now;
+        }
     }
 
     // Update shop item progress bars and "BITS needed" text
