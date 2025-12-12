@@ -38,7 +38,32 @@
         <div id="bits-display"></div>
         <div id="gps-display"></div>
         <div id="crypto-display"></div>
-        <div id="shop-container"></div>
+        <div id="shop-container">
+            <div id="shop-categories-nav"></div>
+            <div id="shop-category-buttons">
+                <button class="category-btn active" data-category="all">All</button>
+            </div>
+            <div id="shop-item-list">
+                <div class="upgrade-item" id="upgrade-clicker">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">Clicker</span>
+                        <span class="upgrade-cost">0</span>
+                        <span class="upgrade-owned">x0</span>
+                    </div>
+                    <div class="upgrade-progress-container">
+                        <div class="upgrade-progress-bar"></div>
+                        <div class="upgrade-progress-text"></div>
+                    </div>
+                    <div class="upgrade-contribution"></div>
+                    <div class="upgrade-efficiency"></div>
+                </div>
+            </div>
+            <div class="shop-pagination">
+                <button id="shop-prev">Previous</button>
+                <span id="shop-page-info">Page 1</span>
+                <button id="shop-next">Next</button>
+            </div>
+        </div>
         <div id="black-market-container"></div>
         <div id="achievements-container"></div>
         <div id="skill-tree-container"></div>

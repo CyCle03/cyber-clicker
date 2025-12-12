@@ -4,8 +4,25 @@ import { UPGRADES, SKILL_TREE } from './js/constants.js';
 import { addBits, buyUpgrade, calculateGPS, buySkill } from './js/game.js';
 import { calculatePotentialRootAccess } from './js/formulas.js'; // Import from formulas.js
 import { initUI } from './js/ui.js'; // Import initUI
+import { SoundManager } from './js/sound.js';
 
 (function () {
+    // Tests should not depend on or overwrite the player's real save.
+    try {
+        localStorage.removeItem('cyberClickerSave');
+    } catch (e) {
+        // Ignore storage access errors in restricted environments
+    }
+
+    // Prevent AudioContext warnings during tests.
+    try {
+        SoundManager.muted = true;
+        SoundManager.playSFX = function () { };
+        SoundManager.playTone = function () { };
+    } catch (e) {
+        // Ignore if sound manager is unavailable
+    }
+
     const resultsDiv = /** @type {HTMLElement} */ (document.getElementById('test-results'));
     let passed = 0;
     let failed = 0;
