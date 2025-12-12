@@ -86,6 +86,28 @@ php -S localhost:8000
 
 Run the test suite by opening `tests.html` in a browser.
 
+## ✅ Release Checklist
+
+### Save Compatibility
+
+- [ ] Existing save loads without errors
+- [ ] Root Access level, Skill Points, Skills, and Upgrades are preserved
+- [ ] Achievements and Story Events are preserved
+- [ ] Save migration (if any) does not reset progress unexpectedly
+
+### GitHub Pages Smoke Test
+
+- [ ] Fresh load works (no console errors)
+- [ ] Shop
+  - [ ] Scroll list renders correctly
+  - [ ] Unaffordable items look disabled (no hover glow, no pointer cursor)
+  - [ ] Affordable items are clickable and purchase correctly
+- [ ] Reboot UI shows Remaining BITS and READY/Next state correctly
+
+### Tests
+
+- [ ] `tests.html` reports all tests PASS (currently 15/15)
+
 ## 💾 Save System
 
 - Automatic save every 15 seconds
