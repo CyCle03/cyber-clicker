@@ -313,11 +313,7 @@ export function logMessage(msg) {
     div.innerText = `> ${msg}`;
     gameLog.prepend(div);
 
-    if (gameLog.children.length > 20) {
-        if (gameLog.lastElementChild) {
-            gameLog.lastElementChild.scrollIntoView();
-        }
-    }
+
 }
 
 export function updateDisplay() {
@@ -381,6 +377,10 @@ export function updateDisplay() {
     }
 
     // Update shop item progress bars and "BITS needed" text
+    if (!shopItemList) {
+
+        return;
+    }
     const shopItems = shopItemList.querySelectorAll('.upgrade-item');
     const gameStateBits = gameState.bits || 0;
 
