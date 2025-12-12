@@ -45,38 +45,30 @@ export function setFirewallInput(element) { firewallInput = element; }
 /** @type {HTMLElement|null} */
 let bitsTooltip = null;
 
-// Shop Pagination State
-let shopCurrentPage = 1;
-const shopItemsPerPage = 5; // Display 5 upgrades per page
+// Shop State
 let currentShopCategory = 'All'; // Default category set to All
+/** @type {((arg0: string) => void) | null} */
+let shopBuyCallback = null;
 
 export function nextShopPage() {
-    const gameState = getGameState();
-    const allUpgrades = Object.values(gameState.upgrades);
-    const filteredUpgrades = allUpgrades.filter(upgrade => {
-        if (currentShopCategory === 'All') return true;
-        return upgrade.category === currentShopCategory;
-    });
-    const totalUpgrades = filteredUpgrades.length;
-    const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
-    if (shopCurrentPage < maxPage) {
-        shopCurrentPage++;
-        renderShop(buyUpgrade);
-    }
+    // Pagination removed: shop is now scroll-based.
+    return;
 }
 
 export function prevShopPage() {
-    if (shopCurrentPage > 1) {
-        shopCurrentPage--;
-        renderShop(buyUpgrade);
-    }
+    // Pagination removed: shop is now scroll-based.
+    return;
 }
 
+/**
+ * @param {string} category
+ */
 export function switchShopCategory(category) {
     if (currentShopCategory !== category) {
         currentShopCategory = category;
-        shopCurrentPage = 1; // Reset page on category switch
-        renderShop(buyUpgrade);
+        if (shopBuyCallback) {
+            renderShop(shopBuyCallback);
+        }
     }
 }
 
@@ -609,28 +601,11 @@ export function renderShop(buyCallback) {
 
     shopItemList.innerHTML = ''; // Clear previous items (renamed from shopContainer)
 
-    const totalUpgrades = filteredUpgrades.length;
-    const maxPage = Math.ceil(totalUpgrades / shopItemsPerPage);
-
-    // Ensure current page is valid for the current category
-    if (shopCurrentPage > maxPage && maxPage > 0) {
-        shopCurrentPage = maxPage;
-    } else if (maxPage === 0) {
-        shopCurrentPage = 1;
-    }
-
-
-    const startIndex = (shopCurrentPage - 1) * shopItemsPerPage;
-    const endIndex = Math.min(startIndex + shopItemsPerPage, totalUpgrades);
-
-    const upgradesToRender = filteredUpgrades.slice(startIndex, endIndex);
-
-    // Render upgrades for the current page and category
-    upgradesToRender.forEach(upgrade => {
+    // Pagination removed: render all upgrades for the selected category.
+    filteredUpgrades.forEach(upgrade => {
         const item = document.createElement('div');
         item.className = 'upgrade-item';
         item.id = `upgrade-${upgrade.id}`; // Use upgrade.id directly
-        item.onclick = () => buyCallback(upgrade.id);
 
         let statText = '';
         if (upgrade.gps > 0) {
@@ -645,6 +620,14 @@ export function renderShop(buyCallback) {
         const canAfford = gameState.bits >= upgrade.cost;
         const progressPercent = canAfford ? 100 : Math.min(100, (gameState.bits / upgrade.cost) * 100);
         const bitsNeeded = Math.max(0, upgrade.cost - gameState.bits);
+
+        if (canAfford) {
+            item.classList.remove('disabled');
+            item.onclick = () => buyCallback(upgrade.id);
+        } else {
+            item.classList.add('disabled');
+            item.onclick = null;
+        }
 
         // Build contribution text
         const contribution = calculateGPSContribution(upgrade.id);
@@ -688,21 +671,16 @@ export function renderShop(buyCallback) {
         shopItemList.appendChild(item); // Appending to shopItemList
     });
 
-    // Add pagination controls
-    const paginationHtml = `
-            <button class="modal-button" onclick="prevShopPage()" ${shopCurrentPage === 1 ? 'disabled' : ''}>PREV</button>
-            <span>Page ${shopCurrentPage} / ${maxPage}</span>
-            <button class="modal-button" onclick="nextShopPage()" ${shopCurrentPage === maxPage || maxPage === 0 ? 'disabled' : ''}>NEXT</button>
-        `;
-
+    // Hide pagination controls (now unused).
     const topPaginationContainer = document.getElementById('shop-pagination-controls');
     if (topPaginationContainer) {
-        topPaginationContainer.innerHTML = paginationHtml;
+        topPaginationContainer.innerHTML = '';
+        topPaginationContainer.style.display = 'none';
     }
-
     const bottomPaginationContainer = document.getElementById('shop-pagination-controls-bottom');
     if (bottomPaginationContainer) {
-        bottomPaginationContainer.innerHTML = paginationHtml;
+        bottomPaginationContainer.innerHTML = '';
+        bottomPaginationContainer.style.display = 'none';
     }
 
     updateShopUI();
