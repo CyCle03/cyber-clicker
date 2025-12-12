@@ -317,26 +317,29 @@ export function rebootSystem() {
 }
 
 // Glitch System
+let glitchRemovalTimeoutId;
+
 export function spawnGlitch() {
     const time = Math.random() * (GLITCH_CONFIG.maxSpawnTime - GLITCH_CONFIG.minSpawnTime) + GLITCH_CONFIG.minSpawnTime;
     setTimeout(() => {
         const glitchEl = createGlitchElement(handleGlitchClick);
 
+        // If auto-glitch is enabled, there's a chance it will be collected automatically.
         if (getGameState().autoGlitchEnabled && Math.random() < 0.5) {
             setTimeout(() => {
                 if (glitchEl.parentNode) {
-                    handleGlitchClick();
-                    glitchEl.remove();
+                    // Simulate a click to trigger the collection and respawn logic.
+                    glitchEl.click(); 
                     logMessage("Auto-Glitch Bot collected the glitch!");
-                    spawnGlitch(); 
                 }
             }, 100 + Math.random() * 400);
         } else {
-            setTimeout(() => {
+            // If not auto-glitched, set a timeout for the glitch to expire.
+            glitchRemovalTimeoutId = setTimeout(() => {
                 if (glitchEl.parentNode) {
                     glitchEl.remove();
                     logMessage("Glitch signal lost...");
-                    spawnGlitch();
+                    spawnGlitch(); // Spawn the next one after expiration.
                 }
             }, GLITCH_CONFIG.duration);
         }
@@ -345,6 +348,9 @@ export function spawnGlitch() {
 }
 
 function handleGlitchClick() {
+    // When a glitch is clicked (manually or via auto-glitch), clear the expiration timeout.
+    clearTimeout(glitchRemovalTimeoutId);
+
     const gameState = getGameState();
     const baseReward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
     const cryptoMagnetBonus = gameState.skills.crypto_magnet || 0;
@@ -355,6 +361,8 @@ function handleGlitchClick() {
     logMessage(`GLITCH HACKED! Recovered ${reward} Cryptos.`);
     createFloatingText(window.innerWidth / 2, window.innerHeight / 2, `+${reward} 🪙`);
     saveGame();
+
+    // Spawn the next glitch. This is the single point for respawning after a successful collection.
     spawnGlitch();
 }
 
