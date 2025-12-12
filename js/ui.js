@@ -3,6 +3,7 @@ import { getGameState } from "./state.js";
 import { BLACK_MARKET_ITEMS, SKILL_TREE } from "./constants.js";
 import { calculateGPSContribution, calculateEfficiency, getEfficiencyRating, calculatePotentialRootAccess } from "./formulas.js";
 import { addBits, startDataBreach } from "./game.js";
+import { debugLog, errorLog } from "./logger.js";
 
 // DOM Elements
 /** @type {HTMLElement} */
@@ -350,17 +351,13 @@ export function formatNumber(num) {
  * @param {string} msg 
  */
 export function logMessage(msg) {
-    // Route DEBUG and ERROR messages to debug console
-    if (msg.startsWith('DEBUG:') || msg.startsWith('ERROR:') || msg.includes('Error')) {
-        const debugLog = document.getElementById('debug-log');
-        if (debugLog) {
-            const div = document.createElement('div');
-            div.className = 'debug-entry ' + (msg.includes('ERROR') || msg.includes('Error') ? 'error' : 'debug');
-            div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            debugLog.prepend(div);
-        }
-        // Only hide DEBUG from main log, keep ERRORs visible
-        if (msg.startsWith('DEBUG:')) return;
+    if (msg.startsWith('DEBUG:')) {
+        debugLog(msg);
+        return;
+    }
+
+    if (msg.startsWith('ERROR:') || msg.includes('Error')) {
+        errorLog(msg);
     }
 
     if (!gameLog) gameLog = /** @type {HTMLElement} */ (document.getElementById('game-log'));

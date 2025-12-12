@@ -1,5 +1,6 @@
 // @ts-check
-import { ACHIEVEMENTS, DEBUG_ENABLED, SKILL_TREE, STORY_EVENTS, UPGRADES } from "./constants.js";
+import { ACHIEVEMENTS, SKILL_TREE, STORY_EVENTS, UPGRADES } from "./constants.js";
+import { debugLog } from "./logger.js";
 import { SoundManager } from "./sound.js";
 
 /**
@@ -95,11 +96,11 @@ export function loadState(savedData) {
     // Ensure gameState is initialized before loading
     if (!gameState.achievements || !Array.isArray(gameState.achievements)) {
         initState();
-        if (DEBUG_ENABLED) console.log("DEBUG: loadState - Game state initialized.");
+        debugLog("DEBUG: loadState - Game state initialized.");
     }
     
     if (savedData) {
-        if (DEBUG_ENABLED) console.log("DEBUG: loadState - Loading saved data for rootAccessLevel:", savedData.rootAccessLevel);
+        debugLog("DEBUG: loadState - Loading saved data for rootAccessLevel:", savedData.rootAccessLevel);
         gameState.bits = savedData.bits || 0;
         gameState.lifetimeBits = savedData.lifetimeBits || 0;
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
@@ -185,11 +186,11 @@ export function loadState(savedData) {
             }
             // Grant skill points = root level - already spent points
             gameState.skillPoints = gameState.rootAccessLevel - totalSkillPointsEarned;
-            if (DEBUG_ENABLED) console.log(`Migration: Granted ${gameState.skillPoints} skill points based on Root Access Level ${gameState.rootAccessLevel}`);
+            debugLog(`Migration: Granted ${gameState.skillPoints} skill points based on Root Access Level ${gameState.rootAccessLevel}`);
         }
-        if (DEBUG_ENABLED) console.log("DEBUG: loadState - Root Access Level after loading:", gameState.rootAccessLevel);
+        debugLog("DEBUG: loadState - Root Access Level after loading:", gameState.rootAccessLevel);
     } else {
-        if (DEBUG_ENABLED) console.log("DEBUG: loadState - No savedData provided. State initialized to defaults.");
+        debugLog("DEBUG: loadState - No savedData provided. State initialized to defaults.");
     }
 }
 

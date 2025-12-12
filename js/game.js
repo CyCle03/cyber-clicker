@@ -3,8 +3,9 @@ import { getGameState, resetStateForPrestige } from './state.js';
 import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallCodeDisplay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
 import { saveGame, hardReset, exportSave, importSave } from './storage.js';
-import { BLACK_MARKET_ITEMS, DEBUG_ENABLED, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
+import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
 import { calculatePotentialRootAccess } from './formulas.js';
+import { debugLog, errorLog } from './logger.js';
 
 /**
  * Safely update statistics field
@@ -402,14 +403,14 @@ export function spawnFirewall() {
         firewallOverlay.classList.add('active');
     }
     else {
-        console.error("ERROR: firewallOverlay is null or undefined!");
+        errorLog("ERROR: firewallOverlay is null or undefined!");
     }
 
     if (firewallCodeDisplay) {
         firewallCodeDisplay.innerText = code;
     }
     else {
-        console.error("ERROR: firewallCodeDisplay is null or undefined!");
+        errorLog("ERROR: firewallCodeDisplay is null or undefined!");
     }
 }
 
@@ -442,31 +443,31 @@ export function handleKeypadInput(value) {
 export function checkFirewallInput() {
     const gameState = getGameState();
     if (!gameState.firewallActive) {
-        if (DEBUG_ENABLED) console.log("DEBUG: checkFirewallInput returned early because firewallActive is false.");
+        debugLog("DEBUG: checkFirewallInput returned early because firewallActive is false.");
         return;
     }
 
     const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
     if (input) {
-        if (DEBUG_ENABLED) console.log(`DEBUG: Firewall Input: "${input.value.toUpperCase()}", Expected Code: "${gameState.firewallCode}"`);
+        debugLog(`DEBUG: Firewall Input: "${input.value.toUpperCase()}", Expected Code: "${gameState.firewallCode}"`);
         if (input.value.toUpperCase() === gameState.firewallCode) {
-            if (DEBUG_ENABLED) console.log("DEBUG: Input matches code, clearing firewall.");
+            debugLog("DEBUG: Input matches code, clearing firewall.");
             clearFirewall();
             input.value = "";
         } else {
-            if (DEBUG_ENABLED) console.log("DEBUG: Input does not match code.");
+            debugLog("DEBUG: Input does not match code.");
             input.style.borderColor = 'red';
             setTimeout(() => input.style.borderColor = 'var(--primary-cyan)', 500);
             SoundManager.playSFX('error');
         }
     } else {
-        console.error("ERROR: Firewall input element not found in checkFirewallInput!");
+        errorLog("ERROR: Firewall input element not found in checkFirewallInput!");
     }
 }
 
 function clearFirewall() {
     const gameState = getGameState();
-    if (DEBUG_ENABLED) console.log("DEBUG: clearFirewall called. Setting firewallActive to false.");
+    debugLog("DEBUG: clearFirewall called. Setting firewallActive to false.");
     gameState.firewallActive = false;
     updateStatistic('firewallsCleared', 1);
 
@@ -477,7 +478,7 @@ function clearFirewall() {
     if (firewallOverlay) {
         firewallOverlay.classList.remove('active'); // Changed from 'visible' to 'active'
     } else {
-        console.error("ERROR: firewallOverlay is null or undefined in clearFirewall!");
+        errorLog("ERROR: firewallOverlay is null or undefined in clearFirewall!");
     }
 
     SoundManager.playSFX('success');
