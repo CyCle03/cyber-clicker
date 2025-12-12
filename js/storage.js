@@ -1,5 +1,6 @@
 // @ts-check
 import { getGameState, loadState } from "./state.js";
+import { DEBUG_ENABLED } from "./constants.js";
 import { logMessage, renderAchievements, renderBlackMarket, renderShop, renderSkillTree, updateDisplay, closeSettings } from "./ui.js"; // ADDED closeSettings
 import { buyBlackMarketItem, buySkill, buyUpgrade, calculateClickPower, calculateGPS } from "./game.js";
 import { SoundManager } from "./sound.js";
@@ -30,7 +31,7 @@ export function saveGame() {
         lastSaveTime: Date.now()
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-    console.log("DEBUG: saveGame - Root Access Level saved:", gameState.rootAccessLevel);
+    if (DEBUG_ENABLED) console.log("DEBUG: saveGame - Root Access Level saved:", gameState.rootAccessLevel);
 }
 
 /**
@@ -63,18 +64,18 @@ export function loadGame() {
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            console.log("DEBUG: loadGame - Save data found and parsed.");
+            if (DEBUG_ENABLED) console.log("DEBUG: loadGame - Save data found and parsed.");
             // Migrate save data if needed
             const migratedData = migrateSaveData(data);
             loadState(migratedData);
             return true;
         } catch (e) {
             console.error("Save file corrupted", e);
-            console.log("DEBUG: loadGame - Save file corrupted. Initializing fresh.");
+            if (DEBUG_ENABLED) console.log("DEBUG: loadGame - Save file corrupted. Initializing fresh.");
             // If save is corrupted, proceed to initialize fresh
         }
     } else {
-        console.log("DEBUG: loadGame - No save data found. Initializing fresh.");
+        if (DEBUG_ENABLED) console.log("DEBUG: loadGame - No save data found. Initializing fresh.");
     }
     // If no save, or save corrupted, initialize fresh
     loadState(null); // Initialize fresh if no save

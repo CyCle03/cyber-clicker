@@ -5,6 +5,11 @@
  * @typedef {import('../script.js').StoryEvent} StoryEvent
  */
 
+export const DEBUG_ENABLED =
+    (typeof window !== 'undefined') &&
+    window.location &&
+    window.location.hostname !== 'cycle03.github.io';
+
 export const UPGRADES = {
     clicker: { id: 'clicker', name: "Mech Switch", cost: 30, gps: 0, click: 1, count: 0, desc: "Mechanical switches for tactile feedback.", category: 'Click' },
     autoClicker: { id: 'autoClicker', name: "Auto-Clicker", cost: 15, gps: 0.1, click: 0, count: 0, desc: "Basic script to automate clicking.", category: 'Production' },

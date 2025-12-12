@@ -3,7 +3,7 @@ import { getGameState, resetStateForPrestige } from './state.js';
 import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallCodeDisplay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
 import { saveGame, hardReset, exportSave, importSave } from './storage.js';
-import { BLACK_MARKET_ITEMS, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
+import { BLACK_MARKET_ITEMS, DEBUG_ENABLED, GLITCH_CONFIG, SKILL_TREE, TUTORIAL_STEPS } from './constants.js';
 import { calculatePotentialRootAccess } from './formulas.js';
 
 /**
@@ -442,19 +442,19 @@ export function handleKeypadInput(value) {
 export function checkFirewallInput() {
     const gameState = getGameState();
     if (!gameState.firewallActive) {
-        console.log("DEBUG: checkFirewallInput returned early because firewallActive is false.");
+        if (DEBUG_ENABLED) console.log("DEBUG: checkFirewallInput returned early because firewallActive is false.");
         return;
     }
 
     const input = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
     if (input) {
-        console.log(`DEBUG: Firewall Input: "${input.value.toUpperCase()}", Expected Code: "${gameState.firewallCode}"`);
+        if (DEBUG_ENABLED) console.log(`DEBUG: Firewall Input: "${input.value.toUpperCase()}", Expected Code: "${gameState.firewallCode}"`);
         if (input.value.toUpperCase() === gameState.firewallCode) {
-            console.log("DEBUG: Input matches code, clearing firewall.");
+            if (DEBUG_ENABLED) console.log("DEBUG: Input matches code, clearing firewall.");
             clearFirewall();
             input.value = "";
         } else {
-            console.log("DEBUG: Input does not match code.");
+            if (DEBUG_ENABLED) console.log("DEBUG: Input does not match code.");
             input.style.borderColor = 'red';
             setTimeout(() => input.style.borderColor = 'var(--primary-cyan)', 500);
             SoundManager.playSFX('error');
@@ -466,7 +466,7 @@ export function checkFirewallInput() {
 
 function clearFirewall() {
     const gameState = getGameState();
-    console.log("DEBUG: clearFirewall called. Setting firewallActive to false.");
+    if (DEBUG_ENABLED) console.log("DEBUG: clearFirewall called. Setting firewallActive to false.");
     gameState.firewallActive = false;
     updateStatistic('firewallsCleared', 1);
 
