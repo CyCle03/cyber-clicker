@@ -316,6 +316,23 @@ export function rebootSystem() {
     }
 }
 
+// Mass Glitch Event
+let massGlitchEventActive = false;
+
+function startMassGlitchEvent(duration) {
+    if (massGlitchEventActive) return;
+
+    massGlitchEventActive = true;
+    logMessage("WARNING: System instability detected! Glitch flood incoming!");
+    SoundManager.playSFX('alert'); // Using alert sound for now
+
+    setTimeout(() => {
+        massGlitchEventActive = false;
+        logMessage("System stability restored.");
+    }, duration);
+}
+
+
 // Glitch System
 let glitchRemovalTimeoutId;
 
@@ -348,8 +365,10 @@ export function spawnGlitch() {
 }
 
 function handleGlitchClick() {
-    // When a glitch is clicked (manually or via auto-glitch), clear the expiration timeout.
-    clearTimeout(glitchRemovalTimeoutId);
+    // When a glitch is clicked, do not clear the expiration timeout during a mass glitch event.
+    if (!massGlitchEventActive) {
+        clearTimeout(glitchRemovalTimeoutId);
+    }
 
     const gameState = getGameState();
     const baseReward = Math.floor(Math.random() * (GLITCH_CONFIG.maxReward - GLITCH_CONFIG.minReward + 1)) + GLITCH_CONFIG.minReward;
@@ -464,6 +483,11 @@ function clearFirewall() {
     SoundManager.playSFX('success');
     logMessage(`FIREWALL BREACHED! REWARD: +${formatNumber(reward)} BITS`);
     updateDisplay();
+
+    // 10% chance to trigger mass glitch event
+    if (Math.random() < 0.1) {
+        startMassGlitchEvent(30000); // 30 seconds
+    }
 }
 
 // Data Breach Mini-game
@@ -596,6 +620,11 @@ function endDataBreach(success) {
             addBits(reward);
             logMessage(`BREACH SUCCESSFUL! Stolen Data Value: ${formatNumber(reward)} Bits`);
             SoundManager.playSFX('success');
+
+            // 20% chance to trigger mass glitch event
+            if (Math.random() < 0.2) {
+                startMassGlitchEvent(30000); // 30 seconds
+            }
         } else {
             logMessage(`BREACH FAILED. Connection Terminated.`);
             SoundManager.playSFX('error');
