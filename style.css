@@ -527,7 +527,7 @@ body {
     filter: grayscale(1);
     cursor: default;
     border-color: #555;
-    pointer-events: none;
+    pointer-events: auto;
 }
 
 .upgrade-item.disabled:hover {

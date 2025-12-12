@@ -46,6 +46,9 @@ export function setFirewallInput(element) { firewallInput = element; }
 /** @type {HTMLElement|null} */
 let bitsTooltip = null;
 
+/** @type {HTMLElement|null} */
+let shopTooltip = null;
+
 // Shop State
 let currentShopCategory = 'All'; // Default category set to All
 /** @type {((arg0: string) => void) | null} */
@@ -275,6 +278,24 @@ export function initUI() {
         bitsTooltip.style.boxShadow = '0 0 10px rgba(0, 255, 234, 0.25)';
         bitsTooltip.style.display = 'none';
         document.body.appendChild(bitsTooltip);
+    }
+
+    if (!shopTooltip) {
+        shopTooltip = document.createElement('div');
+        shopTooltip.id = 'shop-tooltip';
+        shopTooltip.style.position = 'fixed';
+        shopTooltip.style.zIndex = '99999';
+        shopTooltip.style.pointerEvents = 'none';
+        shopTooltip.style.padding = '6px 8px';
+        shopTooltip.style.border = '1px solid rgba(255, 215, 0, 0.6)';
+        shopTooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+        shopTooltip.style.color = 'var(--primary-gold)';
+        shopTooltip.style.fontFamily = 'var(--font-main)';
+        shopTooltip.style.fontSize = '12px';
+        shopTooltip.style.borderRadius = '4px';
+        shopTooltip.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.25)';
+        shopTooltip.style.display = 'none';
+        document.body.appendChild(shopTooltip);
     }
 
     if (bitsDisplay && bitsTooltip) {
@@ -713,6 +734,27 @@ export function renderShop(buyCallback) {
             item.classList.add('disabled');
             item.onclick = null;
         }
+
+        // Tooltip for unaffordable items: show missing BITS on hover.
+        item.onmouseenter = (ev) => {
+            if (!shopTooltip) return;
+            const currentGameState = getGameState();
+            const missing = Math.max(0, upgrade.cost - (currentGameState.bits || 0));
+            if (missing <= 0) return;
+            shopTooltip.innerText = `${formatNumber(missing)} BITS needed`;
+            shopTooltip.style.display = 'block';
+            shopTooltip.style.left = `${/** @type {MouseEvent} */(ev).clientX + 12}px`;
+            shopTooltip.style.top = `${/** @type {MouseEvent} */(ev).clientY + 12}px`;
+        };
+        item.onmouseleave = () => {
+            if (!shopTooltip) return;
+            shopTooltip.style.display = 'none';
+        };
+        item.onmousemove = (ev) => {
+            if (!shopTooltip || shopTooltip.style.display === 'none') return;
+            shopTooltip.style.left = `${/** @type {MouseEvent} */(ev).clientX + 12}px`;
+            shopTooltip.style.top = `${/** @type {MouseEvent} */(ev).clientY + 12}px`;
+        };
 
         // Build contribution text
         const contribution = calculateGPSContribution(upgrade.id);
