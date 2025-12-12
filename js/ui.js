@@ -914,9 +914,19 @@ export function updateRebootButton(potentialLevel) {
     if (!gameState || !rebootButton) return;
     
     const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
+
     if (potentialLevel > gameState.rootAccessLevel) {
         if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
         rebootButton.classList.remove('disabled');
+
+        const currentLevel = gameState.rootAccessLevel;
+        const nextLevel = currentLevel + 1;
+        const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
+        const remainingBits = Math.max(0, requiredBits - (gameState.lifetimeBits || 0));
+        const bonusPercent = currentLevel * 10;
+
+        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(READY: LVL ${currentLevel} → LVL ${potentialLevel})<br>(Remaining: ${formatNumber(remainingBits)} BITS)`;
+        if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
     } else {
         if (btnText) btnText.innerText = `REBOOT SYSTEM`;
         rebootButton.classList.add('disabled');
@@ -927,9 +937,10 @@ export function updateRebootButton(potentialLevel) {
 
         // Updated to match new 10M base requirement
         const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
+        const remainingBits = Math.max(0, requiredBits - (gameState.lifetimeBits || 0));
         const bonusPercent = currentLevel * 10;
 
-        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)<br>(Remaining: ${formatNumber(remainingBits)} BITS)`;
         if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
 
         // Enable/disable reboot button
