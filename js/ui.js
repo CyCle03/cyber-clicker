@@ -933,11 +933,12 @@ export function updateRebootButton(potentialLevel) {
         (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = true;
 
         const nextLevel = currentLevel + 1;
+        const bonusPercent = currentLevel * 10;
         // Formula for required bits for the next level
         const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
-        const bonusPercent = currentLevel * 10;
+        const bitsToNextLevel = Math.max(0, requiredBits - gameState.lifetimeBits);
 
-        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
+        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)<br>(${formatNumber(bitsToNextLevel)} BITS remaining)`;
         if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
     }
 }
