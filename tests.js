@@ -3,7 +3,7 @@ import { getGameState, initState, loadState } from './js/state.js';
 import { UPGRADES, SKILL_TREE } from './js/constants.js';
 import { addBits, buyUpgrade, calculateGPS, buySkill } from './js/game.js';
 import { calculatePotentialRootAccess } from './js/formulas.js'; // Import from formulas.js
-import { initUI } from './js/ui.js'; // Import initUI
+import { initUI, renderShop, updateShopUI, updateRebootButton } from './js/ui.js'; // Import initUI
 import { SoundManager } from './js/sound.js';
 
 (function () {
@@ -213,6 +213,7 @@ import { SoundManager } from './js/sound.js';
         gameState.lifetimeBits = 10000000 * Math.pow(10, 1/5) * 0.9 + 1; // 90% of required for level 1
         let potential = calculatePotentialRootAccess();
         assert(potential === 1, "Should be 1 with skill reduction");
+
     });
 
     test("Game | Buy Skill - Success", () => {
@@ -237,6 +238,52 @@ import { SoundManager } from './js/sound.js';
         gameState.skills.click_efficiency = SKILL_TREE.click_efficiency.maxLevel;
         buySkill("click_efficiency");
         assert(gameState.skills.click_efficiency === SKILL_TREE.click_efficiency.maxLevel, "Click efficiency skill level should remain maxed");
+    });
+
+    test("UI | Shop - Disabled when unaffordable, clickable again when affordable", () => {
+        const gameState = getGameState();
+
+        // Ensure shop is rendered with the buy callback captured.
+        gameState.bits = 0;
+        renderShop(buyUpgrade);
+
+        const clickerEl = /** @type {HTMLElement|null} */ (document.getElementById('upgrade-clicker'));
+        assert(!!clickerEl, "Clicker element should exist after renderShop");
+        if (!clickerEl) throw new Error('Clicker element missing');
+
+        assert(clickerEl.classList.contains('disabled'), "Unaffordable item should be disabled");
+        assert(clickerEl.onclick === null, "Unaffordable item should not be clickable");
+
+        // Become affordable; UI should restore click handler.
+        gameState.bits = 1000;
+        updateShopUI();
+        assert(!clickerEl.classList.contains('disabled'), "Affordable item should no longer be disabled");
+        assert(typeof clickerEl.onclick === 'function', "Affordable item should be clickable");
+
+        // Simulate click and ensure upgrade was purchased.
+        clickerEl.click();
+        assert(gameState.upgrades.clicker.count === 1, "Clicking should purchase the upgrade");
+    });
+
+    test("UI | Reboot Display - Shows remaining bits and READY state", () => {
+        const gameState = getGameState();
+        const rebootLevelDisplay = /** @type {HTMLElement|null} */ (document.getElementById('reboot-level-display'));
+        assert(!!rebootLevelDisplay, "reboot-level-display should exist");
+        if (!rebootLevelDisplay) throw new Error('reboot-level-display missing');
+
+        // Not ready case
+        gameState.rootAccessLevel = 0;
+        gameState.lifetimeBits = 0;
+        updateRebootButton(calculatePotentialRootAccess());
+        assert(rebootLevelDisplay.innerHTML.includes('Remaining:'), "Reboot display should include Remaining bits");
+        assert(rebootLevelDisplay.innerHTML.includes('Next:'), "Reboot display should include Next level info");
+
+        // Ready case
+        const nextLevel = gameState.rootAccessLevel + 1;
+        const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
+        gameState.lifetimeBits = requiredBits + 1;
+        updateRebootButton(calculatePotentialRootAccess());
+        assert(rebootLevelDisplay.innerHTML.includes('READY'), "Reboot display should show READY when potential level increases");
     });
 
     // Summary
