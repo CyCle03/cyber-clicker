@@ -677,6 +677,11 @@ body {
     animation: numberGlow 0.6s ease;
 }
 
+.hud .value {
+    user-select: none;
+    cursor: default;
+}
+
 /* --- Data Breach Mini-game --- */
 .breach-container {
     background: rgba(0, 0, 0, 0.95);

@@ -39,7 +39,11 @@ let shopCategoriesNav; // New: Container for shop category tabs
 /** @type {HTMLInputElement} */
 let firewallInput;
 export function getFirewallInput() { return firewallInput; }
+/** @param {HTMLInputElement} element */
 export function setFirewallInput(element) { firewallInput = element; }
+
+/** @type {HTMLElement|null} */
+let bitsTooltip = null;
 
 // Shop Pagination State
 let shopCurrentPage = 1;
@@ -237,6 +241,42 @@ export function initUI() {
     if (!bitsDisplay) { console.error("UI: Bits display not found!"); logMessage("ERROR: Bits display not found!"); }
     else { logMessage("DEBUG: Bits display found."); }
 
+    if (!bitsTooltip) {
+        bitsTooltip = document.createElement('div');
+        bitsTooltip.id = 'bits-tooltip';
+        bitsTooltip.style.position = 'fixed';
+        bitsTooltip.style.zIndex = '99999';
+        bitsTooltip.style.pointerEvents = 'none';
+        bitsTooltip.style.padding = '6px 8px';
+        bitsTooltip.style.border = '1px solid rgba(0, 255, 234, 0.6)';
+        bitsTooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+        bitsTooltip.style.color = 'var(--primary-cyan)';
+        bitsTooltip.style.fontFamily = 'var(--font-main)';
+        bitsTooltip.style.fontSize = '12px';
+        bitsTooltip.style.borderRadius = '4px';
+        bitsTooltip.style.boxShadow = '0 0 10px rgba(0, 255, 234, 0.25)';
+        bitsTooltip.style.display = 'none';
+        document.body.appendChild(bitsTooltip);
+    }
+
+    if (bitsDisplay && bitsTooltip) {
+        const tooltip = bitsTooltip;
+        bitsDisplay.addEventListener('mouseenter', () => {
+            const exact = bitsDisplay.dataset.exactValue;
+            if (!exact) return;
+            tooltip.innerText = exact;
+            tooltip.style.display = 'block';
+        });
+        bitsDisplay.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+        bitsDisplay.addEventListener('mousemove', (ev) => {
+            if (tooltip.style.display === 'none') return;
+            tooltip.style.left = `${ev.clientX + 12}px`;
+            tooltip.style.top = `${ev.clientY + 12}px`;
+        });
+    }
+
     // Tab Logic
     document.querySelectorAll('.tab-btn').forEach(btn => {
         const el = /** @type {HTMLElement} */ (btn); // Added type assertion
@@ -280,11 +320,12 @@ export function formatNumber(num) {
         return (isNegative ? '-' : '') + absNum.toExponential(3);
     }
 
-    let shortValue = parseFloat((suffixNum !== 0 ? (absNum / Math.pow(1000, suffixNum)) : absNum).toPrecision(5));
-    let shortValueStr = String(shortValue);
-    if (shortValue % 1 !== 0) {
-        shortValueStr = shortValue.toFixed(3);
-    }
+    const scaled = suffixNum !== 0 ? (absNum / Math.pow(1000, suffixNum)) : absNum;
+    // Keep the display width stable: fixed decimals for compact values.
+    // This reduces visual jitter when the value changes quickly.
+    let shortValueStr = scaled.toFixed(2);
+    // Trim trailing zeros and the dot if needed (e.g., 1.00 -> 1, 1.20 -> 1.2)
+    shortValueStr = shortValueStr.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
     return (isNegative ? '-' : '') + shortValueStr + suffixes[suffixNum];
 }
 
@@ -312,8 +353,6 @@ export function logMessage(msg) {
     div.className = 'log-entry';
     div.innerText = `> ${msg}`;
     gameLog.prepend(div);
-
-
 }
 
 export function updateDisplay() {
@@ -325,6 +364,10 @@ export function updateDisplay() {
     
     if (bitsDisplay) {
         bitsDisplay.innerText = formatNumber(gameState.bits || 0);
+        bitsDisplay.dataset.exactValue = (gameState.bits || 0).toLocaleString();
+        if (bitsTooltip && bitsTooltip.style.display !== 'none') {
+            bitsTooltip.innerText = bitsDisplay.dataset.exactValue;
+        }
     } else {
         console.error("UI: bitsDisplay is missing in updateDisplay");
     }
