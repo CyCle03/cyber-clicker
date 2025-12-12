@@ -8,6 +8,29 @@ An incremental clicker game with a space theme.
 
 This is an incremental/idle clicker game. Your goal is to generate resources, purchase upgrades, and progress through the game.
 
+## 🕹️ Gameplay
+
+### Core Loop
+- **Generate Bits**: Click the main button to generate `Bits`, the primary currency.
+- **Buy Upgrades**: Purchase upgrades from the Shop to increase your `GPS` (Global Processing Speed), which automatically generates Bits for you.
+- **Reboot (Prestige)**: When you've earned enough Bits, `Reboot` the system to gain `Root Access` levels. This is the prestige system, which resets your Bits and upgrades but provides permanent bonuses and `Skill Points`.
+
+### Currencies
+- **Bits**: The primary currency used to purchase standard upgrades.
+- **Cryptos**: A premium currency earned from hacking `Glitches` and unlocking `Achievements`. Used to buy powerful items in the Black Market.
+- **Skill Points**: Earned from Rebooting. Used to unlock permanent buffs in the Skill Tree.
+
+### Events & Minigames
+- **Glitches**: Clickable entities that appear randomly on screen. Hacking them awards Cryptos.
+- **Firewall**: A minigame that appears periodically, temporarily reducing your GPS until you solve the code. Solving it provides a large Bit reward.
+- **Data Breach**: A tile-matching minigame where you must find all the data nodes before time runs out.
+- **Mass Glitch Event**: A rare, chaotic event where glitches begin to spawn at an accelerated and compounding rate for a short period.
+
+### Progression
+- **Shop**: The primary source for purchasing upgrades that increase your GPS and manual clicking power.
+- **Black Market**: A special shop where you can spend Cryptos on powerful temporary boosts, instant Bit infusions, and permanent upgrades.
+- **Skill Tree**: A tree of powerful, permanent buffs that can be unlocked using Skill Points.
+
 ## 🚀 Getting Started
 
 ### Installation
