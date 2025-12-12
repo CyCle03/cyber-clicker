@@ -194,11 +194,9 @@ export function resetStateForPrestige(newRootLevel) {
     
     Object.assign(gameState, {
         bits: 0,
-        lifetimeBits: 0,
         gps: 0,
         clickPower: 1,
         rootAccessLevel: newRootLevel,
-        permanentMultiplier: gameState.permanentMultiplier * 1.1, // +10% permanent bonus per reboot
         skillPoints: gameState.skillPoints + (levelsGained > 0 ? levelsGained : 0),
         activeBoosts: [],
         upgrades: JSON.parse(JSON.stringify(UPGRADES)), // Reset upgrades
