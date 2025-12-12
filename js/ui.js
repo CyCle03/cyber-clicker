@@ -912,34 +912,34 @@ export function renderStatistics() {
 export function updateRebootButton(potentialLevel) {
     const gameState = getGameState();
     if (!gameState || !rebootButton) return;
-
-    const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
-    const currentLevel = gameState.rootAccessLevel;
     
-    if (potentialLevel > currentLevel) {
-        // CAN REBOOT
-        if (btnText) btnText.innerText = `REBOOT (LVL ${currentLevel} → ${potentialLevel})`;
+    const btnText = /** @type {HTMLElement} */ (rebootButton.querySelector('.text'));
+    if (potentialLevel > gameState.rootAccessLevel) {
+        if (btnText) btnText.innerText = `REBOOT (LVL ${gameState.rootAccessLevel} → ${potentialLevel})`;
         rebootButton.classList.remove('disabled');
-        (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = false;
-        
-        const cryptosGained = potentialLevel - currentLevel;
-        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Gain ${cryptosGained} Crypto(s) on reboot.`;
-        if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Next Level Bonus: +${potentialLevel * 10}% GPS`;
-
     } else {
-        // CANNOT REBOOT
         if (btnText) btnText.innerText = `REBOOT SYSTEM`;
         rebootButton.classList.add('disabled');
-        (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = true;
-
+        // Display Root Access info
+        const currentLevel = gameState.rootAccessLevel;
+        const calculatedPotentialLevel = calculatePotentialRootAccess();
         const nextLevel = currentLevel + 1;
-        const bonusPercent = currentLevel * 10;
-        // Formula for required bits for the next level
-        const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
-        const bitsToNextLevel = Math.max(0, requiredBits - gameState.lifetimeBits);
 
-        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)<br>(${formatNumber(bitsToNextLevel)} BITS remaining)`;
+        // Updated to match new 10M base requirement
+        const requiredBits = 10000000 * Math.pow(10, nextLevel / 5);
+        const bonusPercent = currentLevel * 10;
+
+        if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)`;
         if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
+
+        // Enable/disable reboot button
+        if (calculatedPotentialLevel > currentLevel) {
+            rebootButton.classList.remove('disabled');
+            (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = false;
+        } else {
+            rebootButton.classList.add('disabled');
+            (/** @type {HTMLButtonElement} */ (rebootButton)).disabled = true;
+        }
     }
 }
 
