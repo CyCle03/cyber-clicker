@@ -60,6 +60,12 @@ let lastBitsDisplayText = '';
 let lastGPSDisplayText = '';
 /** @type {string} */
 let lastCryptoDisplayText = '';
+/** @type {string} */
+let lastBitsExactValueText = '';
+/** @type {string} */
+let lastGPSBonusText = '';
+/** @type {string} */
+let lastGPSBonusDisplay = '';
 
 // Throttle heavy UI sections
 /** @type {number} */
@@ -379,9 +385,13 @@ export function updateDisplay() {
             bitsDisplay.innerText = nextBitsText;
             lastBitsDisplayText = nextBitsText;
         }
-        bitsDisplay.dataset.exactValue = (gameState.bits || 0).toLocaleString();
+        const nextBitsExact = (gameState.bits || 0).toLocaleString();
+        if (nextBitsExact !== lastBitsExactValueText) {
+            bitsDisplay.dataset.exactValue = nextBitsExact;
+            lastBitsExactValueText = nextBitsExact;
+        }
         if (bitsTooltip && bitsTooltip.style.display !== 'none') {
-            bitsTooltip.innerText = bitsDisplay.dataset.exactValue;
+            bitsTooltip.innerText = lastBitsExactValueText;
         }
     } else {
         console.error("UI: bitsDisplay is missing in updateDisplay");
@@ -417,10 +427,20 @@ export function updateDisplay() {
 
             if (totalMultiplier > 1) {
                 const bonusPercent = ((totalMultiplier - 1) * 100).toFixed(0);
-                bonusEl.innerText = `(+${bonusPercent}%)`;
-                bonusEl.style.display = 'inline';
+                const nextBonusText = `(+${bonusPercent}%)`;
+                if (nextBonusText !== lastGPSBonusText) {
+                    bonusEl.innerText = nextBonusText;
+                    lastGPSBonusText = nextBonusText;
+                }
+                if (lastGPSBonusDisplay !== 'inline') {
+                    bonusEl.style.display = 'inline';
+                    lastGPSBonusDisplay = 'inline';
+                }
             } else {
-                bonusEl.style.display = 'none';
+                if (lastGPSBonusDisplay !== 'none') {
+                    bonusEl.style.display = 'none';
+                    lastGPSBonusDisplay = 'none';
+                }
             }
         }
     }
@@ -474,11 +494,15 @@ export function updateDisplay() {
     }
     lastShopUIUpdateTime = now;
 
-    const shopItems = shopItemList.querySelectorAll('.upgrade-item');
+    const shopChildren = shopItemList.children;
     const gameStateBits = gameState.bits || 0;
 
-    shopItems.forEach(itemEl => {
-        const itemHTMLElement = /** @type {HTMLElement} */ (itemEl);
+    for (let i = 0; i < shopChildren.length; i++) {
+        const itemEl = shopChildren[i];
+        if (!(itemEl instanceof HTMLElement)) continue;
+        if (!itemEl.classList.contains('upgrade-item')) continue;
+
+        const itemHTMLElement = itemEl;
         const upgradeId = itemEl.id.replace('upgrade-', '');
         const upgrade = gameState.upgrades[upgradeId];
         if (upgrade) {
@@ -553,7 +577,7 @@ export function updateDisplay() {
                 }
             }
         }
-    });
+    }
 }
 
 /**
