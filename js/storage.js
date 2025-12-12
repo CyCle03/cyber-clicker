@@ -30,27 +30,7 @@ export function saveGame() {
         lastSaveTime: Date.now()
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-
-    // Show Save Indicator with improved feedback
-    const indicator = document.getElementById('save-indicator');
-    if (indicator) {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        indicator.textContent = `✓ Saved at ${timeString}`;
-        indicator.classList.add('visible');
-        
-        // Add animation class for better visual feedback
-        indicator.style.opacity = '1';
-        indicator.style.transform = 'translateY(0)';
-        
-        setTimeout(() => {
-            indicator.style.opacity = '0';
-            indicator.style.transform = 'translateY(-10px)';
-            setTimeout(() => {
-                indicator.classList.remove('visible');
-            }, 300);
-        }, 2000);
-    }
+    console.log("DEBUG: saveGame - Root Access Level saved:", gameState.rootAccessLevel);
 }
 
 /**
@@ -83,14 +63,18 @@ export function loadGame() {
     if (saved) {
         try {
             const data = JSON.parse(saved);
+            console.log("DEBUG: loadGame - Save data found and parsed.");
             // Migrate save data if needed
             const migratedData = migrateSaveData(data);
             loadState(migratedData);
             return true;
         } catch (e) {
             console.error("Save file corrupted", e);
+            console.log("DEBUG: loadGame - Save file corrupted. Initializing fresh.");
             // If save is corrupted, proceed to initialize fresh
         }
+    } else {
+        console.log("DEBUG: loadGame - No save data found. Initializing fresh.");
     }
     // If no save, or save corrupted, initialize fresh
     loadState(null); // Initialize fresh if no save

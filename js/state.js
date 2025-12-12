@@ -95,9 +95,11 @@ export function loadState(savedData) {
     // Ensure gameState is initialized before loading
     if (!gameState.achievements || !Array.isArray(gameState.achievements)) {
         initState();
+        console.log("DEBUG: loadState - Game state initialized.");
     }
     
     if (savedData) {
+        console.log("DEBUG: loadState - Loading saved data for rootAccessLevel:", savedData.rootAccessLevel);
         gameState.bits = savedData.bits || 0;
         gameState.lifetimeBits = savedData.lifetimeBits || 0;
         gameState.rootAccessLevel = savedData.rootAccessLevel || 0;
@@ -185,6 +187,9 @@ export function loadState(savedData) {
             gameState.skillPoints = gameState.rootAccessLevel - totalSkillPointsEarned;
             console.log(`Migration: Granted ${gameState.skillPoints} skill points based on Root Access Level ${gameState.rootAccessLevel}`);
         }
+        console.log("DEBUG: loadState - Root Access Level after loading:", gameState.rootAccessLevel);
+    } else {
+        console.log("DEBUG: loadState - No savedData provided. State initialized to defaults.");
     }
 }
 
