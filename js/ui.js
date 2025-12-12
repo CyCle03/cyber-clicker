@@ -49,6 +49,9 @@ let bitsTooltip = null;
 let currentShopCategory = 'All'; // Default category set to All
 /** @type {((arg0: string) => void) | null} */
 let shopBuyCallback = null;
+/** @type {number} */
+let lastShopUIUpdateTime = 0;
+const SHOP_UI_UPDATE_INTERVAL_MS = 250;
 
 export function nextShopPage() {
     // Pagination removed: shop is now scroll-based.
@@ -416,10 +419,23 @@ export function updateDisplay() {
 
         return;
     }
+
+    const shopPane = document.getElementById('tab-shop');
+    if (!shopPane || !shopPane.classList.contains('active')) {
+        return;
+    }
+
+    const now = Date.now();
+    if (now - lastShopUIUpdateTime < SHOP_UI_UPDATE_INTERVAL_MS) {
+        return;
+    }
+    lastShopUIUpdateTime = now;
+
     const shopItems = shopItemList.querySelectorAll('.upgrade-item');
     const gameStateBits = gameState.bits || 0;
 
     shopItems.forEach(itemEl => {
+        const itemHTMLElement = /** @type {HTMLElement} */ (itemEl);
         const upgradeId = itemEl.id.replace('upgrade-', '');
         const upgrade = gameState.upgrades[upgradeId];
         if (upgrade) {
@@ -464,9 +480,12 @@ export function updateDisplay() {
 
             // Re-evaluate disabled state for the item itself
             if (canAfford) {
-                itemEl.classList.remove('disabled');
+                itemHTMLElement.classList.remove('disabled');
+                const cb = shopBuyCallback;
+                if (cb) itemHTMLElement.onclick = () => cb(upgradeId);
             } else {
-                itemEl.classList.add('disabled');
+                itemHTMLElement.classList.add('disabled');
+                itemHTMLElement.onclick = null;
             }
             
             // Only show progress bar if not affordable
@@ -564,6 +583,7 @@ export function createBinaryParticle(x, y) {
  * @param {(arg0: string) => void} buyCallback 
  */
 export function renderShop(buyCallback) {
+    shopBuyCallback = buyCallback;
     const gameState = getGameState();
     const shopCategoriesNav = document.getElementById('shop-categories-nav'); // Get the categories nav element
     if (!shopCategoriesNav) {
@@ -810,14 +830,19 @@ export function updateShopUI() {
     // Iterate only over currently displayed upgrade items
     const shopItems = shopItemList.querySelectorAll('.upgrade-item');
     shopItems.forEach(itemEl => {
+        const itemHTMLElement = /** @type {HTMLElement} */ (itemEl);
         const upgradeId = itemEl.id.replace('upgrade-', '');
         const upgrade = gameState.upgrades[upgradeId];
         if (upgrade) {
             if (gameState.bits < upgrade.cost) {
-                itemEl.classList.add('disabled');
+                itemHTMLElement.classList.add('disabled');
+                itemHTMLElement.onclick = null;
             } else {
-                itemEl.classList.remove('disabled');
+                itemHTMLElement.classList.remove('disabled');
+                const cb = shopBuyCallback;
+                if (cb) itemHTMLElement.onclick = () => cb(upgradeId);
             }
+
             // Update progress bar and text for currently displayed items
             const canAfford = gameState.bits >= upgrade.cost;
             const progressPercent = canAfford ? 100 : Math.min(100, (gameState.bits / upgrade.cost) * 100);
@@ -826,7 +851,7 @@ export function updateShopUI() {
             const progressBar = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-bar'));
             const progressText = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-progress-text'));
             const upgradeInfo = /** @type {HTMLElement} */ (itemEl.querySelector('.upgrade-info'));
-            
+
             if (progressBar) progressBar.style.width = `${progressPercent}%`;
             if (progressText) progressText.innerText = `${formatNumber(bitsNeeded)} BITS needed`;
 
