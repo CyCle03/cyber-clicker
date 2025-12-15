@@ -8,9 +8,9 @@ import { SoundManager } from "./sound.js";
 const SAVE_KEY = 'cyberClickerSave';
 const SAVE_VERSION = 1; // Increment this when save format changes
 
-export function saveGame() {
+function buildSaveData() {
     const gameState = getGameState();
-    const saveData = {
+    return {
         version: SAVE_VERSION,
         bits: gameState.bits,
         lifetimeBits: gameState.lifetimeBits,
@@ -30,8 +30,12 @@ export function saveGame() {
         autoGlitchEnabled: gameState.autoGlitchEnabled,
         lastSaveTime: Date.now()
     };
+}
+
+export function saveGame() {
+    const saveData = buildSaveData();
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-    debugLog("DEBUG: saveGame - Root Access Level saved:", gameState.rootAccessLevel);
+    debugLog("DEBUG: saveGame - Root Access Level saved:", getGameState().rootAccessLevel);
 }
 
 /**
@@ -97,7 +101,7 @@ export function clearSave() {
 
 export function exportSave() {
     try {
-        const json = JSON.stringify(getGameState());
+        const json = JSON.stringify(buildSaveData());
         const b64 = btoa(json);
 
         const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
@@ -133,13 +137,15 @@ export function importSave() {
         const json = atob(b64);
         const data = JSON.parse(json);
 
+        const migratedData = migrateSaveData(data);
+
         // Basic Validation
-        if (typeof data.bits !== 'number' || !data.upgrades) {
+        if (typeof migratedData.bits !== 'number' || !migratedData.upgrades) {
             throw new Error("Invalid save data format.");
         }
 
         if (confirm("WARNING: Importing a save will overwrite your current progress. Are you sure?")) {
-            loadState(data);
+            loadState(migratedData);
             saveGame(); // Save immediately
 
             // Recalculate derived stats

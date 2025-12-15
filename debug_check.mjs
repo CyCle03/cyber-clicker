@@ -27,9 +27,15 @@ global.localStorage = {
     getItem: () => null,
     setItem: () => { }
 };
-global.navigator = {
-    userAgent: 'node'
-};
+
+try {
+    Object.defineProperty(globalThis, 'navigator', {
+        value: { userAgent: 'node' },
+        configurable: true
+    });
+} catch (e) {
+    // ignore
+}
 
 console.log("Starting debug check...");
 try {

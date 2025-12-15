@@ -4,6 +4,14 @@
 
 An incremental clicker game with a space theme.
 
+## 🧩 Tech Stack
+
+- **Runtime**: Browser (static site)
+- **Language**: Vanilla JavaScript (ES Modules)
+- **Entry**: `index.html` → `js/main.js`
+- **Storage**: LocalStorage (save/export/import)
+- **Tests**: Browser-based runner (`tests.html`)
+
 ## 🎮 Game Overview
 
 This is an incremental/idle clicker game. Your goal is to generate resources, purchase upgrades, and progress through the game.
@@ -36,7 +44,7 @@ This is an incremental/idle clicker game. Your goal is to generate resources, pu
 ### Installation
 
 1. Clone the repository.
-2. Open `index.html` in a web browser, or serve it using a local web server:
+2. Serve the project using a local web server (recommended):
 ```bash
 # Using Python
 python -m http.server 8000
@@ -50,12 +58,14 @@ php -S localhost:8000
 
 3. Open `http://localhost:8000` in your browser
 
+You can also open `index.html` directly in a browser, but some browsers restrict ES module loading or LocalStorage behavior on `file://`.
+
 ### Requirements
 
 - Modern web browser with JavaScript enabled
 - No additional dependencies required (vanilla JavaScript)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 /
@@ -64,6 +74,7 @@ php -S localhost:8000
 ├── favicon.ico
 ├── index.html
 ├── README.md
+├── script.js
 ├── style.css
 ├── tests.html
 ├── tests.js
@@ -84,7 +95,11 @@ php -S localhost:8000
 
 ## 🧪 Testing
 
-Run the test suite by opening `tests.html` in a browser.
+Run the test suite by serving the project and opening `tests.html` in a browser.
+
+- **Recommended**
+  - Start a local server (see Getting Started)
+  - Open `http://localhost:8000/tests.html`
 
 ## ✅ Release Checklist
 
@@ -121,6 +136,31 @@ Run the test suite by opening `tests.html` in a browser.
 - Uses JSDoc for type annotations
 - ES6 modules
 - TypeScript-style type checking with `// @ts-check`
+
+### Notes
+- This repository is a static site (no `package.json` / build step).
+- GitHub Pages deployment is done by pushing to the branch configured in GitHub repo settings.
+
+### Dev Utilities
+
+- `script.js`
+  - JSDoc type definitions used by `// @ts-check` (e.g. `Achievement`, `StoryEvent`).
+  - Not required at runtime; used for editor/type checking.
+- `debug_check.mjs`
+  - Node-based smoke check that mocks minimal browser globals and imports `js/game.js`.
+  - Useful for catching broken imports or syntax errors early.
+  - Run:
+    ```bash
+    node debug_check.mjs
+    ```
+
+### GitHub Pages Deployment
+
+- The live site is hosted on GitHub Pages.
+- To confirm or change the deployment source:
+  - Go to GitHub repository Settings
+  - Pages
+  - Check which Branch/Folder is used as the source
 
 ### Contributing
 
