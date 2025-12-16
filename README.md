@@ -40,6 +40,8 @@ This is an incremental/idle clicker game. Your goal is to generate resources, pu
 - **Shop**: The primary source for purchasing upgrades that increase your GPS and manual clicking power.
 - **Black Market**: A special shop where you can spend Cryptos on powerful temporary boosts, instant Bit infusions, and permanent upgrades.
 - **Skill Tree**: A tree of powerful, permanent buffs that can be unlocked using Skill Points.
+- **Tutorial**: An integrated guide that walks new users through the basics of the game.
+- **Settings**: Audio controls (Master Volume, Mute) and Data Management options.
 
 ## 🚀 Getting Started
 
@@ -215,6 +217,8 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 - **상점**: GPS와 클릭력을 높여주는 업그레이드를 구매할 수 있는 주요 장소입니다.
 - **블랙마켓**: 암호화폐를 사용해 강력한 임시 부스트, 즉시 비트 획득, 영구 업그레이드 등을 구매할 수 있는 특별한 상점입니다.
 - **스킬 트리**: 스킬 포인트를 사용해 해금할 수 있는 강력한 영구 버프들입니다.
+- **튜토리얼**: 신규 유저에게 게임의 기초를 안내하는 통합 가이드 시스템입니다.
+- **설정**: 오디오 제어 (마스터 볼륨, 음소거) 및 데이터 관리 옵션을 제공합니다.
 
 ## 🚀 시작하기
 
