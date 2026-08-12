@@ -1,6 +1,6 @@
 // @ts-check
 import { getGameState } from "./state.js";
-import { BLACK_MARKET_ITEMS, SKILL_TREE } from "./constants.js";
+import { BLACK_MARKET_ITEMS, DEBUG_ENABLED, SKILL_TREE } from "./constants.js";
 import { calculateGPSContribution, calculateEfficiency, getEfficiencyRating, calculatePotentialRootAccess } from "./formulas.js";
 import { addBits, startDataBreach } from "./game.js";
 import { debugLog, errorLog } from "./logger.js";
@@ -250,11 +250,16 @@ export function initUI() {
     }
 
     // Debug Toggle
+    // 배포본에서는 버튼과 패널을 아예 들어낸다. 화면에서 숨기기만 하면 DOM 에
+    // 그대로 남아 개발자 도구·접근성 트리에는 계속 보인다. ?debug=1 로 다시 켠다.
     const debugToggle = document.getElementById('debug-toggle-btn');
-    if (debugToggle) {
+    const debugConsole = document.getElementById('debug-console-container');
+    if (!DEBUG_ENABLED) {
+        if (debugToggle) debugToggle.remove();
+        if (debugConsole) debugConsole.remove();
+    } else if (debugToggle) {
         debugToggle.addEventListener('click', () => {
-            const consoleEl = document.getElementById('debug-console-container');
-            if (consoleEl) consoleEl.classList.toggle('visible');
+            if (debugConsole) debugConsole.classList.toggle('visible');
         });
     }
 

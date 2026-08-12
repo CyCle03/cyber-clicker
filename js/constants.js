@@ -5,10 +5,24 @@
  * @typedef {import('../script.js').StoryEvent} StoryEvent
  */
 
-export const DEBUG_ENABLED =
-    (typeof window !== 'undefined') &&
-    window.location &&
-    window.location.hostname !== 'cycle03.github.io';
+/**
+ * 디버그 콘솔(우측 DEBUG 버튼 + 로그 패널)을 켤지.
+ *
+ * 원래는 "GitHub Pages 가 아니면 켜짐"이었다. 배포처가 늘자 그 조건이 뒤집혀서
+ * cc.elcherlab.com 에서는 켜진 채로 나갔다. 그래서 **켜는 조건을 명시적으로
+ * 적는 쪽**으로 바꾼다 — 배포처가 또 늘어도 기본은 꺼짐이다.
+ *
+ * 켜는 방법
+ *   - 로컬 개발(localhost, 127.0.0.1, file://)에서는 자동으로 켜진다
+ *   - 배포본에서 잠깐 볼 일이 있으면 주소에 `?debug=1` 을 붙인다
+ */
+export const DEBUG_ENABLED = (() => {
+    if (typeof window === 'undefined' || !window.location) return false;
+    const { hostname, protocol, search } = window.location;
+    if (new URLSearchParams(search || '').get('debug') === '1') return true;
+    if (protocol === 'file:') return true;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+})();
 
 export const UPGRADES = {
     clicker: { id: 'clicker', name: "Mech Switch", cost: 30, gps: 0, click: 1, count: 0, desc: "Mechanical switches for tactile feedback.", category: 'Click' },
