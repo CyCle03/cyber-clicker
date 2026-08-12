@@ -1,5 +1,4 @@
-# Antigravity
-
+# Cyber Clicker
 [![CI Status](https://github.com/CyCle03/cyber-clicker/actions/workflows/ci.yml/badge.svg)](https://github.com/CyCle03/cyber-clicker/actions/workflows/ci.yml)
 
 🌐 **Play Online**: https://pc.elcherlab.com/
