@@ -2,7 +2,7 @@
 
 [![CI Status](https://github.com/CyCle03/cyber-clicker/actions/workflows/ci.yml/badge.svg)](https://github.com/CyCle03/cyber-clicker/actions/workflows/ci.yml)
 
-🌐 **Play Online**: https://cycle03.github.io/cyber-clicker/
+🌐 **Play Online**: https://pc.elcherlab.com/
 
 An incremental clicker game with a space theme.
 
