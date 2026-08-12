@@ -8,6 +8,7 @@ import { addBits, calculateGPS, calculateClickPower, buyUpgrade, buyBlackMarketI
 import { SoundManager } from './sound.js';
 import { calculatePotentialRootAccess } from './formulas.js';
 import { GAME_CONSTANTS } from './constants.js';
+import { syncBeforeBoot, renderAccount } from './cloud.js';
 
 let gameLoopId;
 let autoSaveId;
@@ -248,4 +249,10 @@ function gameLoop(timestamp) {
 }
 
 // Start on DOM Load
-document.addEventListener('DOMContentLoaded', init);
+// 로그인 상태면 서버 저장본을 localStorage 로 먼저 맞춘 뒤 부팅한다.
+// 그래야 아래 init() 의 loadGame() 이 지금까지처럼 localStorage 만 읽으면 된다.
+document.addEventListener('DOMContentLoaded', async () => {
+    await syncBeforeBoot();
+    renderAccount();
+    init();
+});

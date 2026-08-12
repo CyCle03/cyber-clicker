@@ -1734,3 +1734,58 @@ body {
     font-size: 0.8em;
     min-width: auto;
 }
+
+/* ── elcherlab 통합 로그인 (설정 모달) ─────────────────── */
+/* 로그인하면 저장본이 서버에도 올라간다. 로그인하지 않으면 지금까지와 같다. */
+
+.cc-account-status {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.cc-auth-input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--primary-cyan, #0ff);
+    border-radius: 4px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85em;
+}
+
+.cc-auth-input:focus {
+    outline: none;
+    box-shadow: 0 0 6px var(--primary-cyan, #0ff);
+}
+
+.cc-auth-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 0.72em;
+    line-height: 1.5;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.cc-auth-check input {
+    margin: 2px 0 0;
+    flex: none;
+    cursor: pointer;
+}
+
+.cc-auth-check a {
+    color: var(--primary-cyan, #0ff);
+}
+
+.cc-auth-error {
+    margin: 6px 0;
+    font-size: 0.78em;
+    color: #ff6b6b;
+}

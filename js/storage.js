@@ -4,6 +4,7 @@ import { debugLog, errorLog } from "./logger.js";
 import { logMessage, renderAchievements, renderBlackMarket, renderShop, renderSkillTree, updateDisplay, closeSettings } from "./ui.js"; // ADDED closeSettings
 import { buyBlackMarketItem, buySkill, buyUpgrade, calculateClickPower, calculateGPS } from "./game.js";
 import { SoundManager } from "./sound.js";
+import { queuePush, deleteRemote } from "./cloud.js";
 
 const SAVE_KEY = 'cyberClickerSave';
 const SAVE_VERSION = 1; // Increment this when save format changes
@@ -35,6 +36,9 @@ function buildSaveData() {
 export function saveGame() {
     const saveData = buildSaveData();
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    // 로그인 상태면 같은 저장본을 서버에도 올린다(로그아웃 상태면 아무 일도 하지 않는다).
+    // 15초마다 자동 저장되므로 전송은 cloud.js 가 몰아서 한다.
+    queuePush(saveData);
     debugLog("DEBUG: saveGame - Root Access Level saved:", getGameState().rootAccessLevel);
 }
 
@@ -90,7 +94,8 @@ export function hardReset() {
     if (confirm("WARNING: Are you sure you want to wipe ALL game data? This cannot be undone!")) {
         if (confirm("Double Check: Really delete everything?")) {
             localStorage.removeItem(SAVE_KEY);
-            location.reload();
+            // 서버 저장본까지 지운다. 지우지 않으면 다음 부팅 때 그대로 돌아온다.
+            deleteRemote().finally(() => location.reload());
         }
     }
 }

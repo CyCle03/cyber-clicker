@@ -290,6 +290,35 @@
                 <button class="modal-button" data-act="toggleMute" id="mute-btn">MUTE SOUND</button>
             </div>
 
+            <!-- elcherlab 통합 로그인. 로그인하면 저장본이 서버(cc.saves)에도 올라가
+                 다른 기기에서 이어서 할 수 있다. 로그인하지 않으면 지금까지처럼
+                 이 브라우저에만 저장된다. 인라인 핸들러 대신 data-act 를 쓴다(CSP). -->
+            <div class="setting-item">
+                <div class="setting-label">ACCOUNT — elcherlab 통합 로그인</div>
+                <div id="cc-account-status" class="cc-account-status">확인 중…</div>
+
+                <div id="cc-auth-form" hidden>
+                    <input id="cc-auth-user" class="cc-auth-input" type="text" autocomplete="username"
+                        placeholder="아이디 (영문·숫자·밑줄 3~20자)" maxlength="20">
+                    <input id="cc-auth-pass" class="cc-auth-input" type="password" autocomplete="current-password"
+                        placeholder="비밀번호 (6자 이상)">
+                    <label class="cc-auth-check">
+                        <input id="cc-auth-age" type="checkbox">
+                        <span>만 14세 이상이며,
+                            <a href="https://elcherlab.com/terms.html" target="_blank" rel="noopener">이용약관</a>과
+                            <a href="https://elcherlab.com/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>에
+                            동의합니다. <b>(가입할 때만 필요)</b></span>
+                    </label>
+                    <p id="cc-auth-error" class="cc-auth-error" hidden></p>
+                    <div class="export-import-controls">
+                        <button class="modal-button" data-act="ccLogin">LOG IN</button>
+                        <button class="modal-button" data-act="ccSignup">SIGN UP</button>
+                    </div>
+                </div>
+
+                <button id="cc-logout-btn" class="modal-button" data-act="ccLogout" hidden>LOG OUT</button>
+            </div>
+
             <div class="setting-item" id="export-import-section" style="display: block;">
                 <div class="setting-label">DATA MANAGEMENT</div>
                 <div class="export-import-controls">
