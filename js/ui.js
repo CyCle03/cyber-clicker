@@ -221,9 +221,11 @@ export function initUI() {
     // exportImport handling removed as it's now part of the settings modal
 
 
-    // Debug Buttons (only in non-deployed environments)
-    const isDeployed = window.location.hostname === 'cycle03.github.io';
-    if (!isDeployed) {
+    // Debug Buttons
+    // 켜는 판정을 아래 디버그 콘솔과 같은 DEBUG_ENABLED 로 통일한다. 예전에는
+    // "cycle03.github.io 가 아니면 켜짐"이라, 배포처가 늘어난 뒤 cc.elcherlab.com
+    // 에는 비트 100만·데이터 브리치 치트 버튼이 그대로 나가 있었다.
+    if (DEBUG_ENABLED) {
         const debugBtn = document.createElement('button');
         debugBtn.innerText = "DEBUG: +1M Bits";
         debugBtn.onclick = () => addBits(1000000);
