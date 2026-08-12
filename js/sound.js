@@ -1,5 +1,7 @@
 // @ts-check
 
+import { debugLog } from './logger.js';
+
 /**
  * @typedef {Object} SoundManagerType
  * @property {AudioContext|null} audioCtx
@@ -170,7 +172,7 @@ export const SoundManager = {
         if (!this.audioCtx) this.initAudio();
         if (this.audioCtx && this.audioCtx.state === 'suspended') {
             this.audioCtx.resume().then(() => {
-                console.log('AudioContext resumed successfully');
+                debugLog('AudioContext resumed successfully');
             }).catch(e => {
                 console.error('Error resuming AudioContext:', e);
             });
