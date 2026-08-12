@@ -1,0 +1,42 @@
+/*
+ * 웹폰트 자체 호스팅.
+ *
+ * 원래는 fonts.googleapis.com 에서 받았다. elcherlab.com 의 서비스들은 CSP 가
+ * font-src 'self' 라 외부 폰트가 차단되기도 하지만, 그보다 CDN 을 쓰면 방문자
+ * IP 가 Google 로 나가서 개인정보처리방침의 국외이전 표에 사업자를 하나 더
+ * 적어야 한다. woff2 두 개를 저장소에 넣는 편이 훨씬 싸다.
+ *
+ * unicode-range 는 구글이 준 latin 서브셋 그대로다. 한글은 애초에 이 폰트들이
+ * 담고 있지 않아 style.css 의 대체 폰트로 떨어진다 — 기존 동작과 같다.
+ *
+ * 두 폰트 모두 SIL Open Font License 1.1 이다(OFL.txt 참조). 자체 호스팅이
+ * 허용되며, 폰트 파일 자체를 판매하지 않는 한 제약이 없다.
+ */
+
+/* Orbitron — 400 과 700 이 같은 가변 폰트 파일을 쓴다 */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(orbitron-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(orbitron-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(share-tech-mono-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

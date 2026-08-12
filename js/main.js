@@ -1,4 +1,6 @@
 // @ts-check
+// 인라인 onclick 대신 쓰는 위임 핸들러. 부수효과만 있으므로 이름 없이 불러온다.
+import './actions.js';
 import { initState, loadState, getGameState } from './state.js';
 import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton, switchTab } from './ui.js';
 import { loadGame, saveGame } from './storage.js';

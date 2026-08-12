@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyber Clicker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap"
-        rel="stylesheet">
+    <!-- 폰트는 자체 호스팅한다(fonts/fonts.css 의 주석 참조).
+         CDN 을 쓰면 방문자 IP 가 Google 로 나가 개인정보처리방침에 사업자를 하나 더
+         적어야 하고, elcherlab 의 CSP(font-src 'self')에도 걸린다. -->
+    <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="stylesheet" href="style.css?v=2">
 </head>
 
@@ -166,7 +166,7 @@
                             </div>
 
                             <div style="margin-top: 30px; text-align: center; padding-bottom: 20px;">
-                                <button class="cyber-button danger" onclick="hardReset()">HARD RESET DATA</button>
+                                <button class="cyber-button danger" data-act="hardReset">HARD RESET DATA</button>
                             </div>
                         </div>
                     </div>
@@ -179,7 +179,7 @@
         <div class="debug-header">
             <span>SYSTEM DEBUG LOG</span>
             <span style="font-size: 0.8em; cursor: pointer;"
-                onclick="document.getElementById('debug-console-container').classList.remove('visible')">[X]</span>
+                data-act="hideOverlay" data-arg="debug-console-container">[X]</span>
         </div>
         <div id="debug-log"></div>
     </div>
@@ -201,28 +201,28 @@
 
             <!-- Touch Keypad -->
             <div class="keypad-container">
-                <button class="keypad-btn" onclick="handleKeypadInput('1')">1</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('2')">2</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('3')">3</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('A')">A</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="1">1</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="2">2</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="3">3</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="A">A</button>
 
-                <button class="keypad-btn" onclick="handleKeypadInput('4')">4</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('5')">5</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('6')">6</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('B')">B</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="4">4</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="5">5</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="6">6</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="B">B</button>
 
-                <button class="keypad-btn" onclick="handleKeypadInput('7')">7</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('8')">8</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('9')">9</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('C')">C</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="7">7</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="8">8</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="9">9</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="C">C</button>
 
-                <button class="keypad-btn" onclick="handleKeypadInput('0')">0</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('D')">D</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('E')">E</button>
-                <button class="keypad-btn" onclick="handleKeypadInput('F')">F</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="0">0</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="D">D</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="E">E</button>
+                <button class="keypad-btn" data-act="handleKeypadInput" data-arg="F">F</button>
 
-                <button class="keypad-btn control-clr" onclick="handleKeypadInput('CLR')">CLR</button>
-                <button class="keypad-btn control-ok" onclick="handleKeypadInput('OK')">OK</button>
+                <button class="keypad-btn control-clr" data-act="handleKeypadInput" data-arg="CLR">CLR</button>
+                <button class="keypad-btn control-ok" data-act="handleKeypadInput" data-arg="OK">OK</button>
             </div>
         </div>
     </div>
@@ -235,7 +235,7 @@
             <div class="offline-amount" id="offline-amount-display">+0 BITS</div>
             <div style="color: #fff; margin-bottom: 30px;" id="offline-time-display">Time Offline: 0s</div>
             <button class="cyber-button"
-                onclick="document.getElementById('offline-overlay').classList.remove('visible')">
+                data-act="hideOverlay" data-arg="offline-overlay">
                 <div class="btn-content">
                     <span class="text">ACKNOWLEDGE</span>
                 </div>
@@ -245,31 +245,31 @@
 
     <!-- Mobile Navigation Bar -->
     <div class="mobile-nav">
-        <button class="mobile-nav-btn active" data-tab="terminal" onclick="switchMobileTab('terminal')">
+        <button class="mobile-nav-btn active" data-tab="terminal" data-act="switchMobileTab" data-arg="terminal">
             <span class="icon">⚡</span>
             <span class="label">TERM</span>
         </button>
-        <button class="mobile-nav-btn" data-tab="shop" onclick="switchMobileTab('shop')">
+        <button class="mobile-nav-btn" data-tab="shop" data-act="switchMobileTab" data-arg="shop">
             <span class="icon">🛒</span>
             <span class="label">SHOP</span>
         </button>
-        <button class="mobile-nav-btn" data-tab="black-market" onclick="switchMobileTab('black-market')">
+        <button class="mobile-nav-btn" data-tab="black-market" data-act="switchMobileTab" data-arg="black-market">
             <span class="icon">☠️</span>
             <span class="label">MARKET</span>
         </button>
-        <button class="mobile-nav-btn" data-tab="skill-tree" onclick="switchMobileTab('skill-tree')">
+        <button class="mobile-nav-btn" data-tab="skill-tree" data-act="switchMobileTab" data-arg="skill-tree">
             <span class="icon">🧠</span>
             <span class="label">SKILLS</span>
         </button>
-        <button class="mobile-nav-btn" data-tab="achievements" onclick="switchMobileTab('achievements')">
+        <button class="mobile-nav-btn" data-tab="achievements" data-act="switchMobileTab" data-arg="achievements">
             <span class="icon">🏆</span>
             <span class="label">ACHIEVE</span>
         </button>
-        <button class="mobile-nav-btn" data-tab="statistics" onclick="switchMobileTab('statistics')">
+        <button class="mobile-nav-btn" data-tab="statistics" data-act="switchMobileTab" data-arg="statistics">
             <span class="icon">📊</span>
             <span class="label">STATS</span>
         </button>
-        <button class="mobile-nav-btn" onclick="openSettings()">
+        <button class="mobile-nav-btn" data-act="openSettings">
             <span class="icon">⚙️</span>
             <span class="label">SETTING</span>
         </button>
@@ -287,26 +287,26 @@
             </div>
 
             <div class="setting-item">
-                <button class="modal-button" onclick="toggleMute()" id="mute-btn">MUTE SOUND</button>
+                <button class="modal-button" data-act="toggleMute" id="mute-btn">MUTE SOUND</button>
             </div>
 
             <div class="setting-item" id="export-import-section" style="display: block;">
                 <div class="setting-label">DATA MANAGEMENT</div>
                 <div class="export-import-controls">
-                    <button class="modal-button" onclick="exportSave()">EXPORT SAVE</button>
-                    <button class="modal-button" onclick="importSave()">IMPORT SAVE</button>
+                    <button class="modal-button" data-act="exportSave">EXPORT SAVE</button>
+                    <button class="modal-button" data-act="importSave">IMPORT SAVE</button>
                 </div>
                 <textarea id="save-data-area" class="save-data-area" placeholder="Paste save data here to import..."></textarea>
             </div>
 
             <div class="modal-footer">
-                <button class="modal-button" onclick="closeSettings()">CLOSE</button>
+                <button class="modal-button" data-act="closeSettings">CLOSE</button>
             </div>
         </div>
     </div>
 
     <!-- Settings Button (Fixed Top Right) -->
-    <button id="settings-btn" class="settings-btn" onclick="openSettings()">⚙️</button>
+    <button id="settings-btn" class="settings-btn" data-act="openSettings">⚙️</button>
 
     <!-- Save Indicator -->
     <div id="save-indicator" class="save-indicator">
