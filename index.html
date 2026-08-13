@@ -114,7 +114,11 @@
                         <!-- SKILL TREE TAB -->
                         <div id="tab-skill-tree" class="tab-pane">
                             <div class="skill-tree-header">
-                                <div class="skill-points-display">SKILL POINTS: <span id="skill-points-value">0</span>
+                                <!-- 라벨만 data-i18n 을 단다. 바깥 div 에 달면 언어 전환 때
+                                     applyI18n 이 안쪽 값(span)까지 라벨로 덮어쓴다. -->
+                                <div class="skill-points-display"><span
+                                        data-i18n="skills.points">SKILL POINTS:</span> <span
+                                        id="skill-points-value">0</span>
                                 </div>
                                 <div class="skill-tree-info" data-i18n="skills.hint">Unlock Root Access levels to earn Skill Points.</div>
                             </div>

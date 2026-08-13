@@ -605,8 +605,14 @@ function handleNodeClick(node, type) {
 }
 
 function updateBreachUI() {
-    if (breachTimerDisplay) breachTimerDisplay.innerText = `TIME: ${Math.max(0, breachTimeLeft).toFixed(1)}s`;
-    if (breachScoreDisplay) breachScoreDisplay.innerText = `DATA: ${breachScore}/${breachTotalData}`;
+    // 값이 계속 바뀌는 자리라 data-i18n 을 붙일 수 없다(전환 때 라벨로 덮인다).
+    // 그리는 쪽에서 사전을 찾는다.
+    if (breachTimerDisplay) {
+        breachTimerDisplay.innerText = t('breach.time', { sec: Math.max(0, breachTimeLeft).toFixed(1) });
+    }
+    if (breachScoreDisplay) {
+        breachScoreDisplay.innerText = t('breach.score', { got: breachScore, total: breachTotalData });
+    }
 }
 
 /**

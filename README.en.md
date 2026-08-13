@@ -13,7 +13,8 @@ An incremental clicker game with a space theme.
 - **Runtime**: Browser (static site)
 - **Language**: Vanilla JavaScript (ES Modules)
 - **Entry**: `index.html` → `js/main.js`
-- **Storage**: LocalStorage (save/export/import)
+- **Storage**: LocalStorage (save/export/import). Signing in also syncs the save to the server so you can continue on another device
+- **Languages**: English · Korean (English is the source, `js/i18n.js`)
 - **Tests**: Browser-based runner (`tests.html`)
 
 ## 🎮 Game Overview
@@ -77,28 +78,33 @@ You can also open `index.html` directly in a browser, but some browsers restrict
 /
 ├── .github/
 │   └── workflows/
-│       └── ci.yml             # GitHub Actions CI workflow
-├── .gitignore
+│       ├── ci.yml            # Smoke check (every push)
+│       └── deploy.yml        # Push to main → self-hosted runner deploys
 ├── debug_check.mjs           # Node-based smoke test
-├── favicon.ico
 ├── index.html                # Main entry point
-├── README.md
-├── script.js                 # JSDoc type definitions
+├── script.js                 # JSDoc type definitions (imported by constants.js)
 ├── style.css
-├── tests.html                # Test runner
+├── tests.html                # Test runner (open it in a browser)
 ├── tests.js                  # Test suite
+├── fonts/                    # Self-hosted web fonts (Orbitron · Share Tech Mono)
 ├── js/                       # Main game code
+│   ├── actions.js            # Wires data-act clicks to handlers (no inline handlers — CSP)
+│   ├── cloud.js              # elcherlab single sign-on + server save sync
 │   ├── constants.js          # Game constants and configurations
 │   ├── formulas.js           # Game calculations and formulas
 │   ├── game.js               # Core game loop and logic
+│   ├── i18n.js               # English/Korean dictionary and switching (English is the source)
 │   ├── logger.js             # Logging utilities
 │   ├── main.js               # Entry point and event handlers
 │   ├── sound.js              # Audio management
 │   ├── state.js              # Game state management
 │   ├── storage.js            # Save/load functionality
 │   └── ui.js                 # UI updates and interactions
-└── tests/                    # Test files
-    └── state.test.js         # State management tests
+├── scripts/
+│   └── deploy.sh             # Refreshes the web root and restarts the backend (run by the runner)
+└── server/                   # Save-sync backend (Express, session cookie verification)
+    ├── index.js
+    └── session.js
 ```
 
 ## 🧪 Testing
@@ -118,7 +124,7 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 - [ ] Achievements and Story Events are preserved
 - [ ] Save migration (if any) does not reset progress unexpectedly
 
-### GitHub Pages Smoke Test
+### Post-deploy smoke test
 
 - [ ] Fresh load works (no console errors)
 - [ ] Shop
@@ -137,6 +143,8 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 - Manual save/export available in Settings
 - Save data stored in browser's LocalStorage
 - Export/Import functionality for backup
+- Signing in with the elcherlab single sign-on uploads the same save to the server, so you can
+  continue on another device. Without signing in it stays in this browser only
 
 ## 🔧 Development
 
@@ -146,8 +154,9 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 - TypeScript-style type checking with `// @ts-check`
 
 ### Notes
-- This repository is a static site (no `package.json` / build step).
-- GitHub Pages deployment is done by pushing to the branch configured in GitHub repo settings.
+- The game itself is a static site — no build step, no `package.json` at the repository root.
+  Only `server/` (the save-sync backend) has its own `package.json`.
+- Deployment is covered under [Deployment](#deployment) below.
 
 ### Dev Utilities
 
@@ -162,13 +171,20 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
     node debug_check.mjs
     ```
 
-### GitHub Pages Deployment
+### Deployment
 
-- The live site is hosted on GitHub Pages.
-- To confirm or change the deployment source:
-  - Go to GitHub repository Settings
-  - Pages
-  - Check which Branch/Folder is used as the source
+Pushing to `main` runs `.github/workflows/deploy.yml` on this repository's own self-hosted runner
+(`cc-runner`), which publishes to <https://cc.elcherlab.com>.
+
+- The repository is not served as the web root directly. `scripts/deploy.sh` stages only the app
+  files and swaps them in with `rsync --delete`, so the README, the test runner and the dev scripts
+  are never published.
+- A push that only touches `*.md` does not deploy (`paths-ignore`). Docs are excluded from the web
+  root anyway, and they come along with the next deploy's `git reset --hard origin/main`.
+- Only one deploy runs at a time (`concurrency`) — overlapping runs would overwrite the web root
+  simultaneously and leave a mix of files.
+- If the runner is offline the deploy silently sits in `queued`. When a change does not appear
+  live, check the runner first.
 
 ### Contributing
 

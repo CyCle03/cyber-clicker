@@ -2,10 +2,9 @@
 #
 # 사이버 클리커 배포 — 체크아웃(cyber-clicker-src) → 웹루트(cyber-clicker)
 #
-# 저장소를 그대로 웹루트로 쓰지 않는다. 그렇게 하면 README·테스트 러너·
-# 예전 코드(backup/)까지 공개되기 때문이다. elcherlab 에서 이미 두 번
-# 겪은 사고라(elcherlab-home 의 docs/, pixel-pet 의 README.md) 처음부터
-# 앱 파일만 추려 내보낸다.
+# 저장소를 그대로 웹루트로 쓰지 않는다. 그렇게 하면 README·테스트 러너까지
+# 공개되기 때문이다. elcherlab 에서 이미 두 번 겪은 사고라(elcherlab-home 의
+# docs/, pixel-pet 의 README.md) 처음부터 앱 파일만 추려 내보낸다.
 #
 # 빌드가 없는 정적 앱이라 스테이징 후 rsync --delete 가 전부다.
 set -euo pipefail
@@ -22,7 +21,7 @@ trap cleanup EXIT
 # ── 1) 스테이징 — 앱이 아닌 것은 전부 뺀다 ─────────────────
 rsync -a \
   --exclude '.git' --exclude '.github' --exclude '.gitignore' --exclude '.claude' \
-  --exclude 'scripts' --exclude 'backup' --exclude 'tests' \
+  --exclude 'scripts' \
   --exclude 'tests.html' --exclude 'tests.js' --exclude 'debug_check.mjs' \
   --exclude '*.md' \
   "$SRC/" "$STAGE/"

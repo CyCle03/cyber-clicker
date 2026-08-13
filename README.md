@@ -11,7 +11,8 @@
 - **런타임**: 브라우저 (정적 사이트)
 - **언어**: 바닐라 자바스크립트 (ES 모듈)
 - **진입점**: `index.html` → `js/main.js`
-- **저장소**: 로컬 스토리지 (저장/내보내기/가져오기)
+- **저장소**: 로컬 스토리지 (저장/내보내기/가져오기). 통합 로그인하면 서버에도 올라가 다른 기기에서 이어서 할 수 있다
+- **표시 언어**: 영어 · 한국어 (원문은 영어, `js/i18n.js`)
 - **테스트**: 브라우저 기반 테스트 러너 (`tests.html`)
 
 ## 🎮 게임 개요
@@ -75,28 +76,33 @@ php -S localhost:8000
 /
 ├── .github/
 │   └── workflows/
-│       └── ci.yml             # GitHub Actions CI 워크플로우
-├── .gitignore
+│       ├── ci.yml            # 스모크 체크 (모든 푸시)
+│       └── deploy.yml        # main 푸시 → self-hosted 러너가 서버에 반영
 ├── debug_check.mjs           # Node.js 기반 스모크 테스트
-├── favicon.ico
 ├── index.html                # 메인 진입점
-├── README.md
-├── script.js                 # JSDoc 타입 정의
+├── script.js                 # JSDoc 타입 정의 (constants.js 가 import 해서 쓴다)
 ├── style.css
-├── tests.html                # 테스트 러너
+├── tests.html                # 테스트 러너 (브라우저에서 연다)
 ├── tests.js                  # 테스트 스위트
+├── fonts/                    # 셀프 호스팅 웹폰트 (Orbitron · Share Tech Mono)
 ├── js/                       # 메인 게임 코드
+│   ├── actions.js            # data-act 클릭 → 핸들러 배선 (인라인 핸들러 금지, CSP)
+│   ├── cloud.js              # elcherlab 통합 로그인 + 서버 저장 동기화
 │   ├── constants.js          # 게임 상수 및 설정
 │   ├── formulas.js           # 게임 계산식
 │   ├── game.js               # 코어 게임 루프 및 로직
+│   ├── i18n.js               # 영어/한국어 사전과 전환 (원문은 영어)
 │   ├── logger.js             # 로깅 유틸리티
 │   ├── main.js               # 진입점 및 이벤트 핸들러
 │   ├── sound.js              # 오디오 관리
 │   ├── state.js              # 게임 상태 관리
 │   ├── storage.js            # 저장/불러오기 기능
 │   └── ui.js                 # UI 업데이트 및 상호작용
-└── tests/                    # 테스트 파일
-    └── state.test.js         # 상태 관리 테스트
+├── scripts/
+│   └── deploy.sh             # 웹루트 갱신 + 백엔드 재시작 (러너가 부른다)
+└── server/                   # 저장본 동기화 백엔드 (Express · 세션 쿠키 검증)
+    ├── index.js
+    └── session.js
 ```
 
 ## 🧪 테스트
@@ -116,7 +122,7 @@ php -S localhost:8000
 - [ ] 업적과 스토리 이벤트가 보존된다
 - [ ] 세이브 마이그레이션이 있다면, 진행도를 예기치 않게 초기화하지 않는다
 
-### GitHub Pages 스모크 테스트
+### 배포 후 스모크 테스트
 
 - [ ] 새로 열었을 때 정상 동작한다 (콘솔 오류 없음)
 - [ ] 상점
@@ -135,6 +141,8 @@ php -S localhost:8000
 - 설정에서 수동 저장·내보내기 가능
 - 세이브 데이터는 브라우저 로컬 스토리지에 저장
 - 백업용 내보내기/가져오기 지원
+- elcherlab 통합 로그인을 하면 같은 저장본이 서버에도 올라가 다른 기기에서 이어서 할 수 있다.
+  로그인하지 않으면 이 브라우저에만 남는다
 
 ## 🛠 개발 유틸리티
 
@@ -147,12 +155,18 @@ php -S localhost:8000
 node debug_check.mjs
 ```
 
-### GitHub Pages 배포
+### 배포
 
-이 사이트는 GitHub Pages에 호스팅되어 있습니다. 배포 소스를 확인하거나 변경하려면:
-1. GitHub 저장소 설정으로 이동
-2. Pages 메뉴 선택
-3. 어떤 브랜치/폴더가 소스로 사용되는지 확인
+`main` 에 푸시하면 이 저장소 전용 self-hosted 러너(`cc-runner`)가 서버에서
+`.github/workflows/deploy.yml` 을 돌려 <https://cc.elcherlab.com> 에 반영합니다.
+
+- 저장소를 웹루트로 그대로 쓰지 않습니다. `scripts/deploy.sh` 가 앱 파일만 추려
+  스테이징한 뒤 `rsync --delete` 로 교체합니다 — README·테스트 러너·개발 스크립트는
+  공개되지 않습니다.
+- `*.md` 만 고친 푸시는 배포를 돌리지 않습니다(`paths-ignore`). 문서는 어차피 웹루트에서
+  제외되고, 다음 배포의 `git reset --hard origin/main` 때 따라옵니다.
+- 배포는 한 번에 하나만 돕니다(`concurrency`). 겹치면 웹루트를 동시에 덮어써 파일이 섞입니다.
+- 러너가 offline 이면 배포가 조용히 `queued` 로 멈춥니다. 반영이 안 되면 러너 상태부터 확인하세요.
 
 ### 기여하기
 
