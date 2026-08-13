@@ -1,5 +1,6 @@
 // @ts-check
 import { getGameState } from "./state.js";
+import { t, tOr } from './i18n.js';
 import { BLACK_MARKET_ITEMS, DEBUG_ENABLED, SKILL_TREE } from "./constants.js";
 import { calculateGPSContribution, calculateEfficiency, getEfficiencyRating, calculatePotentialRootAccess } from "./formulas.js";
 import { addBits, startDataBreach } from "./game.js";
@@ -585,7 +586,7 @@ export function updateDisplay() {
             if (progressContainer) {
                 if (canAfford) {
                     progressContainer.style.display = 'block'; // Always show it
-                    if (progressText) progressText.innerText = "READY!";
+                    if (progressText) progressText.innerText = t('msg.ready');
                     if (progressBar) {
                         progressBar.style.width = `100%`;
                         progressBar.style.background = `var(--success-color)`; // Green
@@ -687,9 +688,9 @@ export function renderShop(buyCallback) {
     const categories = ['All', 'Production', 'Click']; // Order matters for display
     /** @type {Record<string, string>} */
     const categoryDisplayNames = {
-        'All': 'ALL UPGRADES',
-        'Production': 'PRODUCTION',
-        'Click': 'CLICK'
+        'All': t('shop.allUpgrades'),
+        'Production': t('shop.production'),
+        'Click': t('shop.click')
     };
 
     // Render category tabs
@@ -792,8 +793,8 @@ export function renderShop(buyCallback) {
 
         item.innerHTML = `
     <div class="upgrade-info">
-        <h3>${upgrade.name} <span style="font-size:0.8em; color:#fff;">(x${upgrade.count})</span></h3>
-        <p>${upgrade.desc} (${statText})</p>
+        <h3>${tOr(`up.${upgrade.id}.name`, upgrade.name)} <span style="font-size:0.8em; color:#fff;">(x${upgrade.count})</span></h3>
+        <p>${tOr(`up.${upgrade.id}.desc`, upgrade.desc)} (${statText})</p>
         ${contributionHTML}
         ${progressBarHTML}
     </div>
@@ -840,8 +841,8 @@ export function renderBlackMarket(buyCallback) {
         el.onclick = () => buyCallback(key);
 
         el.innerHTML = `
-    <h3>${item.name}</h3>
-    <p>${item.desc}</p>
+    <h3>${tOr(`mkt.${item.id}.name`, item.name)}</h3>
+    <p>${tOr(`mkt.${item.id}.desc`, item.desc)}</p>
     <div class="cost" style="color: var(--primary-gold); font-weight: bold; margin-top: 10px;">
         ${item.cost} CRYPTOS
     </div>
@@ -881,11 +882,11 @@ export function renderSkillTree(buyCallback) {
 
         el.innerHTML = `
             <div class="skill-icon">🧠</div>
-            <div class="skill-name">${skill.name}</div>
-            <div class="skill-desc">${skill.desc}</div>
-            <div class="skill-level">Level: ${currentLevel} / ${skill.maxLevel}</div>
+            <div class="skill-name">${tOr(`skill.${skill.id}.name`, skill.name)}</div>
+            <div class="skill-desc">${tOr(`skill.${skill.id}.desc`, skill.desc)}</div>
+            <div class="skill-level">${t('skills.level', { cur: currentLevel, max: skill.maxLevel })}</div>
             <div class="skill-cost" style="${isMaxed ? 'color:#0f0' : ''}">
-                ${isMaxed ? 'MAXED' : `${skill.cost} SP`}
+                ${isMaxed ? t('skills.maxed') : `${skill.cost} ${t('skills.sp')}`}
             </div>
         `;
         skillTreeContainer.appendChild(el);
@@ -972,7 +973,7 @@ export function updateShopUI() {
             if (progressContainer) {
                 if (canAfford) {
                     progressContainer.style.display = 'block';
-                    if (progressText) progressText.innerText = "READY!";
+                    if (progressText) progressText.innerText = t('msg.ready');
                     if (progressBar) {
                         progressBar.style.width = `100%`;
                         progressBar.style.background = `var(--success-color)`;
@@ -1001,12 +1002,12 @@ export function renderAchievements() {
         item.innerHTML = `
     <span class="icon">${ach.unlocked ? '🏆' : '🔒'}</span>
     <div class="ach-info">
-        <span class="ach-name">${ach.name}</span>
+        <span class="ach-name">${tOr(`ach.${ach.id}.name`, ach.name)}</span>
         <span class="ach-reward" style="font-size:0.8em; color:var(--primary-gold);">+${ach.reward} 🪙</span>
     </div>
 `;
         if (ach.unlocked) {
-            item.title = ach.desc;
+            item.title = tOr(`ach.${ach.id}.desc`, ach.desc);
         }
         achievementsContainer.appendChild(item);
     });
@@ -1019,8 +1020,8 @@ export function showAchievementNotification(ach) {
     el.innerHTML = `
 <div class="ach-icon">🏆</div>
 <div class="ach-text">
-    <div class="ach-title">${ach.name}</div>
-    <div class="ach-desc">${ach.desc}</div>
+    <div class="ach-title">${tOr(`ach.${ach.id}.name`, ach.name)}</div>
+    <div class="ach-desc">${tOr(`ach.${ach.id}.desc`, ach.desc)}</div>
     <div class="ach-reward" style="color:var(--primary-gold); font-weight:bold; margin-top:5px;">+${ach.reward} CRYPTOS</div>
 </div>
 `;
@@ -1086,9 +1087,9 @@ export function updateRebootButton(potentialLevel) {
         const bonusPercent = currentLevel * 10;
 
         if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(READY: LVL ${currentLevel} → LVL ${potentialLevel})<br>(Remaining: ${formatNumber(remainingBits)} BITS)`;
-        if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
+        if (rebootBonusDisplay) rebootBonusDisplay.innerText = t('term.bonus', { pct: bonusPercent });
     } else {
-        if (btnText) btnText.innerText = `REBOOT SYSTEM`;
+        if (btnText) btnText.innerText = t('term.reboot');
         rebootButton.classList.add('disabled');
         // Display Root Access info
         const currentLevel = gameState.rootAccessLevel;
@@ -1101,7 +1102,7 @@ export function updateRebootButton(potentialLevel) {
         const bonusPercent = currentLevel * 10;
 
         if (rebootLevelDisplay) rebootLevelDisplay.innerHTML = `Root Access: LVL ${currentLevel}<br>(Next: LVL ${nextLevel} at ${formatNumber(requiredBits)} BITS)<br>(Remaining: ${formatNumber(remainingBits)} BITS)`;
-        if (rebootBonusDisplay) rebootBonusDisplay.innerText = `Current Bonus: +${bonusPercent}% GPS`;
+        if (rebootBonusDisplay) rebootBonusDisplay.innerText = t('term.bonus', { pct: bonusPercent });
 
         // Enable/disable reboot button
         if (calculatedPotentialLevel > currentLevel) {

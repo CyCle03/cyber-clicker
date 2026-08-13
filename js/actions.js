@@ -15,6 +15,8 @@
  *   <button data-act="switchMobileTab" data-arg="shop">   (지금)
  */
 
+import { toggleLang } from './i18n.js';
+
 /**
  * window 에 없는, 마크업에 DOM 조작이 직접 적혀 있던 동작들.
  * @type {Record<string, (arg: string|null) => void>}
@@ -25,6 +27,11 @@ const SPECIAL = {
     if (!id) return;
     const el = document.getElementById(id);
     if (el) el.classList.remove('visible');
+  },
+
+  /** 영어 ↔ 한국어. window 를 거치지 않고 i18n 모듈을 직접 부른다. */
+  toggleLang() {
+    toggleLang();
   },
 };
 

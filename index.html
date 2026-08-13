@@ -18,16 +18,16 @@
         <!-- Header / HUD -->
         <header class="hud">
             <div class="hud-item">
-                <span class="label">BITS:</span>
+                <span class="label" data-i18n="hud.bits">BITS:</span>
                 <span id="bits-display" class="value glow-cyan">0</span>
             </div>
             <div class="hud-item">
-                <span class="label">GPS:</span>
+                <span class="label" data-i18n="hud.gps">GPS:</span>
                 <span id="gps-display" class="value glow-pink">0</span>
                 <span id="gps-bonus" class="bonus-value"></span>
             </div>
             <div class="hud-item">
-                <span class="label">CRYPTOS:</span>
+                <span class="label" data-i18n="hud.cryptos">CRYPTOS:</span>
                 <span id="crypto-display" class="value glow-gold">0</span>
             </div>
         </header>
@@ -37,13 +37,13 @@
             <div class="split-layout">
                 <!-- LEFT PANEL: TERMINAL (Always Visible) -->
                 <section class="terminal-section">
-                    <div class="section-header">TERMINAL</div>
+                    <div class="section-header" data-i18n="term.title">TERMINAL</div>
 
                     <div class="hack-zone">
                         <button id="hack-button" class="cyber-button">
                             <div class="btn-content">
                                 <span class="icon">⚡</span>
-                                <span class="text">HACK_SYSTEM</span>
+                                <span class="text" data-i18n="term.hack">HACK_SYSTEM</span>
                             </div>
                             <div class="btn-glitch"></div>
                         </button>
@@ -51,7 +51,7 @@
 
                     <!-- Reboot Controls (Below HACK_SYSTEM) -->
                     <div class="reboot-controls">
-                        <button id="reboot-button" class="cyber-button-reboot">REBOOT SYSTEM</button>
+                        <button id="reboot-button" class="cyber-button-reboot" data-i18n="term.reboot">REBOOT SYSTEM</button>
                         <div class="reboot-info">
                             <div id="reboot-level-display" class="reboot-text">Root Access: LVL 0 (Next: LVL 1 at
                                 1,000,000 BITS)</div>
@@ -61,8 +61,8 @@
 
                     <div class="log-container-wrapper">
                         <div id="game-log" class="log-container">
-                            <div class="log-entry">> System initialized...</div>
-                            <div class="log-entry">> Waiting for input...</div>
+                            <div class="log-entry" data-i18n="term.init">&gt; System initialized...</div>
+                            <div class="log-entry" data-i18n="term.waiting">&gt; Waiting for input...</div>
                         </div>
                     </div>
                 </section>
@@ -71,11 +71,11 @@
                 <section class="auxiliary-section">
                     <!-- Tab Navigation -->
                     <nav class="tabs">
-                        <button class="tab-btn active" data-tab="shop">SHOP</button>
-                        <button class="tab-btn" data-tab="black-market">BLACK MARKET</button>
-                        <button class="tab-btn" data-tab="skill-tree">SKILL TREE</button>
-                        <button class="tab-btn" data-tab="achievements">ACHIEVEMENTS</button>
-                        <button class="tab-btn" data-tab="statistics">STATISTICS</button>
+                        <button class="tab-btn active" data-tab="shop" data-i18n="tab.shop">SHOP</button>
+                        <button class="tab-btn" data-tab="black-market" data-i18n="tab.market">BLACK MARKET</button>
+                        <button class="tab-btn" data-tab="skill-tree" data-i18n="tab.skills">SKILL TREE</button>
+                        <button class="tab-btn" data-tab="achievements" data-i18n="tab.achievements">ACHIEVEMENTS</button>
+                        <button class="tab-btn" data-tab="statistics" data-i18n="tab.stats">STATISTICS</button>
                     </nav>
 
                     <div class="tab-content">
@@ -98,7 +98,7 @@
                         <!-- BLACK MARKET TAB -->
                         <div id="tab-black-market" class="tab-pane">
                             <div class="market-header">
-                                <p>WARNING: ILLEGAL TRANSACTIONS DETECTED. SPEND CRYPTOS WISELY.</p>
+                                <p data-i18n="market.warning">WARNING: ILLEGAL TRANSACTIONS DETECTED. SPEND CRYPTOS WISELY.</p>
                             </div>
 
                             <!-- Active Effects Display -->
@@ -116,7 +116,7 @@
                             <div class="skill-tree-header">
                                 <div class="skill-points-display">SKILL POINTS: <span id="skill-points-value">0</span>
                                 </div>
-                                <div class="skill-tree-info">Unlock Root Access levels to earn Skill Points.</div>
+                                <div class="skill-tree-info" data-i18n="skills.hint">Unlock Root Access levels to earn Skill Points.</div>
                             </div>
                             <div id="skill-tree-container" class="skill-tree-container">
                                 <!-- Skill Nodes injected here -->
@@ -136,37 +136,37 @@
                                 <div class="stat-card">
                                     <div class="stat-icon">🖱️</div>
                                     <div class="stat-value" id="stat-clicks">0</div>
-                                    <div class="stat-label">Total Clicks</div>
+                                    <div class="stat-label" data-i18n="stat.totalClicks">Total Clicks</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-icon">💰</div>
                                     <div class="stat-value" id="stat-bits">0</div>
-                                    <div class="stat-label">Total BITS Earned</div>
+                                    <div class="stat-label" data-i18n="stat.totalBits">Total BITS Earned</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-icon">⏱️</div>
                                     <div class="stat-value" id="stat-time">00:00:00</div>
-                                    <div class="stat-label">Play Time</div>
+                                    <div class="stat-label" data-i18n="stat.playTime">Play Time</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-icon">🔄</div>
                                     <div class="stat-value" id="stat-reboots">0</div>
-                                    <div class="stat-label">Reboots</div>
+                                    <div class="stat-label" data-i18n="stat.reboots">Reboots</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-icon">🛡️</div>
                                     <div class="stat-value" id="stat-firewalls">0</div>
-                                    <div class="stat-label">Firewalls Encountered</div>
+                                    <div class="stat-label" data-i18n="stat.firewallsMet">Firewalls Encountered</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-icon">✅</div>
                                     <div class="stat-value" id="stat-firewalls-cleared">0</div>
-                                    <div class="stat-label">Firewalls Cleared</div>
+                                    <div class="stat-label" data-i18n="stat.firewallsCleared">Firewalls Cleared</div>
                                 </div>
                             </div>
 
                             <div style="margin-top: 30px; text-align: center; padding-bottom: 20px;">
-                                <button class="cyber-button danger" data-act="hardReset">HARD RESET DATA</button>
+                                <button class="cyber-button danger" data-act="hardReset" data-i18n="stat.hardReset">HARD RESET DATA</button>
                             </div>
                         </div>
                     </div>
@@ -177,18 +177,18 @@
     <!-- Debug Console Overlay -->
     <div id="debug-console-container">
         <div class="debug-header">
-            <span>SYSTEM DEBUG LOG</span>
+            <span data-i18n="debug.title">SYSTEM DEBUG LOG</span>
             <span style="font-size: 0.8em; cursor: pointer;"
                 data-act="hideOverlay" data-arg="debug-console-container">[X]</span>
         </div>
         <div id="debug-log"></div>
     </div>
-    <button id="debug-toggle-btn">DEBUG</button>
+    <button id="debug-toggle-btn" data-i18n="debug.toggle">DEBUG</button>
 
     <!-- Firewall Overlay -->
     <div id="firewall-overlay">
         <div class="firewall-box">
-            <div class="firewall-title">⚠️ FIREWALL DETECTED ⚠️</div>
+            <div class="firewall-title" data-i18n="firewall.title">⚠️ FIREWALL DETECTED ⚠️</div>
             <div class="firewall-warning">
                 SECURITY BREACH IN PROGRESS.<br>
                 GPS REDUCED BY 50%.<br>
@@ -221,8 +221,8 @@
                 <button class="keypad-btn" data-act="handleKeypadInput" data-arg="E">E</button>
                 <button class="keypad-btn" data-act="handleKeypadInput" data-arg="F">F</button>
 
-                <button class="keypad-btn control-clr" data-act="handleKeypadInput" data-arg="CLR">CLR</button>
-                <button class="keypad-btn control-ok" data-act="handleKeypadInput" data-arg="OK">OK</button>
+                <button class="keypad-btn control-clr" data-act="handleKeypadInput" data-arg="CLR" data-i18n="firewall.clear">CLR</button>
+                <button class="keypad-btn control-ok" data-act="handleKeypadInput" data-arg="OK" data-i18n="firewall.ok">OK</button>
             </div>
         </div>
     </div>
@@ -230,14 +230,14 @@
     <!-- Offline Progress Overlay -->
     <div id="offline-overlay">
         <div class="offline-box">
-            <div class="offline-title">SYSTEM RESTORED</div>
-            <div style="color: #aaa; margin-bottom: 10px;">MINING OPERATIONS CONTINUED IN BACKGROUND</div>
+            <div class="offline-title" data-i18n="offline.title">SYSTEM RESTORED</div>
+            <div style="color: #aaa; margin-bottom: 10px;" data-i18n="offline.subtitle">MINING OPERATIONS CONTINUED IN BACKGROUND</div>
             <div class="offline-amount" id="offline-amount-display">+0 BITS</div>
             <div style="color: #fff; margin-bottom: 30px;" id="offline-time-display">Time Offline: 0s</div>
             <button class="cyber-button"
                 data-act="hideOverlay" data-arg="offline-overlay">
                 <div class="btn-content">
-                    <span class="text">ACKNOWLEDGE</span>
+                    <span class="text" data-i18n="offline.ack">ACKNOWLEDGE</span>
                 </div>
             </button>
         </div>
@@ -247,89 +247,93 @@
     <div class="mobile-nav">
         <button class="mobile-nav-btn active" data-tab="terminal" data-act="switchMobileTab" data-arg="terminal">
             <span class="icon">⚡</span>
-            <span class="label">TERM</span>
+            <span class="label" data-i18n="tab.term.short">TERM</span>
         </button>
         <button class="mobile-nav-btn" data-tab="shop" data-act="switchMobileTab" data-arg="shop">
             <span class="icon">🛒</span>
-            <span class="label">SHOP</span>
+            <span class="label" data-i18n="tab.shop.short">SHOP</span>
         </button>
         <button class="mobile-nav-btn" data-tab="black-market" data-act="switchMobileTab" data-arg="black-market">
             <span class="icon">☠️</span>
-            <span class="label">MARKET</span>
+            <span class="label" data-i18n="tab.market.short">MARKET</span>
         </button>
         <button class="mobile-nav-btn" data-tab="skill-tree" data-act="switchMobileTab" data-arg="skill-tree">
             <span class="icon">🧠</span>
-            <span class="label">SKILLS</span>
+            <span class="label" data-i18n="tab.skills.short">SKILLS</span>
         </button>
         <button class="mobile-nav-btn" data-tab="achievements" data-act="switchMobileTab" data-arg="achievements">
             <span class="icon">🏆</span>
-            <span class="label">ACHIEVE</span>
+            <span class="label" data-i18n="tab.achievements.short">ACHIEVE</span>
         </button>
         <button class="mobile-nav-btn" data-tab="statistics" data-act="switchMobileTab" data-arg="statistics">
             <span class="icon">📊</span>
-            <span class="label">STATS</span>
+            <span class="label" data-i18n="tab.stats.short">STATS</span>
         </button>
         <button class="mobile-nav-btn" data-act="openSettings">
             <span class="icon">⚙️</span>
-            <span class="label">SETTING</span>
+            <span class="label" data-i18n="tab.settings.short">SETTING</span>
         </button>
     </div>
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-header">SYSTEM SETTINGS</div>
+            <div class="modal-header" data-i18n="settings.title">SYSTEM SETTINGS</div>
 
             <div class="setting-item">
-                <div class="setting-label">MASTER VOLUME</div>
+                <button class="modal-button" data-act="toggleLang" data-i18n="lang.other"
+                    data-i18n-title="lang.switchTitle"></button>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label" data-i18n="settings.volume">MASTER VOLUME</div>
                 <input type="range" id="volume-slider" min="0" max="100" value="50" class="cyber-slider">
                 <div class="setting-value" id="volume-value">50%</div>
             </div>
 
             <div class="setting-item">
-                <button class="modal-button" data-act="toggleMute" id="mute-btn">MUTE SOUND</button>
+                <button class="modal-button" data-act="toggleMute" id="mute-btn" data-i18n="settings.mute">MUTE SOUND</button>
             </div>
 
             <!-- elcherlab 통합 로그인. 로그인하면 저장본이 서버(cc.saves)에도 올라가
                  다른 기기에서 이어서 할 수 있다. 로그인하지 않으면 지금까지처럼
                  이 브라우저에만 저장된다. 인라인 핸들러 대신 data-act 를 쓴다(CSP). -->
             <div class="setting-item">
-                <div class="setting-label">ACCOUNT — elcherlab 통합 로그인</div>
-                <div id="cc-account-status" class="cc-account-status">확인 중…</div>
+                <div class="setting-label" data-i18n="account.title">ACCOUNT — elcherlab single sign-on</div>
+                <!-- 이 줄은 renderAccount() 가 로그인 상태에 따라 다시 쓴다.
+                     data-i18n 을 붙이면 언어 전환 때 "Checking…" 으로 되돌아간다. -->
+                <div id="cc-account-status" class="cc-account-status">Checking…</div>
 
                 <div id="cc-auth-form" hidden>
                     <input id="cc-auth-user" class="cc-auth-input" type="text" autocomplete="username"
-                        placeholder="아이디 (영문·숫자·밑줄 3~20자)" maxlength="20">
+                        data-i18n-ph="account.idPlaceholder" maxlength="20">
                     <input id="cc-auth-pass" class="cc-auth-input" type="password" autocomplete="current-password"
-                        placeholder="비밀번호 (6자 이상)">
+                        data-i18n-ph="account.pwPlaceholder">
                     <label class="cc-auth-check">
                         <input id="cc-auth-age" type="checkbox">
-                        <span>만 14세 이상이며,
-                            <a href="https://elcherlab.com/terms.html" target="_blank" rel="noopener">이용약관</a>과
-                            <a href="https://elcherlab.com/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>에
-                            동의합니다. <b>(가입할 때만 필요)</b></span>
+                        <span data-i18n-html="account.consent"></span>
                     </label>
                     <p id="cc-auth-error" class="cc-auth-error" hidden></p>
                     <div class="export-import-controls">
-                        <button class="modal-button" data-act="ccLogin">LOG IN</button>
-                        <button class="modal-button" data-act="ccSignup">SIGN UP</button>
+                        <button class="modal-button" data-act="ccLogin" data-i18n="account.login">LOG IN</button>
+                        <button class="modal-button" data-act="ccSignup" data-i18n="account.signup">SIGN UP</button>
                     </div>
                 </div>
 
-                <button id="cc-logout-btn" class="modal-button" data-act="ccLogout" hidden>LOG OUT</button>
+                <button id="cc-logout-btn" class="modal-button" data-act="ccLogout" hidden data-i18n="account.logout">LOG OUT</button>
             </div>
 
             <div class="setting-item" id="export-import-section" style="display: block;">
-                <div class="setting-label">DATA MANAGEMENT</div>
+                <div class="setting-label" data-i18n="settings.data">DATA MANAGEMENT</div>
                 <div class="export-import-controls">
-                    <button class="modal-button" data-act="exportSave">EXPORT SAVE</button>
-                    <button class="modal-button" data-act="importSave">IMPORT SAVE</button>
+                    <button class="modal-button" data-act="exportSave" data-i18n="settings.export">EXPORT SAVE</button>
+                    <button class="modal-button" data-act="importSave" data-i18n="settings.import">IMPORT SAVE</button>
                 </div>
                 <textarea id="save-data-area" class="save-data-area" placeholder="Paste save data here to import..."></textarea>
             </div>
 
             <div class="modal-footer">
-                <button class="modal-button" data-act="closeSettings">CLOSE</button>
+                <button class="modal-button" data-act="closeSettings" data-i18n="settings.close">CLOSE</button>
             </div>
         </div>
     </div>
@@ -340,14 +344,14 @@
     <!-- Save Indicator -->
     <div id="save-indicator" class="save-indicator">
         <span class="icon">💾</span>
-        <span class="text">SAVED</span>
+        <span class="text" data-i18n="settings.saved">SAVED</span>
     </div>
 
     <!-- Tutorial Overlay -->
     <div id="tutorial-overlay" class="tutorial-overlay">
         <div class="tutorial-box">
-            <h2 id="tutorial-title">SYSTEM INITIALIZED</h2>
-            <p id="tutorial-content">Welcome to the network, user.</p>
+            <h2 id="tutorial-title" data-i18n="tut.title">SYSTEM INITIALIZED</h2>
+            <p id="tutorial-content" data-i18n="tut.welcome">Welcome to the network, user.</p>
             <button id="tutorial-next-btn" class="cyber-button">NEXT >></button>
         </div>
     </div>
@@ -355,7 +359,7 @@
     <!-- Data Breach Mini-game Overlay -->
     <div id="breach-overlay" class="tutorial-overlay">
         <div class="breach-container">
-            <h2>DATA BREACH IN PROGRESS</h2>
+            <h2 data-i18n="breach.title">DATA BREACH IN PROGRESS</h2>
             <div class="breach-info">
                 <span id="breach-timer">TIME: 10.0s</span>
                 <span id="breach-score">DATA: 0/0</span>
@@ -363,7 +367,7 @@
             <div id="breach-grid" class="breach-grid">
                 <!-- Grid generated by JS -->
             </div>
-            <p class="breach-instruction">CLICK GREEN DATA NODES. AVOID RED ICE.</p>
+            <p class="breach-instruction" data-i18n="breach.hint">CLICK GREEN DATA NODES. AVOID RED ICE.</p>
         </div>
     </div>
 

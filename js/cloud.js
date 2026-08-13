@@ -15,6 +15,7 @@
  */
 
 import { debugLog, errorLog } from './logger.js';
+import { t, translateServerError } from './i18n.js';
 
 const AUTH_ORIGIN = 'https://auth.elcherlab.com';
 const SAVE_KEY = 'cyberClickerSave';
@@ -36,7 +37,7 @@ async function api(path, options) {
     ...options,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `요청 실패 (${res.status})`);
+  if (!res.ok) throw new Error(translateServerError(data.error) || t('account.errRequest', { status: res.status }));
   return data;
 }
 
@@ -48,7 +49,7 @@ async function authApi(path, body) {
     credentials: 'include',
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || '요청을 처리할 수 없습니다.');
+  if (!res.ok) throw new Error(translateServerError(data.error) || t('account.errGeneric'));
   return data;
 }
 
@@ -177,11 +178,11 @@ export function renderAccount() {
   if (!status || !form || !logoutBtn) return;
 
   if (session.loggedIn) {
-    status.textContent = `${session.username} 으로 로그인됨 — 진행 상황이 서버에 저장됩니다.`;
+    status.textContent = t('account.loggedIn', { user: session.username });
     form.hidden = true;
     logoutBtn.hidden = false;
   } else {
-    status.textContent = '로그인하지 않았습니다. 진행 상황은 이 브라우저에만 저장됩니다.';
+    status.textContent = t('account.loggedOut');
     form.hidden = false;
     logoutBtn.hidden = true;
   }
@@ -200,9 +201,9 @@ async function submitAuth(mode) {
 
   const username = userEl.value.trim();
   const password = passEl.value;
-  if (!username || !password) return setAuthError('아이디와 비밀번호를 입력하세요.');
+  if (!username || !password) return setAuthError(t('account.errCredentials'));
   if (mode === 'signup' && !(ageEl && ageEl.checked)) {
-    return setAuthError('만 14세 이상 확인과 약관 동의에 체크해 주세요.');
+    return setAuthError(t('account.errConsent'));
   }
 
   setAuthError('');

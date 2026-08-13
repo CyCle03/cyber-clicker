@@ -1,5 +1,6 @@
 // @ts-check
 import { getGameState, resetStateForPrestige } from './state.js';
+import { t, tOr } from './i18n.js';
 import { logMessage, showAchievementNotification, renderAchievements, updateShopUI, createGlitchElement, createFloatingText, formatNumber, firewallOverlay, firewallCodeDisplay, getFirewallInput, setFirewallInput, openSettings, closeSettings, switchMobileTab, renderBlackMarket, renderSkillTree, updateDisplay, renderShop } from './ui.js';
 import { SoundManager } from './sound.js';
 import { saveGame, hardReset, exportSave, importSave } from './storage.js';
@@ -57,8 +58,9 @@ function updateTutorialStep() {
 
     if (!content || !nextBtn) return;
 
-    content.innerHTML = TUTORIAL_STEPS[currentTutorialStep].text;
-    nextBtn.innerText = currentTutorialStep === TUTORIAL_STEPS.length - 1 ? "CLOSE" : "NEXT";
+    // 튜토리얼 문구는 사전에서 온다. TUTORIAL_STEPS 는 단계 수만 센다.
+    content.innerHTML = t(`tut.${currentTutorialStep + 1}`);
+    nextBtn.innerText = currentTutorialStep === TUTORIAL_STEPS.length - 1 ? t('settings.close') : t('tut.next');
 }
 
 // Core Functions
@@ -162,7 +164,8 @@ function checkStoryEvents() {
     gameState.storyEvents.forEach(evt => {
         if (!evt.triggered && evt.condition(gameState)) {
             evt.triggered = true;
-            logMessage(`[STORY] ${evt.message}`);
+            // 스토리 문구도 사전에서. evt.message 는 새 이벤트를 아직 안 옮겼을 때의 대비책이다.
+            logMessage(`[STORY] ${tOr(`story.${evt.id}`, evt.message)}`);
             saveGame();
         }
     });
@@ -206,7 +209,7 @@ export function buyUpgrade(key) {
         logMessage(`System upgraded: ${upgrade.name}`);
     } else {
         SoundManager.playSFX('error');
-        logMessage("Insufficient funds.");
+        logMessage(t('msg.insufficientBits'));
     }
 }
 
@@ -260,7 +263,7 @@ export function buyBlackMarketItem(key) {
         saveGame();
     } else {
         SoundManager.playSFX('error');
-        logMessage("Insufficient Cryptos.");
+        logMessage(t('msg.insufficientCryptos'));
     }
 }
 
@@ -272,7 +275,7 @@ export function buySkill(skillId) {
 
     const currentLevel = gameState.skills[skillId] || 0;
     if (currentLevel >= skill.maxLevel) {
-        logMessage("Skill already maxed.");
+        logMessage(t('msg.skillMaxed'));
         return;
     }
 
@@ -290,7 +293,7 @@ export function buySkill(skillId) {
         logMessage(`Skill Acquired: ${skill.name}`);
     } else {
         SoundManager.playSFX('error');
-        logMessage("Insufficient Skill Points.");
+        logMessage(t('msg.insufficientSkillPoints'));
     }
 }
 
@@ -313,7 +316,7 @@ export function rebootSystem() {
             logMessage(`REWARD: +${cryptosGained} CRYPTOS`);
         }
     } else {
-        logMessage("Insufficient data for reboot.");
+        logMessage(t('msg.insufficientReboot'));
     }
 }
 
@@ -324,12 +327,12 @@ function startMassGlitchEvent(duration) {
     if (massGlitchEventActive) return;
 
     massGlitchEventActive = true;
-    logMessage("WARNING: System instability detected! Glitch flood incoming!");
+    logMessage(t('msg.glitchFlood'));
     SoundManager.playSFX('alert'); // Using alert sound for now
 
     setTimeout(() => {
         massGlitchEventActive = false;
-        logMessage("System stability restored.");
+        logMessage(t('msg.stabilityRestored'));
     }, duration);
 }
 
@@ -348,7 +351,7 @@ export function spawnGlitch() {
                 if (glitchEl.parentNode) {
                     // Simulate a click to trigger the collection and respawn logic.
                     glitchEl.click(); 
-                    logMessage("Auto-Glitch Bot collected the glitch!");
+                    logMessage(t('msg.autoGlitch'));
                 }
             }, 100 + Math.random() * 400);
         } else {
@@ -356,7 +359,7 @@ export function spawnGlitch() {
             glitchRemovalTimeoutId = setTimeout(() => {
                 if (glitchEl.parentNode) {
                     glitchEl.remove();
-                    logMessage("Glitch signal lost...");
+                    logMessage(t('msg.glitchLost'));
                     spawnGlitch(); // Spawn the next one after expiration.
                 }
             }, GLITCH_CONFIG.duration);
@@ -627,7 +630,7 @@ function endDataBreach(success) {
                 startMassGlitchEvent(30000); // 30 seconds
             }
         } else {
-            logMessage(`BREACH FAILED. Connection Terminated.`);
+            logMessage(t('breach.failed'));
             SoundManager.playSFX('error');
         }
     }, 1000);

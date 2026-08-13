@@ -1,6 +1,7 @@
 // @ts-check
 // 인라인 onclick 대신 쓰는 위임 핸들러. 부수효과만 있으므로 이름 없이 불러온다.
 import './actions.js';
+import { t, applyI18n } from './i18n.js';
 import { initState, loadState, getGameState } from './state.js';
 import { initUI, logMessage, updateDisplay, renderShop, renderBlackMarket, renderSkillTree, renderAchievements, animateHackButton, createBinaryParticle, getFirewallInput, setFirewallInput, formatNumber, updateRebootButton, switchTab } from './ui.js';
 import { loadGame, saveGame } from './storage.js';
@@ -124,7 +125,7 @@ function init() {
                     if (offlineAmount) offlineAmount.innerText = `+${formatNumber(offlineBits)} BITS`;
                     if (offlineTimeDisplay) {
                         const formattedTime = formatOfflineTime(offlineTimeMs);
-                        offlineTimeDisplay.innerText = `Time Offline: ${formattedTime}`;
+                        offlineTimeDisplay.innerText = t('offline.time', { time: formattedTime });
                     }
                     offlineOverlay.classList.add('visible');
                     setTimeout(() => {
@@ -194,9 +195,9 @@ function init() {
         rebootBtnId = setInterval(() => updateRebootButton(calculatePotentialRootAccess()), GAME_CONSTANTS.REBOOT_BUTTON_UPDATE_INTERVAL);
 
         spawnGlitch();
-        logMessage("System Online.");
+        logMessage(t('msg.systemOnline'));
         if (hasSave) {
-            logMessage("Save data loaded.");
+            logMessage(t('msg.saveLoaded'));
         }
 
     } catch (e) {
@@ -253,6 +254,19 @@ function gameLoop(timestamp) {
 // 그래야 아래 init() 의 loadGame() 이 지금까지처럼 localStorage 만 읽으면 된다.
 document.addEventListener('DOMContentLoaded', async () => {
     await syncBeforeBoot();
+    applyI18n(document);
     renderAccount();
     init();
+
+    // 언어를 바꾸면 정적 문구는 applyI18n 이 처리하고, 스크립트가 그려 넣은 목록은
+    // 여기서 다시 그린다. 진행 중인 게임을 잃지 않도록 새로고침은 하지 않는다.
+    document.addEventListener('cc:langchange', () => {
+        renderAccount();
+        // 구매 콜백을 함께 넘겨야 한다 — 빼먹으면 다시 그린 뒤 버튼이 말없이 죽는다.
+        renderShop(buyUpgrade);
+        renderBlackMarket(buyBlackMarketItem);
+        renderSkillTree(buySkill);
+        renderAchievements();
+        updateDisplay();
+    });
 });

@@ -1,5 +1,6 @@
 // @ts-check
 import { getGameState, loadState } from "./state.js";
+import { t } from './i18n.js';
 import { debugLog, errorLog } from "./logger.js";
 import { logMessage, renderAchievements, renderBlackMarket, renderShop, renderSkillTree, updateDisplay, closeSettings } from "./ui.js"; // ADDED closeSettings
 import { buyBlackMarketItem, buySkill, buyUpgrade, calculateClickPower, calculateGPS } from "./game.js";
@@ -92,7 +93,7 @@ export function loadGame() {
 
 export function hardReset() {
     if (confirm("WARNING: Are you sure you want to wipe ALL game data? This cannot be undone!")) {
-        if (confirm("Double Check: Really delete everything?")) {
+        if (confirm(t('msg.confirmReset'))) {
             localStorage.removeItem(SAVE_KEY);
             // 서버 저장본까지 지운다. 지우지 않으면 다음 부팅 때 그대로 돌아온다.
             deleteRemote().finally(() => location.reload());
@@ -116,17 +117,17 @@ export function exportSave() {
             // Try to copy to clipboard automatically
             try {
                 navigator.clipboard.writeText(b64).then(() => {
-                    logMessage("SAVE EXPORTED: Copied to clipboard!");
+                    logMessage(t('msg.exportClipboard'));
                 }).catch(() => {
-                    logMessage("SAVE EXPORTED: Copy from the text area.");
+                    logMessage(t('msg.exportTextarea'));
                 });
             } catch (e) {
-                logMessage("SAVE EXPORTED: Copy from the text area.");
+                logMessage(t('msg.exportTextarea'));
             }
         }
     } catch (e) {
         console.error("Export failed:", e);
-        logMessage("ERROR: Export failed.");
+        logMessage(t('msg.exportFailed'));
     }
 }
 
@@ -134,7 +135,7 @@ export function importSave() {
     try {
         const textArea = /** @type {HTMLTextAreaElement} */ (document.getElementById('save-data-area'));
         if (!textArea || !textArea.value) {
-            logMessage("ERROR: No save data found to import.");
+            logMessage(t('msg.noSaveToImport'));
             return;
         }
 
@@ -146,7 +147,7 @@ export function importSave() {
 
         // Basic Validation
         if (typeof migratedData.bits !== 'number' || !migratedData.upgrades) {
-            throw new Error("Invalid save data format.");
+            throw new Error(t('msg.invalidFormat'));
         }
 
         if (confirm("WARNING: Importing a save will overwrite your current progress. Are you sure?")) {
@@ -165,13 +166,13 @@ export function importSave() {
             renderAchievements();
 
             closeSettings();
-            logMessage("SYSTEM RESTORED: Save imported successfully.");
+            logMessage(t('msg.importOk'));
             SoundManager.playSFX('success');
         }
     }
     catch (e) {
         console.error("Import failed:", e);
-        logMessage("ERROR: Invalid save string.");
+        logMessage(t('msg.invalidSaveString'));
         SoundManager.playSFX('error');
     }
 }
