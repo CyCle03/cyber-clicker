@@ -106,6 +106,7 @@ You can also open `index.html` directly in a browser, but some browsers restrict
 │   ├── build-favicon.js      # favicon.svg → favicon.ico (zlib only, no dependencies)
 │   └── deploy.sh             # Refreshes the web root and restarts the backend (run by the runner)
 └── server/                   # Save-sync backend (Express, session cookie verification)
+                              #  └ /internal/export-user serves the export doc in ko and en
     ├── index.js
     └── session.js
 ```
@@ -201,3 +202,7 @@ smoke check here only imports the one game module, so it has the same hole; henc
 2. Create a feature branch
 3. Make your changes
 4. Test thoroughly
+
+### The data-export document
+
+The data-export (right-of-access) document comes in **two versions, Korean and English**. The single sign-on service puts `lang` in the internal request body, and `en` gets English keys back (anything else answers in Korean). The keys are not translated on the fly because this is a file you download and keep — if the same key changed with the language, it would no longer line up with copies you already saved.
