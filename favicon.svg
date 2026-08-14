@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Cyber Clicker">
+  <!-- 터미널 창 — 해킹 클리커라는 주제를 16px 에서도 알아볼 수 있는 최소 형태로.
+       배경을 깔지 않고 투명으로 둬서 밝은/어두운 탭 바 양쪽에서 다 읽힌다.
+       테두리만 네온으로 두고 속을 어둡게 파내야 흰 탭 바에서도 창처럼 보인다. -->
+  <rect x="3" y="5" width="26" height="22" rx="3" fill="#00ffea"/>
+  <rect x="6" y="8" width="20" height="16" rx="2" fill="#002222"/>
+  <!-- 프롬프트 > 와 커서 -->
+  <path d="M9.5 11.5 11.5 11.5 15.5 16 11.5 20.5 9.5 20.5 13 16Z" fill="#00ff00"/>
+  <rect x="17" y="18.3" width="6" height="2.2" fill="#00ff00"/>
+</svg>
