@@ -15,7 +15,7 @@
  */
 
 import { debugLog, errorLog } from './logger.js';
-import { t, translateServerError, getLang } from './i18n.js';
+import { t, getLang } from './i18n.js';
 
 const AUTH_ORIGIN = 'https://auth.elcherlab.com';
 const SAVE_KEY = 'cyberClickerSave';
@@ -37,7 +37,7 @@ async function api(path, options) {
     ...options,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(translateServerError(data.error) || t('account.errRequest', { status: res.status }));
+  if (!res.ok) throw new Error(data.error || t('account.errRequest', { status: res.status }));
   return data;
 }
 
@@ -53,8 +53,8 @@ async function authApi(path, body) {
     credentials: 'include',
   });
   const data = await res.json().catch(() => ({}));
-  // auth 가 위 lang 을 보고 맞춰 보낸다. 아래 번역은 옛 auth·캐시된 옛 번들 대비 그물이다.
-  if (!res.ok) throw new Error(translateServerError(data.error) || t('account.errGeneric'));
+  // 문구는 auth 가 위 lang 을 보고 이미 맞춰 보낸다 — 여기서 다시 옮기지 않는다.
+  if (!res.ok) throw new Error(data.error || t('account.errGeneric'));
   return data;
 }
 
