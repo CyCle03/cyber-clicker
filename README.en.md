@@ -84,12 +84,14 @@ You can also open `index.html` directly in a browser, but some browsers restrict
 ├── index.html                # Main entry point
 ├── script.js                 # JSDoc type definitions (imported by constants.js)
 ├── style.css
+├── favicon.svg               # Tab icon source (a terminal window). Re-run the script below if you change it
+├── favicon.ico               # favicon.svg baked to 32x32 — committed because there is no build step
 ├── tests.html                # Test runner (open it in a browser)
 ├── tests.js                  # Test suite
 ├── fonts/                    # Self-hosted web fonts (Orbitron · Share Tech Mono)
 ├── js/                       # Main game code
 │   ├── actions.js            # Wires data-act clicks to handlers (no inline handlers — CSP)
-│   ├── cloud.js              # elcherlab single sign-on + server save sync
+│   ├── cloud.js              # elcherlab single sign-on + server save sync (passes `?lang=` to auth)
 │   ├── constants.js          # Game constants and configurations
 │   ├── formulas.js           # Game calculations and formulas
 │   ├── game.js               # Core game loop and logic
@@ -101,6 +103,7 @@ You can also open `index.html` directly in a browser, but some browsers restrict
 │   ├── storage.js            # Save/load functionality
 │   └── ui.js                 # UI updates and interactions
 ├── scripts/
+│   ├── build-favicon.js      # favicon.svg → favicon.ico (zlib only, no dependencies)
 │   └── deploy.sh             # Refreshes the web root and restarts the backend (run by the runner)
 └── server/                   # Save-sync backend (Express, session cookie verification)
     ├── index.js
@@ -175,6 +178,12 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 
 Pushing to `main` runs `.github/workflows/deploy.yml` on this repository's own self-hosted runner
 (`cc-runner`), which publishes to <https://cc.elcherlab.com>.
+
+Gates before the deploy: **syntax check** (all of `js/` plus `script.js`) → smoke check → CSP,
+external-origin and dev-log checks. The syntax check only **parses** each file as a module; it
+runs nothing, so no DOM is needed. pet shipped an unclosed call from its i18n work on 2026-08-13
+and every test passed because none of them imported that file — the screen came up empty. The
+smoke check here only imports the one game module, so it has the same hole; hence this gate.
 
 - The repository is not served as the web root directly. `scripts/deploy.sh` stages only the app
   files and swaps them in with `rsync --delete`, so the README, the test runner and the dev scripts

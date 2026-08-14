@@ -82,12 +82,14 @@ php -S localhost:8000
 ├── index.html                # 메인 진입점
 ├── script.js                 # JSDoc 타입 정의 (constants.js 가 import 해서 쓴다)
 ├── style.css
+├── favicon.svg               # 탭 아이콘 원본(터미널 창). 바꾸면 아래 스크립트를 다시 돌린다
+├── favicon.ico               # favicon.svg 를 32x32 로 구운 생성물 — 빌드가 없어 커밋한다
 ├── tests.html                # 테스트 러너 (브라우저에서 연다)
 ├── tests.js                  # 테스트 스위트
 ├── fonts/                    # 셀프 호스팅 웹폰트 (Orbitron · Share Tech Mono)
 ├── js/                       # 메인 게임 코드
 │   ├── actions.js            # data-act 클릭 → 핸들러 배선 (인라인 핸들러 금지, CSP)
-│   ├── cloud.js              # elcherlab 통합 로그인 + 서버 저장 동기화
+│   ├── cloud.js              # elcherlab 통합 로그인 + 서버 저장 동기화 (auth 에 `?lang=` 을 넘긴다)
 │   ├── constants.js          # 게임 상수 및 설정
 │   ├── formulas.js           # 게임 계산식
 │   ├── game.js               # 코어 게임 루프 및 로직
@@ -99,6 +101,7 @@ php -S localhost:8000
 │   ├── storage.js            # 저장/불러오기 기능
 │   └── ui.js                 # UI 업데이트 및 상호작용
 ├── scripts/
+│   ├── build-favicon.js      # favicon.svg → favicon.ico (의존성 없이 zlib 만)
 │   └── deploy.sh             # 웹루트 갱신 + 백엔드 재시작 (러너가 부른다)
 └── server/                   # 저장본 동기화 백엔드 (Express · 세션 쿠키 검증)
     ├── index.js
@@ -159,6 +162,12 @@ node debug_check.mjs
 
 `main` 에 푸시하면 이 저장소 전용 self-hosted 러너(`cc-runner`)가 서버에서
 `.github/workflows/deploy.yml` 을 돌려 <https://cc.elcherlab.com> 에 반영합니다.
+
+배포 전 관문: **구문 검사**(`js/` + `script.js` 전체) → 스모크 체크 → CSP · 외부 출처 ·
+개발 로그 검사. 구문 검사는 파일 하나하나를 모듈로 **파싱만** 해 본다(실행하지 않으므로
+DOM 이 필요 없다). pet 이 2026-08-13 에 i18n 작업으로 닫히지 않은 호출 하나를 남겼는데,
+그 파일을 import 하지 않는 테스트가 전부 통과해 그대로 배포됐고 화면이 통째로 비었다 —
+여기 스모크 체크도 게임 모듈 하나만 import 하므로 같은 구멍이 있어서 넣었다.
 
 - 저장소를 웹루트로 그대로 쓰지 않습니다. `scripts/deploy.sh` 가 앱 파일만 추려
   스테이징한 뒤 `rsync --delete` 로 교체합니다 — README·테스트 러너·개발 스크립트는
