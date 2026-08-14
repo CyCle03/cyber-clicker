@@ -133,6 +133,17 @@ const server = http.createServer(async (req, res) => {
       const userId = body && body.userId;
       if (typeof userId !== 'string' || !userId) return json(res, 400, { error: 'userId 가 필요합니다.' });
       const r = await pool.query('select data, updated_at from cc.saves where user_id = $1', [userId]);
+      // 열람권 문서의 키는 언어별로 아예 다른 한 벌이다. 받아서 보관하는 파일이라
+      // 같은 키를 언어에 따라 바꾸면 이미 받아 둔 파일과 형식이 갈린다.
+      // lang 은 auth 가 본문에 실어 보낸다(모르는 값이면 한국어).
+      const en = body && body.lang === 'en';
+      if (en) {
+        return json(res, 200, {
+          service: 'Cyber Clicker (cc.elcherlab.com)',
+          serverSave: r.rows[0] ? { gameData: r.rows[0].data, lastSaved: r.rows[0].updated_at } : null,
+          note: 'Play from before you signed in lives only in that browser\'s localStorage, so it is not on the server.',
+        });
+      }
       return json(res, 200, {
         서비스: '사이버 클리커 (cc.elcherlab.com)',
         서버저장: r.rows[0] ? { 게임데이터: r.rows[0].data, 마지막저장: r.rows[0].updated_at } : null,
