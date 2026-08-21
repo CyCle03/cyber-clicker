@@ -38,6 +38,20 @@ export let firewallCodeDisplay;
 /** @type {HTMLElement} */
 let shopCategoriesNav; // New: Container for shop category tabs
 
+// updateDisplay() 는 매 프레임 돈다. 아래 다섯은 index.html 에 처음부터 있고 다시
+// 만들어지지 않는데도 프레임마다 다시 찾고 있었다(초당 300번). 나머지 참조는 이미
+// 캐시돼 있어 이것들만 예외였다.
+/** @type {HTMLElement|null} */
+let gpsBonusEl = null;
+/** @type {HTMLElement|null} */
+let statisticsPane = null;
+/** @type {HTMLElement|null} */
+let activeEffectsContainer = null;
+/** @type {HTMLElement|null} */
+let blackMarketPane = null;
+/** @type {HTMLElement|null} */
+let shopPane = null;
+
 /** @type {HTMLInputElement} */
 let firewallInput;
 export function getFirewallInput() { return firewallInput; }
@@ -100,19 +114,6 @@ export function switchShopCategory(category) {
             renderShop(shopBuyCallback);
         }
     }
-}
-
-/**
- * Safely get DOM element by ID with type assertion
- * @template {HTMLElement} T
- * @param {string} id - Element ID
- * @param {new() => T} [type] - Optional type constructor
- * @returns {T|null} Element or null if not found
- */
-function getElementById(id, type) {
-    const element = document.getElementById(id);
-    if (!element) return null;
-    return /** @type {T} */ (element);
 }
 
 /**
@@ -189,6 +190,13 @@ export function initUI() {
     firewallOverlay = /** @type {HTMLElement} */ (document.getElementById('firewall-overlay'));
     firewallCodeDisplay = /** @type {HTMLElement} */ (document.getElementById('firewall-code-display'));
     firewallInput = /** @type {HTMLInputElement} */ (document.getElementById('firewall-input'));
+
+    // 매 프레임 다시 찾지 않도록 여기서 한 번만 잡아 둔다(위 선언의 주석 참고).
+    gpsBonusEl = document.getElementById('gps-bonus');
+    statisticsPane = document.getElementById('tab-statistics');
+    activeEffectsContainer = document.getElementById('active-effects-container');
+    blackMarketPane = document.getElementById('tab-black-market');
+    shopPane = document.getElementById('tab-shop');
 
     // Initialize all section displays to none, then activate the default one
     const shop = document.getElementById('shop-section');
@@ -431,7 +439,7 @@ export function updateDisplay() {
         }
 
         // Calculate and display total bonus
-        const bonusEl = document.getElementById('gps-bonus');
+        const bonusEl = gpsBonusEl; // 아래에서 여러 번 쓰므로 짧은 이름으로 받는다
         if (bonusEl) {
             let totalMultiplier = 1;
 
@@ -484,9 +492,8 @@ export function updateDisplay() {
 
     // Update statistics
     {
-        const statsPane = document.getElementById('tab-statistics');
         const now = Date.now();
-        if (statsPane && statsPane.classList.contains('active') && (now - lastStatisticsUpdateTime >= STATISTICS_UPDATE_INTERVAL_MS)) {
+        if (statisticsPane && statisticsPane.classList.contains('active') && (now - lastStatisticsUpdateTime >= STATISTICS_UPDATE_INTERVAL_MS)) {
             renderStatistics();
             lastStatisticsUpdateTime = now;
         }
@@ -494,10 +501,8 @@ export function updateDisplay() {
 
     // Update active effects (for countdown timers)
     {
-        const effectsContainer = document.getElementById('active-effects-container');
-        const blackMarketPane = document.getElementById('tab-black-market');
         const now = Date.now();
-        if (effectsContainer && blackMarketPane && blackMarketPane.classList.contains('active') && (now - lastActiveEffectsUpdateTime >= ACTIVE_EFFECTS_UPDATE_INTERVAL_MS)) {
+        if (activeEffectsContainer && blackMarketPane && blackMarketPane.classList.contains('active') && (now - lastActiveEffectsUpdateTime >= ACTIVE_EFFECTS_UPDATE_INTERVAL_MS)) {
             renderActiveEffects();
             lastActiveEffectsUpdateTime = now;
         }
@@ -509,7 +514,6 @@ export function updateDisplay() {
         return;
     }
 
-    const shopPane = document.getElementById('tab-shop');
     if (!shopPane || !shopPane.classList.contains('active')) {
         return;
     }

@@ -105,7 +105,7 @@ You can also open `index.html` directly in a browser, but some browsers restrict
 ├── scripts/
 │   ├── build-favicon.js      # favicon.svg → favicon.ico (zlib only, no dependencies)
 │   └── deploy.sh             # Refreshes the web root and restarts the backend (run by the runner)
-└── server/                   # Save-sync backend (Express, session cookie verification)
+└── server/                   # Save-sync backend (node:http, local session-cookie verification)
                               #  └ /internal/export-user serves the export doc in ko and en
     ├── index.js
     └── session.js
@@ -139,7 +139,7 @@ Run the test suite by serving the project and opening `tests.html` in a browser.
 
 ### Tests
 
-- [ ] `tests.html` reports all tests PASS (currently 15/15)
+- [ ] `tests.html` reports all tests PASS (currently 16/16)
 
 ## 💾 Save System
 

@@ -103,7 +103,7 @@ php -S localhost:8000
 ├── scripts/
 │   ├── build-favicon.js      # favicon.svg → favicon.ico (의존성 없이 zlib 만)
 │   └── deploy.sh             # 웹루트 갱신 + 백엔드 재시작 (러너가 부른다)
-└── server/                   # 저장본 동기화 백엔드 (Express · 세션 쿠키 검증)
+└── server/                   # 저장본 동기화 백엔드 (node:http · 세션 쿠키 로컬 검증)
                               #  └ /internal/export-user 는 열람권 문서를 한/영 두 벌로 낸다
     ├── index.js
     └── session.js
@@ -137,7 +137,7 @@ php -S localhost:8000
 
 ### 테스트
 
-- [ ] `tests.html` 이 전부 PASS 로 보고한다 (현재 15/15)
+- [ ] `tests.html` 이 전부 PASS 로 보고한다 (현재 16/16)
 
 ## 💾 세이브 시스템
 
@@ -184,7 +184,7 @@ DOM 이 필요 없다). pet 이 2026-08-13 에 i18n 작업으로 닫히지 않�
 2. 기능 브랜치를 만드세요
 3. 변경사항을 만드세요
 4. 철저히 테스트하세요
-5. Submit a pull request
+5. 풀 리퀘스트를 보내세요
 
 ### 열람권 문서
 
